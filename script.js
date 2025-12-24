@@ -63,6 +63,9 @@ function initializeApp() {
     // Mettre à jour les listes déroulantes
     updatePlaceSelect();
     updateCultTypeSelect();
+
+    // Initialiser la langue
+    initializeLanguage();
 }
 
 function setupEventListeners() {
@@ -129,7 +132,14 @@ function setupEventListeners() {
     addSafeListener('generate-pdf-btn', 'click', generatePDF);
     addSafeListener('generate-csv-btn', 'click', generateCSV);
     addSafeListener('show-reports-btn', 'click', showReports);
-    addSafeListener('email-share-btn', 'click', () => showAlert('Fonctionnalité Email bientôt disponible', 'info'));
+    addSafeListener('email-share-btn', 'click', shareViaEmail);
+    addSafeListener('notifications-btn', 'click', toggleNotifications);
+    addSafeListener('archive-planning-btn', 'click', archiveCurrentPlanning);
+    addSafeListener('show-archives-btn', 'click', showArchivedPlannings);
+    addSafeListener('help-btn', 'click', () => {
+        const helpModal = new bootstrap.Modal(document.getElementById('helpModal'));
+        helpModal.show();
+    });
 
     // Gestion des intervenants
     addSafeListener('manage-intervenants-btn', 'click', showManageIntervenantsModal);
@@ -1775,6 +1785,9 @@ function loadFromLocalStorageSecure() {
         if (data.interventions && Array.isArray(data.interventions)) {
             interventions = data.interventions;
             updateInterventionsList();
+
+            // Vérifier les interventions à venir pour les notifications
+            checkUpcomingInterventions();
         }
 
         // Mettre à jour les listes déroulantes
@@ -1787,6 +1800,414 @@ function loadFromLocalStorageSecure() {
     } catch (error) {
         console.error('Erreur de chargement sécurisé:', error);
         showAlert('Erreur lors du chargement sécurisé des données: ' + error.message, 'danger');
+    }
+}
+
+// Fonction pour vérifier les interventions à venir et envoyer des notifications
+function checkUpcomingInterventions() {
+    const now = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(now.getDate() + 1);
+
+    // Vérifier les interventions de demain
+    const upcomingInterventions = interventions.filter(intervention => {
+        const interventionDate = new Date(intervention.date);
+        // Vérifier si l'intervention est demain
+        return interventionDate.toDateString() === tomorrow.toDateString();
+    });
+
+    if (upcomingInterventions.length > 0) {
+        // Créer un message de rappel
+        const names = upcomingInterventions.map(intervention => intervention.fullName).join(', ');
+        const places = [...new Set(upcomingInterventions.map(intervention => intervention.place))].join(', ');
+
+        const message = `Rappel: ${upcomingInterventions.length} intervention(s) prévue(s) pour demain (${tomorrow.toLocaleDateString()}) - ${names} - Lieux: ${places}`;
+        showAlert(message, 'warning');
+
+        // Optionnellement, demander à l'utilisateur s'il veut activer les notifications push
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    showBrowserNotification('Rappel d\'intervention', message);
+                }
+            });
+        } else if ('Notification' in window && Notification.permission === 'granted') {
+            showBrowserNotification('Rappel d\'intervention', message);
+        }
+    }
+}
+
+// Fonction pour afficher une notification navigateur
+function showBrowserNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        const notification = new Notification(title, {
+            body: body,
+            icon: 'AD.jpeg',
+            tag: 'intervention-reminder'
+        });
+
+        // Ouvrir l'application quand l'utilisateur clique sur la notification
+        notification.onclick = function() {
+            window.focus();
+            notification.close();
+        };
+    }
+}
+
+// Fonction pour activer/désactiver les notifications
+function toggleNotifications() {
+    if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+            showAlert('Les notifications sont activées', 'info');
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    showAlert('Les notifications sont activées', 'success');
+                } else {
+                    showAlert('Les notifications sont désactivées', 'info');
+                }
+            });
+        } else {
+            showAlert('Les notifications sont bloquées. Veuillez les activer dans les paramètres de votre navigateur.', 'warning');
+        }
+    } else {
+        showAlert('Votre navigateur ne supporte pas les notifications.', 'warning');
+    }
+}
+
+// Système de traduction multilingue
+const translations = {
+    fr: {
+        'app_title': 'Planificateur d\'Interventions - Assemblées de Dieu',
+        'notification_enabled': 'Les notifications sont activées',
+        'notification_disabled': 'Les notifications sont désactivées',
+        'notification_blocked': 'Les notifications sont bloquées. Veuillez les activer dans les paramètres de votre navigateur.',
+        'browser_no_support': 'Votre navigateur ne supporte pas les notifications.',
+        'reminder_notification': 'Rappel d\'intervention',
+        'upcoming_interventions': 'intervention(s) prévue(s) pour demain',
+        'notifications_activated': 'Les notifications sont activées',
+        'notifications_deactivated': 'Les notifications sont désactivées',
+        'activate_notifications': 'Activer les Notifications',
+        'share_via_email': 'Partager par Email',
+        'view_reports': 'Voir les Rapports',
+        'help_and_docs': 'Aide et Documentation',
+        'export_data': 'Exporter les données',
+        'import_data': 'Importer les données',
+        'sync_data': 'Synchroniser',
+        'generate_pdf': 'Exporter en PDF (Pro)',
+        'generate_csv': 'Exporter en CSV',
+        'whatsapp_share': 'Partager sur WhatsApp',
+        'general_info': 'Informations Générales',
+        'configuration': 'Configuration des Types de Cultes/Réunions',
+        'interventions': 'Interventions Planifiées',
+        'export_section': 'Export et Partage'
+    },
+    en: {
+        'app_title': 'Intervention Planner - Assemblies of God',
+        'notification_enabled': 'Notifications are enabled',
+        'notification_disabled': 'Notifications are disabled',
+        'notification_blocked': 'Notifications are blocked. Please enable them in your browser settings.',
+        'browser_no_support': 'Your browser does not support notifications.',
+        'reminder_notification': 'Intervention reminder',
+        'upcoming_interventions': 'intervention(s) scheduled for tomorrow',
+        'notifications_activated': 'Notifications are activated',
+        'notifications_deactivated': 'Notifications are deactivated',
+        'activate_notifications': 'Activate Notifications',
+        'share_via_email': 'Share via Email',
+        'view_reports': 'View Reports',
+        'help_and_docs': 'Help and Documentation',
+        'export_data': 'Export Data',
+        'import_data': 'Import Data',
+        'sync_data': 'Sync',
+        'generate_pdf': 'Export to PDF (Pro)',
+        'generate_csv': 'Export to CSV',
+        'whatsapp_share': 'Share on WhatsApp',
+        'general_info': 'General Information',
+        'configuration': 'Configuration of Service/Meeting Types',
+        'interventions': 'Scheduled Interventions',
+        'export_section': 'Export and Share'
+    }
+};
+
+// Fonction pour changer la langue
+function changeLanguage(lang) {
+    if (!translations[lang]) {
+        console.warn(`Langue non supportée: ${lang}`);
+        return;
+    }
+
+    // Stocker la langue sélectionnée
+    localStorage.setItem('selectedLanguage', lang);
+
+    // Mettre à jour les textes dans l'interface
+    updateInterfaceTexts(lang);
+}
+
+// Fonction pour obtenir la traduction d'un texte
+function translate(key, lang = null) {
+    const selectedLang = lang || localStorage.getItem('selectedLanguage') || 'fr';
+    const langTranslations = translations[selectedLang] || translations['fr'];
+
+    return langTranslations[key] || key;
+}
+
+// Fonction pour mettre à jour les textes dans l'interface
+function updateInterfaceTexts(lang) {
+    // Mettre à jour les textes des boutons et éléments d'interface
+    const elementsToUpdate = {
+        'notifications-btn': 'activate_notifications',
+        'email-share-btn': 'share_via_email',
+        'show-reports-btn': 'view_reports',
+        'help-btn': 'help_and_docs',
+        'export-data-btn': 'export_data',
+        'import-data-btn': 'import_data',
+        'sync-data-btn': 'sync_data',
+        'generate-pdf-btn': 'generate_pdf',
+        'generate-csv-btn': 'generate_csv',
+        'whatsapp-share-btn': 'whatsapp_share',
+        'step1': 'general_info',
+        'step2': 'configuration',
+        'step3': 'export_section'
+    };
+
+    Object.keys(elementsToUpdate).forEach(elementId => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            const translatedText = translate(elementsToUpdate[elementId], lang);
+            // Pour les boutons, on ne veut pas remplacer tout le contenu
+            if (elementId.includes('-btn')) {
+                const icon = element.querySelector('i');
+                if (icon) {
+                    // Conserver l'icône et mettre à jour le texte qui suit
+                    const textNodes = Array.from(element.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+                    if (textNodes.length > 0) {
+                        textNodes[0].nodeValue = textNodes[0].nodeValue.replace(/[^<]*$/, ' ' + translatedText);
+                    } else {
+                        // Si aucun noeud texte n'est trouvé, ajouter le texte traduit
+                        element.innerHTML = icon.outerHTML + ' ' + translatedText;
+                    }
+                } else {
+                    element.textContent = translatedText;
+                }
+            } else {
+                element.textContent = translatedText;
+            }
+        }
+    });
+
+    // Mettre à jour le titre de la page
+    document.title = translate('app_title', lang);
+}
+
+// Fonction pour initialiser la langue
+function initializeLanguage() {
+    const savedLang = localStorage.getItem('selectedLanguage') || 'fr';
+    updateInterfaceTexts(savedLang);
+}
+
+// Fonction pour archiver un planning
+function archiveCurrentPlanning() {
+    if (interventions.length === 0) {
+        showAlert('Aucun planning à archiver.', 'warning');
+        return;
+    }
+
+    // Créer un objet avec les données actuelles
+    const archivedData = {
+        archivedAt: new Date().toISOString(),
+        churchInfo: {
+            name: document.getElementById('church-name').value,
+            region: document.getElementById('region').value,
+            section: document.getElementById('section').value,
+            temple: document.getElementById('temple').value,
+            year: document.getElementById('year').value,
+            quarter: document.getElementById('quarter').value
+        },
+        interventions: [...interventions], // Copie des interventions
+        intervenants: [...intervenantsDB] // Copie des intervenants
+    };
+
+    // Obtenir les archives existantes ou initialiser un tableau vide
+    let archivedPlannings = JSON.parse(localStorage.getItem('archivedPlannings') || '[]');
+
+    // Ajouter le nouveau planning archivé
+    archivedPlannings.push(archivedData);
+
+    // Limiter à 10 archives pour ne pas surcharger le stockage
+    if (archivedPlannings.length > 10) {
+        archivedPlannings.shift(); // Supprimer le plus ancien
+    }
+
+    // Sauvegarder dans le localStorage
+    localStorage.setItem('archivedPlannings', JSON.stringify(archivedPlannings));
+
+    showAlert(`Planning archivé avec succès ! Vous avez maintenant ${archivedPlannings.length} planning(s) archivé(s).`, 'success');
+}
+
+// Fonction pour afficher les plannings archivés
+function showArchivedPlannings() {
+    const archivedPlannings = JSON.parse(localStorage.getItem('archivedPlannings') || '[]');
+
+    if (archivedPlannings.length === 0) {
+        showAlert('Aucun planning archivé.', 'info');
+        return;
+    }
+
+    // Créer une modale pour afficher les plannings archivés
+    let archivedContent = '';
+    archivedPlannings.forEach((archive, index) => {
+        const archivedDate = new Date(archive.archivedAt).toLocaleString();
+        const interventionCount = archive.interventions.length;
+
+        archivedContent += `
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-archive me-2"></i>
+                        Archivé le: ${archivedDate}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Église:</strong> ${archive.churchInfo.name}</p>
+                    <p><strong>Trimestre:</strong> ${archive.churchInfo.quarter} ${archive.churchInfo.year}</p>
+                    <p><strong>Interventions:</strong> ${interventionCount}</p>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadArchivedPlanning(${index})">
+                            <i class="fas fa-download me-1"></i>Charger
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteArchivedPlanning(${index})">
+                            <i class="fas fa-trash me-1"></i>Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    const modalHTML = `
+        <div class="modal fade" id="archivedPlanningsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-archive me-2"></i>Plannings Archivés</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Vous pouvez charger un planning archivé pour récupérer ses données, ou le supprimer de l'archive.
+                        </div>
+                        <div id="archived-plannings-list">
+                            ${archivedContent}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="clearAllArchives()">
+                            <i class="fas fa-trash-alt me-2"></i>Tout supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Supprimer la modale existante si elle existe
+    const existingModal = document.getElementById('archivedPlanningsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Ajouter la modale au DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Afficher la modale
+    const modal = new bootstrap.Modal(document.getElementById('archivedPlanningsModal'));
+    modal.show();
+
+    // Nettoyer la modale quand elle est fermée
+    document.getElementById('archivedPlanningsModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Fonction pour charger un planning archivé
+function loadArchivedPlanning(index) {
+    const archivedPlannings = JSON.parse(localStorage.getItem('archivedPlannings') || '[]');
+
+    if (index < 0 || index >= archivedPlannings.length) {
+        showAlert('Index de planning archivé invalide.', 'danger');
+        return;
+    }
+
+    const archived = archivedPlannings[index];
+
+    // Demander confirmation avant de charger
+    if (!confirm('Êtes-vous sûr de vouloir charger ce planning archivé ? Cela remplacera les données actuelles.')) {
+        return;
+    }
+
+    // Charger les informations de l'église
+    document.getElementById('church-name').value = archived.churchInfo.name || '';
+    document.getElementById('region').value = archived.churchInfo.region || '';
+    document.getElementById('section').value = archived.churchInfo.section || '';
+    document.getElementById('temple').value = archived.churchInfo.temple || '';
+    document.getElementById('year').value = archived.churchInfo.year || '2025';
+    document.getElementById('quarter').value = archived.churchInfo.quarter || '4';
+
+    // Charger les interventions
+    interventions = [...archived.interventions];
+    updateInterventionsList();
+
+    // Charger les intervenants
+    intervenantsDB = [...archived.intervenants];
+    populateIntervenantsSelect();
+
+    // Mettre à jour les listes déroulantes
+    updateDynamicSelects();
+
+    showAlert(`Planning archivé chargé avec succès ! ${archived.interventions.length} interventions restaurées.`, 'success');
+
+    // Fermer la modale
+    const modal = bootstrap.Modal.getInstance(document.getElementById('archivedPlanningsModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+// Fonction pour supprimer un planning archivé
+function deleteArchivedPlanning(index) {
+    const archivedPlannings = JSON.parse(localStorage.getItem('archivedPlannings') || '[]');
+
+    if (index < 0 || index >= archivedPlannings.length) {
+        showAlert('Index de planning archivé invalide.', 'danger');
+        return;
+    }
+
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce planning archivé ?')) {
+        archivedPlannings.splice(index, 1);
+        localStorage.setItem('archivedPlannings', JSON.stringify(archivedPlannings));
+
+        // Actualiser l'affichage
+        const modal = bootstrap.Modal.getInstance(document.getElementById('archivedPlanningsModal'));
+        if (modal) {
+            modal.hide();
+        }
+        showArchivedPlannings();
+
+        showAlert('Planning archivé supprimé avec succès.', 'success');
+    }
+}
+
+// Fonction pour supprimer toutes les archives
+function clearAllArchives() {
+    if (confirm('Êtes-vous sûr de vouloir supprimer toutes les archives ? Cette action est irréversible.')) {
+        localStorage.removeItem('archivedPlannings');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('archivedPlanningsModal'));
+        if (modal) {
+            modal.hide();
+        }
+        showAlert('Toutes les archives ont été supprimées.', 'success');
     }
 }
 

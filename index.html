@@ -48,6 +48,16 @@
                     <i class="fas fa-question-circle"></i>
                 </button>
             </div>
+
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown">
+                    <i class="fas fa-globe me-1"></i>FR
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="changeLanguage('fr')">Français</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -648,6 +658,18 @@
 
                         <button type="button" class="btn btn-outline-info" id="show-reports-btn">
                             <i class="fas fa-chart-bar me-2"></i>Voir les Rapports
+                        </button>
+
+                        <button type="button" class="btn btn-outline-warning" id="notifications-btn">
+                            <i class="fas fa-bell me-2"></i>Activer les Notifications
+                        </button>
+
+                        <button type="button" class="btn btn-outline-secondary" id="archive-planning-btn">
+                            <i class="fas fa-box-archive me-2"></i>Archiver le Planning
+                        </button>
+
+                        <button type="button" class="btn btn-outline-info" id="show-archives-btn">
+                            <i class="fas fa-archive me-2"></i>Voir les Archives
                         </button>
                     </div>
 
