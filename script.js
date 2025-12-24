@@ -630,6 +630,12 @@ async function generatePDF(customFileName = null, options = {}, fileName = null)
         const includeHeaders = options.hasOwnProperty('includeHeaders') ? options.includeHeaders : true;
 
         const doc = new jsPDF(orientation, 'mm', format);
+
+        // Ajouter la police Cambria (ou une police similaire) au document
+        // Note: jsPDF ne charge pas directement les polices système comme Cambria
+        // Nous utiliserons une police intégrée qui ressemble à Cambria (times)
+        // Pour une police personnalisée comme Cambria, il faudrait l'ajouter via addFont
+
         const primaryColor = [13, 27, 42];
 
         // Calculer les dimensions de la page
@@ -661,11 +667,12 @@ async function generatePDF(customFileName = null, options = {}, fileName = null)
 
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
+        // Utiliser la police Cambria si disponible, sinon une police similaire
+        doc.setFont('times', 'bold'); // times est souvent proche de Cambria
         doc.text("EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU", pageWidth / 2, 15, { align: 'center' });
 
         doc.setFontSize(14);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont('times', 'normal');
         doc.text("Temple BERACA de Natitingou", pageWidth / 2, 25, { align: 'center' });
 
         const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
@@ -690,11 +697,32 @@ ${item.dayOfWeek}`, item.place, item.cultType, item.fullName, item.observations 
         const tableConfig = {
             startY: startY,
             theme: 'grid',
-            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
-            columnStyles: { 0: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, 3: { fontStyle: 'bold' } },
+            headStyles: {
+                fillColor: primaryColor,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'center',
+                font: 'times' // Utiliser times qui est proche de Cambria
+            },
+            bodyStyles: {
+                font: 'times' // Appliquer la police aux cellules du corps
+            },
+            columnStyles: {
+                0: {
+                    cellWidth: 25,
+                    halign: 'center',
+                    fontStyle: 'bold',
+                    font: 'times' // Police pour la colonne Date
+                },
+                3: {
+                    fontStyle: 'bold',
+                    font: 'times' // Police pour la colonne Intervenant
+                }
+            },
             didDrawPage: function (data) {
                 doc.setFontSize(8);
                 doc.setTextColor(150, 150, 150);
+                doc.setFont('times', 'normal'); // Appliquer la police pour le texte de pied de page
                 doc.text(`Généré le ${new Date().toLocaleDateString()}`, margins.left, pageHeight - 10);
             }
         };
@@ -862,7 +890,8 @@ function shareViaEmail() {
 function getBase64ImageFromUrl(url) {
     return new Promise((resolve, reject) => {
         var img = new Image();
-        img.setAttribute('crossOrigin', 'anonymous');
+        // Supprimer l'attribut crossOrigin pour éviter les problèmes CORS avec les fichiers locaux
+        // img.setAttribute('crossOrigin', 'anonymous');
 
         img.onload = function () {
             var canvas = document.createElement("canvas");
@@ -877,7 +906,9 @@ function getBase64ImageFromUrl(url) {
         };
 
         img.onerror = function () {
-            reject(new Error("Impossible de charger l\'image " + url));
+            // En cas d'erreur, on continue sans l'image
+            console.warn("Impossible de charger l'image " + url + ", poursuite sans logo");
+            resolve(null); // Résoudre avec null au lieu de rejeter
         };
 
         img.src = url;
