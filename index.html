@@ -836,7 +836,7 @@
 
             <!-- Logo AD à droite -->
             <div>
-                <img src="AD.jpeg" alt="Logo AD" class="img-fluid" style="max-height: 50px; border-radius: 8px;">
+                <img src="AD.jpeg" alt="Logo AD" class="img-fluid" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px;">
             </div>
         </div>
     </nav>
@@ -2126,7 +2126,7 @@
                     const logoData = await getBase64ImageFromUrl('AD.jpeg');
                     if (logoData) {
                         // Ajouter le logo (x, y, width, height)
-                        doc.addImage(logoData, 'JPEG', 10, 5, 30, 30);
+                        doc.addImage(logoData, 'JPEG', 10, 2, 38, 38);
                     }
                 } catch (error) {
                     console.warn("Impossible de charger le logo AD.jpeg", error);
@@ -3203,36 +3203,43 @@
             }
 
             try {
-                // Préparer les données
-                const data = prepareExcelData();
+                const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
+                const year = document.getElementById('year').value;
 
                 // Créer l'en-tête CSV
-                let csvContent = 'Date,Intervenant,Type de culte,Lieu,Observations\n';
+                let csvContent = `Planning des Interventions - ${quarter} ${year}\n`;
+                csvContent += 'Date,Jour,Lieu,Type de culte,Thème,Intervenant,Observations\n';
 
-                // Ajouter les interventions groupées
-                Object.entries(data.groups).forEach(([groupName, items]) => {
-                    items.forEach(item => {
-                        const date = item.formattedDate.split(' ')[0]; // Extraire seulement la date sans l'heure
-                        const fullName = item.fullName.replace(/"/g, '""'); // Échaper les guillemets
-                        const cultType = item.cultType.replace(/"/g, '""');
-                        const place = item.place.replace(/"/g, '""');
-                        const observations = (item.observations || item.theme || '').replace(/"/g, '""');
+                // Trier et ajouter les données
+                const sortedInterventions = [...interventions].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                        csvContent += `"${date}","${fullName}","${cultType}","${place}","${observations}"\n`;
-                    });
+                sortedInterventions.forEach(item => {
+                    const dateObj = new Date(item.date);
+                    const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+                    
+                    const row = [
+                        formattedDate,
+                        item.dayOfWeek,
+                        item.place,
+                        item.cultType,
+                        item.theme || "",
+                        item.fullName,
+                        item.observations || ""
+                    ].map(field => `"${(field || '').replace(/"/g, '""')}"`).join(',');
+
+                    csvContent += row + '\n';
                 });
 
                 // Créer un blob et le télécharger
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
-
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `Plan_Action_AD_${data.year}_T${data.quarter.charAt(0)}_${data.temple}.csv`;
+                link.download = `Planning_BERACA_${year}_${Date.now()}.csv`;
                 link.click();
-
                 URL.revokeObjectURL(url);
-
+                
+                addToHistory("CSV", link.download);
                 showAlert('Fichier CSV généré avec succès!', 'success');
             } catch (error) {
                 console.error('Erreur lors de l\'export CSV:', error);
@@ -3240,104 +3247,197 @@
             }
         }
 
-        // Fonction pour exporter en PDF
-        function generatePDF() {
+        // Fonction pour la prévisualisation dans la modale
+        function previewExcel() {
+            if (interventions.length === 0) {
+                showAlert('Aucune intervention à prévisualiser.', 'warning');
+                return;
+            }
+
+            const modalContent = document.getElementById('modal-excel-preview');
+            const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
+            const year = document.getElementById('year').value;
+
+            let html = `
+                <div class="text-center mb-4">
+                    <img src="AD.jpeg" alt="Logo AD" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;">
+                    <h3 style="color: #0d1b2a; font-family: 'Times New Roman', serif; font-weight: bold; margin-bottom: 5px;">EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU</h3>
+                    <h4 style="color: #415a77; font-family: 'Times New Roman', serif; margin-bottom: 5px;">Temple BERACA de Natitingou</h4>
+                    <h5 style="color: #778da9;">Planning des Interventions - ${quarter} ${year}</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover" style="border-color: #dee2e6;">
+                        <thead style="background-color: #0d1b2a; color: white;">
+                            <tr>
+                                <th>Date</th>
+                                <th>Jour</th>
+                                <th>Lieu</th>
+                                <th>Type de Culte</th>
+                                <th>Intervenant</th>
+                                <th>Observations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            const sortedInterventions = [...interventions].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            sortedInterventions.forEach(item => {
+                const dateObj = new Date(item.date);
+                const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+                
+                html += `
+                    <tr>
+                        <td class="fw-bold">${formattedDate}</td>
+                        <td>${item.dayOfWeek}</td>
+                        <td>${item.place}</td>
+                        <td><span class="badge bg-light text-dark border">${item.cultType}</span></td>
+                        <td class="fw-bold text-primary">${item.fullName}</td>
+                        <td><small>${item.observations || '-'}</small></td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table></div>`;
+            modalContent.innerHTML = html;
+
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+        }
+
+        // Fonction générique pour Excel (réécriture propre)
+        function generateExcel() {
             if (interventions.length === 0) {
                 showAlert('Aucune intervention à exporter.', 'warning');
                 return;
             }
 
-            // Créer un nouvel onglet/contenu pour le PDF
-            const printWindow = window.open('', '_blank');
-            const data = prepareExcelData();
+            const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
+            const year = document.getElementById('year').value;
 
-            // Générer le contenu HTML pour le PDF
-            let htmlContent = `
-                <html>
-                <head>
-                    <title>Plan d'Action - ${data.temple}</title>
-                    <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Cambria+Math:wght@400;700&display=swap');
-                        body {
-                            font-family: 'Cambria Math', 'Times New Roman', serif;
-                            font-size: 14px;
-                            margin: 20px;
-                        }
-                        .header { text-align: center; margin-bottom: 20px; }
-                        .header h1 { color: #1a237e; font-size: 24px; }
-                        .header h2 { color: #283593; font-size: 20px; margin: 5px 0; }
-                        .info { text-align: center; margin-bottom: 20px; }
-                        .group-title { background-color: #f0f0f0; padding: 8px; margin-top: 15px; font-weight: bold; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        th, td {
-                            border: 1px solid #ddd;
-                            padding: 8px;
-                            text-align: left;
-                            font-family: 'Cambria Math', 'Times New Roman', serif;
-                            font-size: 14px;
-                        }
-                        th { background-color: #f2f2f2; }
-                        tr:nth-child(even) { background-color: #f9f9f9; }
-                        @media (max-width: 768px) {
-                            body { font-size: 12px; margin: 10px; }
-                            .header h1 { font-size: 20px; }
-                            .header h2 { font-size: 16px; }
-                            th, td { padding: 5px; }
-                        }
-                        @media (max-width: 480px) {
-                            body { font-size: 10px; margin: 5px; }
-                            .header h1 { font-size: 16px; }
-                            .header h2 { font-size: 12px; }
-                            th, td { padding: 3px; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>ASSEMBLÉES DE DIEU</h1>
-                        <h2>AD</h2>
-                        <h3>BÉNIN</h3>
-                    </div>
-                    <div class="info">
-                        <h3>${data.churchName}</h3>
-                        <p>Région : ${data.region} | Section : ${data.section} | Temple : ${data.temple}</p>
-                        <h4>PLAN D'ACTION TRIMESTRIEL ${data.year}</h4>
-                        <p>${data.quarter}</p>
-                    </div>
-            `;
+            const ws_data = [
+                ["EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU"],
+                ["Temple BERACA de Natitingou"],
+                [`Planning des Interventions - ${quarter} ${year}`],
+                [""], 
+                ["Date", "Jour", "Lieu", "Type de Culte", "Thème", "Intervenant", "Observations"]
+            ];
 
-            // Ajouter les interventions groupées
-            Object.entries(data.groups).forEach(([groupName, items]) => {
-                htmlContent += `<div class="group-title">${groupName}</div>`;
-                htmlContent += '<table>';
-                htmlContent += '<tr><th>DATES</th><th>Noms et Prénoms</th><th>Observations</th></tr>';
-
-                items.forEach(item => {
-                    const date = item.formattedDate.split(' ')[0]; // Extraire seulement la date
-                    htmlContent += `<tr>
-                        <td>${date}</td>
-                        <td>${item.fullName}</td>
-                        <td>${item.observations || item.theme || ''}</td>
-                    </tr>`;
-                });
-
-                htmlContent += '</table>';
+            interventions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            interventions.forEach(item => {
+                const dateObj = new Date(item.date);
+                const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+                ws_data.push([
+                    formattedDate,
+                    item.dayOfWeek,
+                    item.place,
+                    item.cultType,
+                    item.theme || "",
+                    item.fullName,
+                    item.observations || ""
+                ]);
             });
 
-            htmlContent += `
-                </body>
-                </html>
-            `;
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            
+            // Fusion
+            if(!ws['!merges']) ws['!merges'] = [];
+            ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } });
+            ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 6 } });
+            ws['!merges'].push({ s: { r: 2, c: 0 }, e: { r: 2, c: 6 } });
 
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
+            // Largeurs
+            ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 30 }, { wch: 40 }];
 
-            // Attendre un peu pour s'assurer que le contenu est chargé
-            printWindow.onload = function() {
-                printWindow.print();
-            };
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Planning");
+            const fileName = `Planning_BERACA_${year}_${Date.now()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            addToHistory("Excel", fileName);
+            showAlert('Fichier Excel généré avec succès !', 'success');
+        }
 
-            showAlert('Fichier PDF généré avec succès! Vérifiez votre fenêtre d\'impression.', 'success');
+        // Fonction PDF Pro (jsPDF)
+        async function generatePDF(customFileName = null) {
+            if (interventions.length === 0) {
+                showAlert('Aucune intervention à exporter.', 'warning');
+                return null;
+            }
+
+            const btn = document.getElementById('generate-pdf-btn');
+            if(btn) {
+                var originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Génération...';
+                btn.disabled = true;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const primaryColor = [13, 27, 42]; 
+                
+                // En-tête
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, 210, 40, 'F');
+
+                try {
+                    const logoData = await getBase64ImageFromUrl('AD.jpeg');
+                    if (logoData) doc.addImage(logoData, 'JPEG', 10, 2, 38, 38);
+                } catch (error) { console.warn("Logo non chargé", error); }
+
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text("EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU", 115, 15, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'normal');
+                doc.text("Temple BERACA de Natitingou", 115, 25, { align: 'center' });
+                
+                const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
+                const year = document.getElementById('year').value;
+                doc.setFontSize(12);
+                doc.setTextColor(200, 200, 200);
+                doc.text(`Planning des Interventions - ${quarter} ${year}`, 115, 35, { align: 'center' });
+
+                const columns = ["Date", "Lieu", "Type", "Intervenant", "Observations"];
+                const rows = interventions.map(item => {
+                    const dateObj = new Date(item.date);
+                    const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+                    return [`${formattedDate}\n${item.dayOfWeek}`, item.place, item.cultType, item.fullName, item.observations || ""];
+                });
+
+                doc.autoTable({
+                    head: [columns],
+                    body: rows,
+                    startY: 45,
+                    theme: 'grid',
+                    headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+                    columnStyles: { 0: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, 3: { fontStyle: 'bold' } },
+                    didDrawPage: function (data) {
+                        doc.setFontSize(8);
+                        doc.setTextColor(150, 150, 150);
+                        doc.text(`Généré le ${new Date().toLocaleDateString()}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                    }
+                });
+
+                let fileName = customFileName ? (customFileName.endsWith('.pdf') ? customFileName : customFileName + '.pdf') : `Planning_BERACA_${year}_${Date.now()}.pdf`;
+                doc.save(fileName);
+                addToHistory("PDF", fileName);
+                if (!customFileName) showAlert('Fichier PDF (Pro) généré avec succès !', 'success');
+                return fileName;
+
+            } catch (err) {
+                console.error(err);
+                showAlert('Erreur PDF: ' + err.message, 'danger');
+                return null;
+            } finally {
+                if(btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
         }
 
         // Fonction pour afficher la modale de gestion des intervenants
