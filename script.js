@@ -66,94 +66,112 @@ function initializeApp() {
 }
 
 function setupEventListeners() {
+    const addSafeListener = (id, event, callback) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(event, callback);
+    };
+
     // Navigation entre les étapes
-    document.getElementById('next-step-1').addEventListener('click', () => goToStep(2));
-    document.getElementById('next-step-2').addEventListener('click', () => goToStep(3));
-    document.getElementById('prev-step-2').addEventListener('click', () => goToStep(1));
-    document.getElementById('prev-step-3').addEventListener('click', () => goToStep(2));
+    addSafeListener('next-step-1', 'click', () => goToStep(2));
+    addSafeListener('next-step-2', 'click', () => goToStep(3));
+    addSafeListener('prev-step-2', 'click', () => goToStep(1));
+    addSafeListener('prev-step-3', 'click', () => goToStep(2));
     
     // Date change
-    document.getElementById('intervention-date').addEventListener('change', updateDayOfWeek);
+    addSafeListener('intervention-date', 'change', updateDayOfWeek);
     
     // Type autre
-    document.getElementById('type-other').addEventListener('change', function() {
+    addSafeListener('type-other', 'change', function() {
         const otherSpecify = document.getElementById('type-other-specify');
-        otherSpecify.disabled = !this.checked;
-        if (this.checked) otherSpecify.focus();
+        if (otherSpecify) {
+            otherSpecify.disabled = !this.checked;
+            if (this.checked) otherSpecify.focus();
+        }
     });
     
     // Lieu autre
-    document.getElementById('place-other').addEventListener('change', function() {
+    addSafeListener('place-other', 'change', function() {
         const otherSpecify = document.getElementById('place-other-specify');
-        otherSpecify.disabled = !this.checked;
-        if (this.checked) otherSpecify.focus();
+        if (otherSpecify) {
+            otherSpecify.disabled = !this.checked;
+            if (this.checked) otherSpecify.focus();
+        }
     });
     
-    // Quand on modifie le type autre
-    document.getElementById('type-other-specify').addEventListener('input', function() {
-        updateCultTypeSelect();
-    });
-    
-    // Quand on modifie le lieu autre
-    document.getElementById('place-other-specify').addEventListener('input', function() {
-        updatePlaceSelect();
-    });
+    // Modification type/lieu autre
+    addSafeListener('type-other-specify', 'input', updateCultTypeSelect);
+    addSafeListener('place-other-specify', 'input', updatePlaceSelect);
     
     // Ajout d'intervention
-    document.getElementById('add-intervention-btn').addEventListener('click', addIntervention);
-    document.getElementById('add-multiple-btn').addEventListener('click', addMultipleInterventions);
+    addSafeListener('add-intervention-btn', 'click', addIntervention);
+    addSafeListener('add-multiple-btn', 'click', addMultipleInterventions);
     
     // Ajout d'intervenant
-    document.getElementById('add-new-intervenant').addEventListener('click', addNewIntervenant);
+    addSafeListener('add-new-intervenant', 'click', addNewIntervenant);
     
     // Boutons d'action
-    document.getElementById('clear-all-btn').addEventListener('click', clearAllInterventions);
-    document.getElementById('generate-excel-btn').addEventListener('click', generateExcel);
-    document.getElementById('preview-excel-btn').addEventListener('click', previewExcel);
-    document.getElementById('new-planning-btn').addEventListener('click', newPlanning);
+    addSafeListener('clear-all-btn', 'click', clearAllInterventions);
+    addSafeListener('generate-excel-btn', 'click', generateExcel);
+    addSafeListener('preview-excel-btn', 'click', previewExcel);
+    addSafeListener('new-planning-btn', 'click', newPlanning);
     
     // Téléchargement
-    document.getElementById('download-excel-btn').addEventListener('click', downloadExcel);
+    addSafeListener('download-excel-btn', 'click', downloadExcel);
 
-    // Initialiser le partage WhatsApp (nouvelle méthode)
+    // Initialiser le partage WhatsApp
     setupWhatsAppSharing();
 
     // Importation Excel
-    document.getElementById('import-excel-btn').addEventListener('click', showImportModal);
+    addSafeListener('import-excel-btn', 'click', showImportModal);
 
-    // Exportations
-    document.getElementById('customize-pdf-btn').addEventListener('click', showPdfCustomizationModal);
-    document.getElementById('generate-pdf-btn').addEventListener('click', generatePDF);
-    document.getElementById('generate-csv-btn').addEventListener('click', generateCSV);
+    // Exportations et Personnalisation
+    addSafeListener('customize-pdf-btn', 'click', showPdfCustomizationModal);
+    addSafeListener('generate-pdf-btn', 'click', generatePDF);
+    addSafeListener('generate-csv-btn', 'click', generateCSV);
+    addSafeListener('email-share-btn', 'click', () => showAlert('Fonctionnalité Email bientôt disponible', 'info'));
 
     // Gestion des intervenants
-    document.getElementById('manage-intervenants-btn').addEventListener('click', showManageIntervenantsModal);
+    addSafeListener('manage-intervenants-btn', 'click', showManageIntervenantsModal);
 
     // Planification automatique
-    document.getElementById('auto-plan-btn').addEventListener('click', showAutoPlanModal);
+    addSafeListener('auto-plan-btn', 'click', showAutoPlanModal);
 
     // Gestion des profils
-    document.getElementById('manage-profiles-btn').addEventListener('click', showManageProfilesModal);
+    addSafeListener('manage-profiles-btn', 'click', showManageProfilesModal);
 
-    // Gestion des données
-    document.getElementById('export-data-btn').addEventListener('click', exportData);
-    document.getElementById('import-data-btn').addEventListener('click', importData);
-    document.getElementById('sync-data-btn').addEventListener('click', syncData);
+    // Gestion des données (Vérifier si les fonctions existent avant)
+    if (typeof exportData === 'function') addSafeListener('export-data-btn', 'click', exportData);
+    if (typeof importData === 'function') addSafeListener('import-data-btn', 'click', importData);
+    if (typeof syncData === 'function') addSafeListener('sync-data-btn', 'click', syncData);
 
     // Déverrouillage des informations générales
-    document.getElementById('unlock-general-info').addEventListener('click', unlockGeneralInfo);
+    addSafeListener('unlock-general-info', 'click', unlockGeneralInfo);
 
     // Recherche et filtres
-    document.getElementById('search-input').addEventListener('input', applyFilters);
-    document.getElementById('filter-day').addEventListener('change', applyFilters);
-    document.getElementById('filter-type').addEventListener('change', applyFilters);
-    document.getElementById('filter-place').addEventListener('change', applyFilters);
-    document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
+    addSafeListener('search-input', 'input', applyFilters);
+    addSafeListener('filter-day', 'change', applyFilters);
+    addSafeListener('filter-type', 'change', applyFilters);
+    addSafeListener('filter-place', 'change', applyFilters);
+    addSafeListener('filter-intervenant', 'change', applyFilters);
+    addSafeListener('filter-start-date', 'change', applyFilters);
+    addSafeListener('filter-end-date', 'change', applyFilters);
+    addSafeListener('toggle-advanced-filters', 'click', typeof toggleAdvancedFilters === 'function' ? toggleAdvancedFilters : () => {
+        const adv = document.getElementById('advanced-filters');
+        if (adv) adv.style.display = adv.style.display === 'none' ? 'block' : 'none';
+    });
+    addSafeListener('clear-filters-btn', 'click', clearFilters);
 
     // Changement des configurations
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', updateDynamicSelects);
     });
+
+    // Sauvegarde automatique
+    window.addEventListener('beforeunload', saveToLocalStorage);
+
+    // Charger les données sauvegardées
+    setTimeout(loadFromLocalStorage, 100);
+}
 
     // Sauvegarde automatique
     window.addEventListener('beforeunload', saveToLocalStorageSecure);
@@ -2014,14 +2032,17 @@ function formatDateForInput(dateValue) {
 function updateFilterOptions() {
     const typeFilter = document.getElementById('filter-type');
     const placeFilter = document.getElementById('filter-place');
+    const intervenantFilter = document.getElementById('filter-intervenant');
 
     // Vider les options existantes
     typeFilter.innerHTML = '<option value="">Tous les types</option>';
     placeFilter.innerHTML = '<option value="">Tous les lieux</option>';
+    intervenantFilter.innerHTML = '<option value="">Tous les intervenants</option>';
 
-    // Extraire les types et lieux uniques des interventions
+    // Extraire les types, lieux et intervenants uniques des interventions
     const uniqueTypes = [...new Set(interventions.map(i => i.cultType))];
     const uniquePlaces = [...new Set(interventions.map(i => i.place))];
+    const uniqueIntervenants = [...new Set(interventions.map(i => i.fullName))];
 
     // Ajouter les options
     uniqueTypes.forEach(type => {
@@ -2037,32 +2058,70 @@ function updateFilterOptions() {
         option.textContent = place;
         placeFilter.appendChild(option);
     });
+
+    uniqueIntervenants.forEach(intervenant => {
+        const option = document.createElement('option');
+        option.value = intervenant;
+        option.textContent = intervenant;
+        intervenantFilter.appendChild(option);
+    });
 }
 
 // Fonction pour appliquer les filtres
 function applyFilters() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
     const selectedDay = document.getElementById('filter-day').value;
     const selectedType = document.getElementById('filter-type').value;
     const selectedPlace = document.getElementById('filter-place').value;
+    const selectedIntervenant = document.getElementById('filter-intervenant').value; // Nouveau filtre
+    const startDate = document.getElementById('filter-start-date').value; // Nouveau filtre
+    const endDate = document.getElementById('filter-end-date').value; // Nouveau filtre
 
     // Filtrer les interventions
     const filteredInterventions = interventions.filter(intervention => {
-        const matchesSearch =
+        // Correspondance avec le terme de recherche
+        const matchesSearch = !searchTerm ||
             intervention.fullName.toLowerCase().includes(searchTerm) ||
             intervention.place.toLowerCase().includes(searchTerm) ||
             intervention.cultType.toLowerCase().includes(searchTerm) ||
-            intervention.observations.toLowerCase().includes(searchTerm);
+            intervention.observations.toLowerCase().includes(searchTerm) ||
+            intervention.theme.toLowerCase().includes(searchTerm);
 
+        // Correspondance avec les filtres spécifiques
         const matchesDay = !selectedDay || intervention.dayOfWeek === selectedDay;
         const matchesType = !selectedType || intervention.cultType === selectedType;
         const matchesPlace = !selectedPlace || intervention.place === selectedPlace;
+        const matchesIntervenant = !selectedIntervenant || intervention.fullName.toLowerCase().includes(selectedIntervenant.toLowerCase());
 
-        return matchesSearch && matchesDay && matchesType && matchesPlace;
+        // Correspondance avec les dates
+        let matchesDateRange = true;
+        if (startDate || endDate) {
+            const interventionDate = new Date(intervention.date);
+            if (startDate && interventionDate < new Date(startDate)) {
+                matchesDateRange = false;
+            }
+            if (endDate && interventionDate > new Date(endDate)) {
+                matchesDateRange = false;
+            }
+        }
+
+        return matchesSearch && matchesDay && matchesType && matchesPlace && matchesIntervenant && matchesDateRange;
     });
 
     // Mettre à jour l'affichage avec les interventions filtrées
     displayInterventions(filteredInterventions);
+}
+
+// Fonction pour activer/désactiver les filtres avancés
+function toggleAdvancedFilters() {
+    const advancedFilters = document.getElementById('advanced-filters');
+    if (advancedFilters.style.display === 'none' || !advancedFilters.style.display) {
+        advancedFilters.style.display = 'block';
+        document.getElementById('toggle-advanced-filters').textContent = 'Masquer les filtres avancés';
+    } else {
+        advancedFilters.style.display = 'none';
+        document.getElementById('toggle-advanced-filters').textContent = 'Afficher les filtres avancés';
+    }
 }
 
 // Fonction pour afficher les interventions (modifiée pour prendre en compte un sous-ensemble)
@@ -2167,6 +2226,9 @@ function clearFilters() {
     document.getElementById('filter-day').value = '';
     document.getElementById('filter-type').value = '';
     document.getElementById('filter-place').value = '';
+    document.getElementById('filter-intervenant').value = '';
+    document.getElementById('filter-start-date').value = '';
+    document.getElementById('filter-end-date').value = '';
     updateInterventionsList(); // Afficher toutes les interventions
 }
 

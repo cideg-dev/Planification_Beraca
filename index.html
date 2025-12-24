@@ -532,6 +532,31 @@
                         </div>
                     </div>
 
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-advanced-filters">
+                                <i class="fas fa-filter me-1"></i>Afficher les filtres avancés
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="advanced-filters" style="display: none;">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select" id="filter-intervenant">
+                                    <option value="">Tous les intervenants</option>
+                                    <!-- Rempli dynamiquement -->
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" class="form-control" id="filter-start-date" placeholder="Date de début">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" class="form-control" id="filter-end-date" placeholder="Date de fin">
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="interventions-list">
                         <p class="text-muted text-center py-4">
                             <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
