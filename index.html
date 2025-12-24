@@ -3373,6 +3373,11 @@
 
         // Fonction PDF Pro (jsPDF)
         async function generatePDF(customFileName = null) {
+            // Si customFileName est un événement (click), on le remet à null
+            if (typeof customFileName !== 'string') {
+                customFileName = null;
+            }
+
             if (interventions.length === 0) {
                 showAlert('Aucune intervention à exporter.', 'warning');
                 return null;
