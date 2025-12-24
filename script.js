@@ -112,11 +112,11 @@ function setupEventListeners() {
     document.getElementById('preview-excel-btn').addEventListener('click', previewExcel);
     document.getElementById('new-planning-btn').addEventListener('click', newPlanning);
     
-    // Téléchargement et partage
+    // Téléchargement
     document.getElementById('download-excel-btn').addEventListener('click', downloadExcel);
-    document.getElementById('whatsapp-share-btn').addEventListener('click', shareViaWhatsApp);
-    document.getElementById('whatsapp-modal-share').addEventListener('click', shareViaWhatsApp);
-    document.getElementById('whatsapp-share-float').addEventListener('click', shareViaWhatsApp);
+
+    // Initialiser le partage WhatsApp (nouvelle méthode)
+    setupWhatsAppSharing();
 
     // Importation Excel
     document.getElementById('import-excel-btn').addEventListener('click', showImportModal);
@@ -158,6 +158,13 @@ function setupEventListeners() {
 }
 
 function changeTheme(theme) {
+    // Valider que le thème est autorisé pour éviter les injections CSS
+    const allowedThemes = ['light', 'dark', 'neon', 'galaxy', 'rainbow', 'high-contrast', 'pastel'];
+    if (!allowedThemes.includes(theme)) {
+        console.warn(`Thème non autorisé : ${theme}`);
+        return;
+    }
+
     document.body.className = 'theme-' + theme;
     saveToLocalStorage();
 }
@@ -706,82 +713,132 @@ ${item.dayOfWeek}`, item.place, item.cultType, item.fullName, item.observations 
     }
 }
 
+// Nouvelle logique de partage WhatsApp avec sélecteur de fichiers
+function setupWhatsAppSharing() {
+    const waButton = document.getElementById('whatsapp-share-btn');
+    const waFloat = document.getElementById('whatsapp-share-float');
+    const waModalBtn = document.getElementById('whatsapp-modal-share');
+    const filePicker = document.getElementById('whatsapp-file-picker');
+
+    // Fonction pour déclencher le sélecteur
+    const triggerPicker = (e) => {
+        e.preventDefault();
+        filePicker.click(); // Ouvre la fenêtre native de sélection
+    };
+
+    // Attacher les événements aux boutons
+    if (waButton) waButton.addEventListener('click', triggerPicker);
+    if (waFloat) waFloat.addEventListener('click', triggerPicker);
+    if (waModalBtn) waModalBtn.addEventListener('click', triggerPicker);
+
+    // Gérer la sélection du fichier
+    filePicker.addEventListener('change', async function(e) {
+        const file = this.files[0];
+        
+        if (!file) return; // Aucun fichier sélectionné
+
+        // 4. Valider le type de fichier
+        const validTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+            'application/vnd.ms-excel' // .xls
+        ];
+
+        // Vérification par extension (plus fiable sur certains navigateurs mobiles)
+        const fileName = file.name.toLowerCase();
+        const isValidExtension = fileName.endsWith('.pdf') || fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+
+        if (!isValidExtension && !validTypes.includes(file.type)) {
+            showAlert('Format de fichier invalide. Veuillez sélectionner un PDF ou un Excel.', 'danger');
+            this.value = ''; // Reset
+            return;
+        }
+
+        // Préparer les données de partage
+        const shareData = {
+            files: [file],
+            title: 'Planning AD BERACA',
+            text: `Voici le fichier : ${file.name}`
+        };
+
+        // 3. Utiliser l'API Web Share pour l'intégration
+        if (navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+                // 5. Message de confirmation post-partage
+                addToHistory("Partage Fichier", file.name);
+                showAlert('Fichier partagé avec succès !', 'success');
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Erreur de partage:', err);
+                    showAlert('Erreur lors du partage : ' + err.message, 'danger');
+                }
+            }
+        } else {
+            // Fallback pour PC (Desktop) où le partage de fichiers n'est souvent pas supporté
+            handleDesktopFallback(file);
+        }
+
+        // Reset pour permettre de resélectionner le même fichier si besoin
+        this.value = '';
+    });
+}
+
+function handleDesktopFallback(file) {
+    // Sur PC, on ne peut pas injecter le fichier directement dans WhatsApp Web via JS
+    // On ouvre WhatsApp Web et on guide l'utilisateur
+    
+    const confirmFallback = confirm(
+        "Sur ordinateur, le navigateur ne peut pas envoyer le fichier directement à WhatsApp.\n\n" +
+        "Voulez-vous ouvrir WhatsApp Web pour y glisser le fichier manuellement ?"
+    );
+
+    if (confirmFallback) {
+        const text = `Voici le fichier "${file.name}" concernant le planning.`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        
+        showAlert('WhatsApp Web ouvert. Veuillez maintenant glisser le fichier dans la discussion.', 'info');
+        addToHistory("Ouverture WhatsApp Web", file.name);
+    }
+}
+
+// Fonction obsolète remplacée par setupWhatsAppSharing
 function shareViaWhatsApp() {
+    // Cette fonction est laissée vide ou redirige vers le sélecteur pour compatibilité
+    document.getElementById('whatsapp-file-picker').click();
+}
+
+function shareViaEmail() {
     if (interventions.length === 0) {
         showAlert('Veuillez d\'abord créer un planning.', 'warning');
         return;
     }
 
-    // Pré-remplir le nom du fichier
-    const year = document.getElementById('year').value;
-    const defaultName = `Planning_BERACA_${year}`;
-    document.getElementById('wa-filename').value = defaultName;
-
-    // Ouvrir la modale
-    const modal = new bootstrap.Modal(document.getElementById('whatsappModal'));
-    modal.show();
-    
-    // Configurer le bouton de confirmation (une seule fois pour éviter les doublons d'événements)
-    const confirmBtn = document.getElementById('confirm-wa-send');
-    // Cloner le bouton pour supprimer les anciens écouteurs d'événements (astuce rapide)
-    const newBtn = confirmBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-    
-    newBtn.addEventListener('click', async function() {
-        const filenameInput = document.getElementById('wa-filename');
-        const phoneInput = document.getElementById('wa-phone');
-        
-        const filename = filenameInput.value.trim();
-        const phone = phoneInput.value.replace(/\s+/g, '').replace(/\+/g, '');
-        
-        if (!filename) {
-            alert("Veuillez entrer un nom de fichier.");
+    // Générer le fichier PDF automatiquement
+    generatePDF().then(generatedFileName => {
+        if (!generatedFileName) {
+            // Une erreur s'est produite pendant la génération du PDF
             return;
         }
-        
-        // Fermer la modale
-        modal.hide();
-        
-        // 1. Générer le fichier
-        // On passe le nom pour générer le PDF. generatePDF gère l'extension.
-        const generatedFileName = await generatePDF(filename);
-        
-        if (!generatedFileName) {
-            // Si null retourné, erreur déjà gérée dans generatePDF
-            return; 
-        }
-        
-        // 2. Préparer le message et le lien
-        const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
-        const text = `*Shalom !* 
 
-Voici le planning des interventions de l\'église AD BERACA pour le ${quarter} ${year}.
+        // Préparer le message email
+        const quarterSelect = document.getElementById('quarter');
+        const quarter = quarterSelect.options[quarterSelect.selectedIndex].text;
+        const year = document.getElementById('year').value;
 
-*Veuillez trouver le fichier PDF "${generatedFileName}" ci-joint.* 
+        const subject = encodeURIComponent(`Planning des interventions - Église AD BERACA ${quarter} ${year}`);
+        const body = encodeURIComponent(
+            `Bonjour,\n\n` +
+            `Veuillez trouver ci-joint le planning des interventions de l'église AD BERACA pour le ${quarter} ${year}.\n\n` +
+            `Shalom !`
+        );
 
-Bonne réception.`;
-        
-        let waUrl = `https://wa.me/`;
-        if (phone) {
-            // Ajouter l\'indicatif 229 si l\'utilisateur ne l\'a pas mis et que le numéro fait 8 chiffres (standard Bénin)
-            let targetPhone = phone;
-            if (targetPhone.length === 8 && !targetPhone.startsWith('229')) {
-                targetPhone = '229' + targetPhone;
-            } else if (targetPhone.startsWith('00')) {
-                targetPhone = targetPhone.substring(2);
-            }
-            
-            waUrl += `${targetPhone}?text=${encodeURIComponent(text)}`;
-        } else {
-            // Si pas de numéro, partage générique
-            waUrl += `?text=${encodeURIComponent(text)}`;
-        }
+        // Créer le lien mailto
+        const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
 
-        // 3. Ouvrir WhatsApp
-        setTimeout(() => {
-            window.open(waUrl, '_blank');
-            addToHistory("Partage WhatsApp", `${generatedFileName} -> ${phone || 'Inconnu'}`);
-        }, 1000);
+        // Ouvrir l'application email par défaut
+        window.open(mailtoLink, '_blank');
+        addToHistory("Partage Email", `${generatedFileName} -> Email`);
     });
 }
 
@@ -789,23 +846,23 @@ function getBase64ImageFromUrl(url) {
     return new Promise((resolve, reject) => {
         var img = new Image();
         img.setAttribute('crossOrigin', 'anonymous');
-        
+
         img.onload = function () {
             var canvas = document.createElement("canvas");
             canvas.width = this.width;
             canvas.height = this.height;
-            
+
             var ctx = canvas.getContext("2d");
             ctx.drawImage(this, 0, 0);
-            
+
             var dataURL = canvas.toDataURL("image/jpeg");
             resolve(dataURL);
         };
-        
+
         img.onerror = function () {
             reject(new Error("Impossible de charger l\'image " + url));
         };
-        
+
         img.src = url;
     });
 }

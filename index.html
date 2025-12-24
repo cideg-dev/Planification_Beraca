@@ -30,6 +30,8 @@
                 <div class="theme-btn theme-neon-btn" title="Néon" onclick="changeTheme('neon')"></div>
                 <div class="theme-btn theme-galaxy-btn" title="Galaxie" onclick="changeTheme('galaxy')"></div>
                 <div class="theme-btn theme-rainbow-btn" title="Arc-en-ciel" onclick="changeTheme('rainbow')"></div>
+                <div class="theme-btn theme-high-contrast-btn" title="Contraste élevé" onclick="changeTheme('high-contrast')">HC</div>
+                <div class="theme-btn theme-pastel-btn" title="Pastel" onclick="changeTheme('pastel')">P</div>
             </div>
 
             <div class="navbar-text me-3">
@@ -599,6 +601,10 @@
                         <button type="button" class="btn btn-outline-primary" id="whatsapp-share-btn" style="background: linear-gradient(135deg, #25D366, #128C7E); border: none; color: white;">
                             <i class="fab fa-whatsapp me-2"></i>Partager sur WhatsApp
                         </button>
+
+                        <button type="button" class="btn btn-outline-primary" id="email-share-btn" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; color: white;">
+                            <i class="fas fa-envelope me-2"></i>Partager par Email
+                        </button>
                     </div>
 
                     <!-- Historique des partages -->
@@ -788,6 +794,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     
+    <!-- Input caché pour la sélection de fichier WhatsApp -->
+    <input type="file" id="whatsapp-file-picker" style="display: none;" accept=".pdf, .xlsx, .xls, .application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/pdf">
+
     <script src="script.js"></script>
 </body>
 </html>
