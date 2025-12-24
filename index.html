@@ -27,8 +27,10 @@
         textarea,
         th,
         td {
-            font-family: 'Cambria Math', 'Times New Roman', serif !important;
-            font-size: 14px;
+            font-family: 'Cambria', 'Times New Roman', 'Monotype Corsiva', 'Lucida Calligraphy', serif !important;
+            font-size: 16px; /* Taille augmentée pour lisibilité */
+            line-height: 1.6; /* Interlignage aéré */
+            letter-spacing: 0.03em; /* Interlettrage ajusté */
         }
 
         :root {
@@ -51,7 +53,7 @@
         /* Thèmes */
         body.theme-light {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            color: #212529;
+            color: #000000; /* Noir pur pour meilleur contraste */
         }
         
         body.theme-dark {
@@ -161,7 +163,8 @@
         
         body.theme-dark .main-card,
         body.theme-neon .main-card,
-        body.theme-galaxy .main-card {
+        body.theme-galaxy .main-card,
+        body.theme-rainbow .main-card {
             background: rgba(30, 30, 46, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -336,10 +339,12 @@
         body.theme-neon .form-control,
         body.theme-neon .form-select,
         body.theme-galaxy .form-control,
-        body.theme-galaxy .form-select {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            color: white;
+        body.theme-galaxy .form-select,
+        body.theme-rainbow .form-control,
+        body.theme-rainbow .form-select {
+            background: rgba(0, 0, 0, 0.6); /* Fond plus sombre pour contraste texte blanc */
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
         }
         
         .form-control:focus, .form-select:focus {
@@ -363,26 +368,27 @@
             border: 2px solid rgba(13, 27, 42, 0.1);
         }
         
-        body.theme-dark .checkbox-group,
-        body.theme-neon .checkbox-group,
-        body.theme-galaxy .checkbox-group {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
+                body.theme-dark .checkbox-group,
+                body.theme-neon .checkbox-group,
+                body.theme-galaxy .checkbox-group,
+                body.theme-rainbow .checkbox-group {
+                    background: rgba(255, 255, 255, 0.05);
+                    border-color: rgba(255, 255, 255, 0.1);
+                }
         
-        .form-check-label {
-            font-weight: 600;
-            color: #333;
-            display: flex;
-            align-items: center;
-        }
-        
-        body.theme-dark .form-check-label,
-        body.theme-neon .form-check-label,
-        body.theme-galaxy .form-check-label {
-            color: #f8f9fa;
-        }
-        
+                .form-check-label {
+                    font-weight: 600;
+                    color: inherit; /* S'adapte au thème (noir sur blanc, blanc sur noir) */
+                    display: flex;
+                    align-items: center;
+                }
+                
+                body.theme-dark .form-check-label,
+                body.theme-neon .form-check-label,
+                body.theme-galaxy .form-check-label,
+                body.theme-rainbow .form-check-label {
+                    color: #f8f9fa;
+                }        
         .whatsapp-share {
             background: linear-gradient(135deg, #25D366, #128C7E);
             color: white;
@@ -687,16 +693,60 @@
             height: 50px;
             padding: 8px;
             background: rgba(255, 255, 255, 0.9);
+            font-family: inherit; /* Hériter de la police globale */
+            font-size: inherit;
         }
         
+        /* Styles Select2 pour thèmes sombres (Dark, Neon, Galaxy) */
         body.theme-dark .select2-container--default .select2-selection--single,
         body.theme-neon .select2-container--default .select2-selection--single,
-        body.theme-galaxy .select2-container--default .select2-selection--single {
-            background: rgba(255, 255, 255, 0.1);
+        body.theme-galaxy .select2-container--default .select2-selection--single,
+        body.theme-rainbow .select2-container--default .select2-selection--single {
+            background: rgba(0, 0, 0, 0.6);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+
+        body.theme-dark .select2-container--default .select2-selection--single .select2-selection__rendered,
+        body.theme-neon .select2-container--default .select2-selection--single .select2-selection__rendered,
+        body.theme-galaxy .select2-container--default .select2-selection--single .select2-selection__rendered,
+        body.theme-rainbow .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #ffffff;
+            line-height: 32px;
+        }
+
+        /* Menu déroulant Select2 (Dropdown) en mode sombre */
+        body.theme-dark .select2-dropdown,
+        body.theme-neon .select2-dropdown,
+        body.theme-galaxy .select2-dropdown,
+        body.theme-rainbow .select2-dropdown {
+            background-color: #1e1e1e;
             border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        body.theme-dark .select2-search__field,
+        body.theme-neon .select2-search__field,
+        body.theme-galaxy .select2-search__field {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.theme-dark .select2-results__option,
+        body.theme-neon .select2-results__option,
+        body.theme-galaxy .select2-results__option {
+            color: #ffffff;
+        }
+
+        body.theme-dark .select2-results__option--highlighted[aria-selected],
+        body.theme-neon .select2-results__option--highlighted[aria-selected],
+        body.theme-galaxy .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--accent-color);
             color: white;
         }
-        
+
+        /* Styles généraux Select2 */
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 35px;
             font-weight: 500;
@@ -1625,12 +1675,9 @@
         
         function updateCultTypeSelect() {
             const cultTypeSelect = document.getElementById('cult-type-select');
-            const currentDay = document.getElementById('day-of-week').value;
             const currentValue = cultTypeSelect.value;
             
             cultTypeSelect.innerHTML = '<option value="">Sélectionnez un type...</option>';
-            
-            if (!currentDay) return;
             
             // Récupérer tous les types cochés
             const checkedTypes = [];
@@ -1645,14 +1692,9 @@
                 }
             });
             
-            // Filtrer les types disponibles pour ce jour
-            const availableTypes = cultTypesByDay[currentDay] || [];
-            
-            // Ajouter les types disponibles qui sont cochés
+            // Ajouter tous les types cochés à la liste
             checkedTypes.forEach(type => {
-                if (availableTypes.includes(type) || !cultTypesByDay[currentDay]) {
-                    cultTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
-                }
+                cultTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
             });
             
             // Restaurer la valeur précédente si elle existe toujours
