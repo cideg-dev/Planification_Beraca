@@ -140,10 +140,10 @@ function setupEventListeners() {
     // Gestion des profils
     addSafeListener('manage-profiles-btn', 'click', showManageProfilesModal);
 
-    // Gestion des données (Vérifier si les fonctions existent avant)
-    if (typeof exportData === 'function') addSafeListener('export-data-btn', 'click', exportData);
-    if (typeof importData === 'function') addSafeListener('import-data-btn', 'click', importData);
-    if (typeof syncData === 'function') addSafeListener('sync-data-btn', 'click', syncData);
+    // Gestion des données
+    addSafeListener('export-data-btn', 'click', exportData);
+    addSafeListener('import-data-btn', 'click', importData);
+    addSafeListener('sync-data-btn', 'click', syncData);
 
     // Déverrouillage des informations générales
     addSafeListener('unlock-general-info', 'click', unlockGeneralInfo);
@@ -166,13 +166,6 @@ function setupEventListeners() {
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', updateDynamicSelects);
     });
-
-    // Sauvegarde automatique
-    window.addEventListener('beforeunload', saveToLocalStorage);
-
-    // Charger les données sauvegardées
-    setTimeout(loadFromLocalStorage, 100);
-}
 
     // Sauvegarde automatique
     window.addEventListener('beforeunload', saveToLocalStorageSecure);
