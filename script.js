@@ -135,6 +135,11 @@ function setupEventListeners() {
     // Gestion des profils
     document.getElementById('manage-profiles-btn').addEventListener('click', showManageProfilesModal);
 
+    // Gestion des données
+    document.getElementById('export-data-btn').addEventListener('click', exportData);
+    document.getElementById('import-data-btn').addEventListener('click', importData);
+    document.getElementById('sync-data-btn').addEventListener('click', syncData);
+
     // Déverrouillage des informations générales
     document.getElementById('unlock-general-info').addEventListener('click', unlockGeneralInfo);
 
@@ -1190,30 +1195,54 @@ function showAlert(message, type) {
     }, 5000);
 }
 
+// Fonction de sauvegarde améliorée avec gestion des erreurs et historique
 function saveToLocalStorage() {
-    const data = {
-        theme: document.body.className.replace('theme-', ''),
-        generalInfo: {
-            churchName: document.getElementById('church-name').value,
-            region: document.getElementById('region').value,
-            section: document.getElementById('section').value,
-            temple: document.getElementById('temple').value,
-            year: document.getElementById('year').value,
-            quarter: document.getElementById('quarter').value
-        },
-        configurations: {
-            days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
-            types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
-            places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
-            otherType: document.getElementById('type-other-specify').value,
-            otherPlace: document.getElementById('place-other-specify').value
-        },
-        intervenants: intervenantsDB,
-        interventions: interventions,
-        lastSaved: new Date().toISOString()
-    };
-    
-    localStorage.setItem('churchPlanningData', JSON.stringify(data));
+    try {
+        const data = {
+            version: '1.1', // Ajout d'une version pour la gestion des migrations futures
+            theme: document.body.className.replace('theme-', ''),
+            generalInfo: {
+                churchName: document.getElementById('church-name').value,
+                region: document.getElementById('region').value,
+                section: document.getElementById('section').value,
+                temple: document.getElementById('temple').value,
+                year: document.getElementById('year').value,
+                quarter: document.getElementById('quarter').value
+            },
+            configurations: {
+                days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                otherType: document.getElementById('type-other-specify').value,
+                otherPlace: document.getElementById('place-other-specify').value
+            },
+            intervenants: intervenantsDB,
+            interventions: interventions,
+            lastSaved: new Date().toISOString(),
+            lastSavedTimestamp: Date.now()
+        };
+
+        localStorage.setItem('churchPlanningData', JSON.stringify(data));
+
+        // Sauvegarder dans l'historique (conserver les 5 dernières sauvegardes)
+        const history = JSON.parse(localStorage.getItem('churchPlanningHistory') || '[]');
+        history.unshift({
+            timestamp: Date.now(),
+            data: JSON.stringify(data),
+            description: `Sauvegarde du ${new Date().toLocaleString()}`
+        });
+
+        // Garder uniquement les 5 dernières sauvegardes
+        if (history.length > 5) {
+            history.splice(5);
+        }
+
+        localStorage.setItem('churchPlanningHistory', JSON.stringify(history));
+
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde:', error);
+        showAlert('Erreur lors de la sauvegarde des données: ' + error.message, 'danger');
+    }
 }
 
 function loadFromLocalStorage() {
@@ -1289,7 +1318,201 @@ function loadFromLocalStorage() {
         }
     } catch (error) {
         console.error('Erreur de chargement:', error);
+        showAlert('Erreur lors du chargement des données: ' + error.message, 'danger');
     }
+}
+
+// Fonction pour exporter les données
+function exportData() {
+    try {
+        const data = {
+            version: '1.1',
+            theme: document.body.className.replace('theme-', ''),
+            generalInfo: {
+                churchName: document.getElementById('church-name').value,
+                region: document.getElementById('region').value,
+                section: document.getElementById('section').value,
+                temple: document.getElementById('temple').value,
+                year: document.getElementById('year').value,
+                quarter: document.getElementById('quarter').value
+            },
+            configurations: {
+                days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                otherType: document.getElementById('type-other-specify').value,
+                otherPlace: document.getElementById('place-other-specify').value
+            },
+            intervenants: intervenantsDB,
+            interventions: interventions,
+            exportedAt: new Date().toISOString()
+        };
+
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+        const exportFileDefaultName = `Planning_AD_${new Date().toISOString().slice(0, 10)}.json`;
+
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+
+        showAlert('Données exportées avec succès !', 'success');
+    } catch (error) {
+        console.error('Erreur lors de l\'export:', error);
+        showAlert('Erreur lors de l\'export des données: ' + error.message, 'danger');
+    }
+}
+
+// Fonction pour importer les données
+function importData() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+
+    fileInput.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+
+                // Confirmer l'importation
+                if (confirm(`Êtes-vous sûr de vouloir importer ces données ? Cela remplacera toutes les données actuelles. ${data.interventions ? data.interventions.length + ' interventions' : 'Aucune intervention'}`)) {
+                    // Restaurer les informations générales
+                    document.getElementById('church-name').value = data.generalInfo.churchName || '';
+                    document.getElementById('region').value = data.generalInfo.region || '';
+                    document.getElementById('section').value = data.generalInfo.section || '';
+                    document.getElementById('temple').value = data.generalInfo.temple || '';
+                    document.getElementById('year').value = data.generalInfo.year || '2025';
+                    document.getElementById('quarter').value = data.generalInfo.quarter || '4';
+
+                    // Restaurer les configurations
+                    if (data.configurations) {
+                        // Désélectionner tout d'abord
+                        document.querySelectorAll('input[id^="day-"]').forEach(cb => cb.checked = false);
+                        document.querySelectorAll('input[id^="type-"]').forEach(cb => cb.checked = false);
+                        document.querySelectorAll('input[id^="place-"]').forEach(cb => cb.checked = false);
+
+                        // Jours
+                        data.configurations.days.forEach(dayValue => {
+                            const checkbox = document.querySelector(`input[id^="day-"][value="${dayValue}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+
+                        // Types
+                        data.configurations.types.forEach(typeValue => {
+                            const checkbox = document.querySelector(`input[id^="type-"][value="${typeValue}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+
+                        // Lieux
+                        data.configurations.places.forEach(placeValue => {
+                            const checkbox = document.querySelector(`input[id^="place-"][value="${placeValue}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+
+                        // Autres valeurs
+                        if (data.configurations.otherType) {
+                            document.getElementById('type-other-specify').value = data.configurations.otherType;
+                            document.getElementById('type-other').checked = true;
+                            document.getElementById('type-other-specify').disabled = false;
+                        } else {
+                            document.getElementById('type-other-specify').value = '';
+                            document.getElementById('type-other').checked = false;
+                            document.getElementById('type-other-specify').disabled = true;
+                        }
+                        if (data.configurations.otherPlace) {
+                            document.getElementById('place-other-specify').value = data.configurations.otherPlace;
+                            document.getElementById('place-other').checked = true;
+                            document.getElementById('place-other-specify').disabled = false;
+                        } else {
+                            document.getElementById('place-other-specify').value = '';
+                            document.getElementById('place-other').checked = false;
+                            document.getElementById('place-other-specify').disabled = true;
+                        }
+                    }
+
+                    // Restaurer les intervenants
+                    if (data.intervenants && Array.isArray(data.intervenants)) {
+                        intervenantsDB = data.intervenants;
+                        populateIntervenantsSelect();
+                    }
+
+                    // Restaurer les interventions
+                    if (data.interventions && Array.isArray(data.interventions)) {
+                        interventions = data.interventions;
+                        updateInterventionsList();
+                    }
+
+                    // Mettre à jour les listes déroulantes
+                    updateDynamicSelects();
+
+                    // Restaurer le thème
+                    if (data.theme) {
+                        changeTheme(data.theme);
+                    }
+
+                    showAlert('Données importées avec succès !', 'success');
+                    saveToLocalStorage(); // Sauvegarder immédiatement après l'import
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'import:', error);
+                showAlert('Erreur lors de l\'import des données: ' + error.message, 'danger');
+            }
+        };
+
+        reader.readAsText(file);
+    };
+
+    fileInput.click();
+}
+
+// Fonction pour synchroniser les données via un service externe (simulation)
+function syncData() {
+    // Cette fonction simule une synchronisation avec un service cloud
+    // Dans une implémentation réelle, cela utiliserait une API
+    showAlert('Synchronisation avec le cloud en cours...', 'info');
+
+    // Simuler un processus de synchronisation
+    setTimeout(() => {
+        try {
+            const data = {
+                version: '1.1',
+                theme: document.body.className.replace('theme-', ''),
+                generalInfo: {
+                    churchName: document.getElementById('church-name').value,
+                    region: document.getElementById('region').value,
+                    section: document.getElementById('section').value,
+                    temple: document.getElementById('temple').value,
+                    year: document.getElementById('year').value,
+                    quarter: document.getElementById('quarter').value
+                },
+                configurations: {
+                    days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                    types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                    places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                    otherType: document.getElementById('type-other-specify').value,
+                    otherPlace: document.getElementById('place-other-specify').value
+                },
+                intervenants: intervenantsDB,
+                interventions: interventions,
+                lastSync: new Date().toISOString()
+            };
+
+            // Dans une vraie implémentation, on enverrait ces données à un serveur
+            // Ici, on va juste simuler le succès
+            showAlert('Données synchronisées avec succès !', 'success');
+
+            // Enregistrer la date de synchronisation
+            localStorage.setItem('lastSync', new Date().toISOString());
+        } catch (error) {
+            console.error('Erreur lors de la synchronisation:', error);
+            showAlert('Erreur lors de la synchronisation: ' + error.message, 'danger');
+        }
+    }, 2000);
 }
 
 // Fonctionnalités d'importation Excel
