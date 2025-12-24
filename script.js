@@ -156,7 +156,7 @@ function setupEventListeners() {
     });
 
     // Sauvegarde automatique
-    window.addEventListener('beforeunload', saveToLocalStorage);
+    window.addEventListener('beforeunload', saveToLocalStorageSecure);
 
     // Charger les données sauvegardées
     setTimeout(loadFromLocalStorage, 100);
@@ -1456,7 +1456,7 @@ function importData() {
                     }
 
                     showAlert('Données importées avec succès !', 'success');
-                    saveToLocalStorage(); // Sauvegarder immédiatement après l'import
+                    saveToLocalStorageSecure(); // Sauvegarder immédiatement après l'import
                 }
             } catch (error) {
                 console.error('Erreur lors de l\'import:', error);
@@ -1468,6 +1468,283 @@ function importData() {
     };
 
     fileInput.click();
+}
+
+// Fonction utilitaire pour nettoyer les données d'entrée
+function sanitizeInput(input) {
+    if (typeof input !== 'string') {
+        return input;
+    }
+
+    // Retirer les balises HTML et les caractères dangereux
+    const div = document.createElement('div');
+    div.textContent = input;
+    return div.innerHTML
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/\</g, "") // Supprimer les caractères potentiellement dangereux
+        .trim();
+}
+
+// Fonction pour valider les données avant sauvegarde
+function validateData(data) {
+    const errors = [];
+
+    // Valider les informations générales
+    if (data.generalInfo) {
+        if (typeof data.generalInfo.churchName !== 'string' || data.generalInfo.churchName.length > 100) {
+            errors.push('Nom de l\'église invalide');
+        }
+
+        if (typeof data.generalInfo.region !== 'string' || data.generalInfo.region.length > 50) {
+            errors.push('Région invalide');
+        }
+
+        if (typeof data.generalInfo.section !== 'string' || data.generalInfo.section.length > 50) {
+            errors.push('Section invalide');
+        }
+
+        if (typeof data.generalInfo.temple !== 'string' || data.generalInfo.temple.length > 50) {
+            errors.push('Temple invalide');
+        }
+
+        const year = parseInt(data.generalInfo.year);
+        if (isNaN(year) || year < 1900 || year > 2100) {
+            errors.push('Année invalide');
+        }
+
+        const quarter = parseInt(data.generalInfo.quarter);
+        if (isNaN(quarter) || quarter < 1 || quarter > 4) {
+            errors.push('Trimestre invalide');
+        }
+    }
+
+    // Valider les intervenants
+    if (data.intervenants && Array.isArray(data.intervenants)) {
+        for (let i = 0; i < data.intervenants.length; i++) {
+            const intervenant = data.intervenants[i];
+            if (typeof intervenant.firstName !== 'string' || intervenant.firstName.length > 50) {
+                errors.push(`Prénom de l'intervenant ${i+1} invalide`);
+            }
+            if (typeof intervenant.lastName !== 'string' || intervenant.lastName.length > 50) {
+                errors.push(`Nom de l'intervenant ${i+1} invalide`);
+            }
+        }
+    }
+
+    // Valider les interventions
+    if (data.interventions && Array.isArray(data.interventions)) {
+        for (let i = 0; i < data.interventions.length; i++) {
+            const intervention = data.interventions[i];
+            if (intervention.date && !/^\d{4}-\d{2}-\d{2}$/.test(intervention.date)) {
+                errors.push(`Date de l'intervention ${i+1} invalide`);
+            }
+        }
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors: errors
+    };
+}
+
+// Fonction pour chiffrer/déchiffrer les données sensibles (simplifié)
+function encryptData(data) {
+    // Cette fonction implémente un chiffrement basique pour les données sensibles
+    // Dans une application réelle, il faudrait utiliser une bibliothèque de cryptographie robuste
+    try {
+        const jsonString = JSON.stringify(data);
+        // Encodage de base - dans une vraie application, utilisez Web Crypto API
+        return btoa(encodeURIComponent(jsonString));
+    } catch (error) {
+        console.error('Erreur lors du chiffrement des données:', error);
+        return null;
+    }
+}
+
+function decryptData(encryptedData) {
+    try {
+        const jsonString = decodeURIComponent(atob(encryptedData));
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.error('Erreur lors du déchiffrement des données:', error);
+        return null;
+    }
+}
+
+// Fonction de sauvegarde améliorée avec sécurité
+function saveToLocalStorageSecure() {
+    try {
+        const data = {
+            version: '1.1',
+            theme: document.body.className.replace('theme-', ''),
+            generalInfo: {
+                churchName: sanitizeInput(document.getElementById('church-name').value),
+                region: sanitizeInput(document.getElementById('region').value),
+                section: sanitizeInput(document.getElementById('section').value),
+                temple: sanitizeInput(document.getElementById('temple').value),
+                year: document.getElementById('year').value,
+                quarter: document.getElementById('quarter').value
+            },
+            configurations: {
+                days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                otherType: sanitizeInput(document.getElementById('type-other-specify').value),
+                otherPlace: sanitizeInput(document.getElementById('place-other-specify').value)
+            },
+            intervenants: intervenantsDB.map(intervenant => ({
+                ...intervenant,
+                firstName: sanitizeInput(intervenant.firstName),
+                lastName: sanitizeInput(intervenant.lastName)
+            })),
+            interventions: interventions,
+            lastSaved: new Date().toISOString(),
+            lastSavedTimestamp: Date.now()
+        };
+
+        // Valider les données avant sauvegarde
+        const validation = validateData(data);
+        if (!validation.isValid) {
+            console.error('Erreurs de validation:', validation.errors);
+            showAlert('Erreurs de validation des données: ' + validation.errors.join(', '), 'danger');
+            return;
+        }
+
+        // Chiffrer les données sensibles avant de les stocker
+        const encryptedData = encryptData(data);
+        if (encryptedData) {
+            localStorage.setItem('churchPlanningDataEncrypted', encryptedData);
+
+            // Sauvegarder dans l'historique (conserver les 5 dernières sauvegardes)
+            let history = JSON.parse(localStorage.getItem('churchPlanningHistory') || '[]');
+            const encryptedHistoryItem = encryptData({
+                timestamp: Date.now(),
+                data: JSON.stringify(data),
+                description: `Sauvegarde du ${new Date().toLocaleString()}`
+            });
+
+            if (encryptedHistoryItem) {
+                history.unshift({
+                    timestamp: Date.now(),
+                    data: encryptedHistoryItem,
+                    description: `Sauvegarde du ${new Date().toLocaleString()}`
+                });
+
+                // Garder uniquement les 5 dernières sauvegardes
+                if (history.length > 5) {
+                    history.splice(5);
+                }
+
+                localStorage.setItem('churchPlanningHistory', JSON.stringify(history));
+            }
+        }
+
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde sécurisée:', error);
+        showAlert('Erreur lors de la sauvegarde sécurisée des données: ' + error.message, 'danger');
+    }
+}
+
+// Fonction de chargement améliorée avec sécurité
+function loadFromLocalStorageSecure() {
+    try {
+        const encryptedData = localStorage.getItem('churchPlanningDataEncrypted');
+        if (!encryptedData) {
+            // Si aucune donnée chiffrée n'est trouvée, essayer l'ancienne méthode
+            loadFromLocalStorage();
+            return;
+        }
+
+        const data = decryptData(encryptedData);
+        if (!data) {
+            console.error('Impossible de déchiffrer les données');
+            showAlert('Erreur lors du chargement des données chiffrées', 'danger');
+            return;
+        }
+
+        // Valider les données après déchiffrement
+        const validation = validateData(data);
+        if (!validation.isValid) {
+            console.error('Erreurs de validation après déchiffrement:', validation.errors);
+            showAlert('Erreurs de validation des données après déchiffrement: ' + validation.errors.join(', '), 'danger');
+            return;
+        }
+
+        // Vérifier la version des données
+        if (data.version && data.version !== '1.1') {
+            console.warn(`Version des données: ${data.version}, version actuelle: 1.1`);
+        }
+
+        // Restaurer le thème
+        if (data.theme) {
+            changeTheme(data.theme);
+        }
+
+        // Restaurer les informations générales
+        document.getElementById('church-name').value = data.generalInfo.churchName || '';
+        document.getElementById('region').value = data.generalInfo.region || '';
+        document.getElementById('section').value = data.generalInfo.section || '';
+        document.getElementById('temple').value = data.generalInfo.temple || '';
+        document.getElementById('year').value = data.generalInfo.year || '2025';
+        document.getElementById('quarter').value = data.generalInfo.quarter || '4';
+
+        // Restaurer les configurations
+        if (data.configurations) {
+            // Jours
+            document.querySelectorAll('input[id^="day-"]').forEach(cb => {
+                cb.checked = data.configurations.days.includes(cb.value);
+            });
+
+            // Types
+            document.querySelectorAll('input[id^="type-"]').forEach(cb => {
+                cb.checked = data.configurations.types.includes(cb.value);
+            });
+
+            // Lieux
+            document.querySelectorAll('input[id^="place-"]').forEach(cb => {
+                cb.checked = data.configurations.places.includes(cb.value);
+            });
+
+            // Autres valeurs
+            if (data.configurations.otherType) {
+                document.getElementById('type-other-specify').value = data.configurations.otherType;
+                document.getElementById('type-other').checked = true;
+                document.getElementById('type-other-specify').disabled = false;
+            }
+            if (data.configurations.otherPlace) {
+                document.getElementById('place-other-specify').value = data.configurations.otherPlace;
+                document.getElementById('place-other').checked = true;
+                document.getElementById('place-other-specify').disabled = false;
+            }
+        }
+
+        // Restaurer les intervenants
+        if (data.intervenants && Array.isArray(data.intervenants)) {
+            intervenantsDB = data.intervenants;
+            populateIntervenantsSelect();
+        }
+
+        // Restaurer les interventions
+        if (data.interventions && Array.isArray(data.interventions)) {
+            interventions = data.interventions;
+            updateInterventionsList();
+        }
+
+        // Mettre à jour les listes déroulantes
+        updateDynamicSelects();
+
+        if (interventions.length > 0) {
+            const lastSaved = new Date(data.lastSaved);
+            showAlert(`${interventions.length} interventions restaurées (sauvegarde du ${lastSaved.toLocaleDateString()})`, 'info');
+        }
+    } catch (error) {
+        console.error('Erreur de chargement sécurisé:', error);
+        showAlert('Erreur lors du chargement sécurisé des données: ' + error.message, 'danger');
+    }
 }
 
 // Fonction pour synchroniser les données via un service externe (simulation)
@@ -1483,10 +1760,10 @@ function syncData() {
                 version: '1.1',
                 theme: document.body.className.replace('theme-', ''),
                 generalInfo: {
-                    churchName: document.getElementById('church-name').value,
-                    region: document.getElementById('region').value,
-                    section: document.getElementById('section').value,
-                    temple: document.getElementById('temple').value,
+                    churchName: sanitizeInput(document.getElementById('church-name').value),
+                    region: sanitizeInput(document.getElementById('region').value),
+                    section: sanitizeInput(document.getElementById('section').value),
+                    temple: sanitizeInput(document.getElementById('temple').value),
                     year: document.getElementById('year').value,
                     quarter: document.getElementById('quarter').value
                 },
@@ -1494,13 +1771,21 @@ function syncData() {
                     days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
                     types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
                     places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
-                    otherType: document.getElementById('type-other-specify').value,
-                    otherPlace: document.getElementById('place-other-specify').value
+                    otherType: sanitizeInput(document.getElementById('type-other-specify').value),
+                    otherPlace: sanitizeInput(document.getElementById('place-other-specify').value)
                 },
                 intervenants: intervenantsDB,
                 interventions: interventions,
                 lastSync: new Date().toISOString()
             };
+
+            // Valider les données avant envoi
+            const validation = validateData(data);
+            if (!validation.isValid) {
+                console.error('Erreurs de validation avant synchronisation:', validation.errors);
+                showAlert('Erreurs de validation: ' + validation.errors.join(', '), 'danger');
+                return;
+            }
 
             // Dans une vraie implémentation, on enverrait ces données à un serveur
             // Ici, on va juste simuler le succès
