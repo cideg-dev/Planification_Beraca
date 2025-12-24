@@ -2591,35 +2591,8 @@
             link.download = generatedFileName;
             link.click();
         }
-        
-        function shareViaWhatsApp() {
-            if (!excelFileBlob) {
-                showAlert('Veuillez d\'abord générer le fichier Excel.', 'warning');
-                return;
-            }
-            
-            // Convertir le blob en data URL
-            const reader = new FileReader();
-            reader.onload = function() {
-                const base64data = reader.result.split(',')[1];
-                
-                // Créer un message pour WhatsApp
-                const message = `*ASSEMBLÉES DE DIEU - Plan d'Action*\n\n` +
-                               `Fichier: ${generatedFileName}\n` +
-                               `Interventions: ${interventions.length}\n` +
-                               `Trimestre: ${document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text}\n\n` +
-                               `Généré via l'application de planification.`;
-                
-                const encodedMessage = encodeURIComponent(message);
-                const whatsappURL = `https://wa.me/?text=${encodedMessage}`;
-                
-                window.open(whatsappURL, '_blank');
-            };
-            
-            reader.readAsDataURL(excelFileBlob);
-            showAlert('Prêt à partager sur WhatsApp!', 'info');
-        }
-        
+
+
         function prepareExcelData() {
             const churchName = document.getElementById('church-name').value;
             const region = document.getElementById('region').value;
@@ -3494,6 +3467,80 @@
                     btn.disabled = false;
                 }
             }
+        }
+
+        // Fonction pour partager sur WhatsApp via Modale
+        function shareViaWhatsApp() {
+            if (interventions.length === 0) {
+                showAlert('Veuillez d\'abord créer un planning.', 'warning');
+                return;
+            }
+
+            // Pré-remplir le nom du fichier
+            const year = document.getElementById('year').value;
+            const defaultName = `Planning_BERACA_${year}`;
+            document.getElementById('wa-filename').value = defaultName;
+
+            // Ouvrir la modale
+            const modal = new bootstrap.Modal(document.getElementById('whatsappModal'));
+            modal.show();
+            
+            // Configurer le bouton de confirmation (une seule fois pour éviter les doublons d'événements)
+            const confirmBtn = document.getElementById('confirm-wa-send');
+            // Cloner le bouton pour supprimer les anciens écouteurs d'événements (astuce rapide)
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            
+            newBtn.addEventListener('click', async function() {
+                const filenameInput = document.getElementById('wa-filename');
+                const phoneInput = document.getElementById('wa-phone');
+                
+                const filename = filenameInput.value.trim();
+                const phone = phoneInput.value.replace(/\s+/g, '').replace(/\+/g, '');
+                
+                if (!filename) {
+                    alert("Veuillez entrer un nom de fichier.");
+                    return;
+                }
+                
+                // Fermer la modale
+                modal.hide();
+                
+                // 1. Générer le fichier
+                // On passe le nom pour générer le PDF. generatePDF gère l'extension.
+                const generatedFileName = await generatePDF(filename);
+                
+                if (!generatedFileName) {
+                    // Si null retourné, erreur déjà gérée dans generatePDF
+                    return; 
+                }
+                
+                // 2. Préparer le message et le lien
+                const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
+                const text = `*Shalom !* \n\nVoici le planning des interventions de l'église AD BERACA pour le ${quarter} ${year}.\n\n*Veuillez trouver le fichier PDF "${generatedFileName}" ci-joint.* \n\nBonne réception.`;
+                
+                let waUrl = `https://wa.me/`;
+                if (phone) {
+                    // Ajouter l'indicatif 229 si l'utilisateur ne l'a pas mis et que le numéro fait 8 chiffres (standard Bénin)
+                    let targetPhone = phone;
+                    if (targetPhone.length === 8 && !targetPhone.startsWith('229')) {
+                        targetPhone = '229' + targetPhone;
+                    } else if (targetPhone.startsWith('00')) {
+                        targetPhone = targetPhone.substring(2);
+                    }
+                    
+                    waUrl += `${targetPhone}?text=${encodeURIComponent(text)}`;
+                } else {
+                    // Si pas de numéro, partage générique
+                    waUrl += `?text=${encodeURIComponent(text)}`;
+                }
+
+                // 3. Ouvrir WhatsApp
+                setTimeout(() => {
+                    window.open(waUrl, '_blank');
+                    addToHistory("Partage WhatsApp", `${generatedFileName} -> ${phone || 'Inconnu'}`);
+                }, 1000);
+            });
         }
 
         // Fonction pour afficher la modale de gestion des intervenants
