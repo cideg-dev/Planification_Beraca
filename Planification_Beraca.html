@@ -1,0 +1,3968 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificateur d'Interventions - Assemblées de Dieu</title>
+    <link rel="icon" href="AD.jpeg" type="image/jpeg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Définir la police Cambria Math comme police par défaut */
+        body,
+        .form-control,
+        .form-select,
+        .btn,
+        .card,
+        .modal,
+        .table,
+        h1, h2, h3, h4, h5, h6,
+        p,
+        span,
+        div,
+        label,
+        input,
+        select,
+        textarea,
+        th,
+        td {
+            font-family: 'Cambria Math', 'Times New Roman', serif !important;
+            font-size: 14px;
+        }
+
+        :root {
+            --primary-color: #0d1b2a;
+            --secondary-color: #1b263b;
+            --accent-color: #415a77;
+            --light-blue: #778da9;
+            --light-bg: #e0e1dd;
+            --neon-blue: #00b4d8;
+            --neon-purple: #9d4edd;
+            --neon-green: #38b000;
+            --rainbow-start: #ff006e;
+            --rainbow-middle: #8338ec;
+            --rainbow-end: #3a86ff;
+            --galaxy-dark: #0c0c1d;
+            --galaxy-light: #1d1d3d;
+            --galaxy-accent: #6d28d9;
+        }
+        
+        /* Thèmes */
+        body.theme-light {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #212529;
+        }
+        
+        body.theme-dark {
+            background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+            color: #f8f9fa;
+        }
+        
+        body.theme-neon {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+        }
+        
+        body.theme-galaxy {
+            background: linear-gradient(135deg, var(--galaxy-dark) 0%, var(--galaxy-light) 100%);
+            color: #ffffff;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(109, 40, 217, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 180, 216, 0.2) 0%, transparent 50%);
+        }
+        
+        body.theme-rainbow {
+            background: linear-gradient(135deg, var(--rainbow-start), var(--rainbow-middle), var(--rainbow-end));
+            color: white;
+        }
+        
+        .navbar {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            padding: 8px 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .logo-text {
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            color: #1a237e;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .logo-ad {
+            font-size: 2.2rem;
+            color: #1a237e;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: #1a237e;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        .theme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .theme-light-btn { background: linear-gradient(135deg, #f8f9fa, #e9ecef); }
+        .theme-dark-btn { background: linear-gradient(135deg, #121212, #1e1e1e); }
+        .theme-neon-btn { background: linear-gradient(135deg, #0a0a0a, #1a1a2e); }
+        .theme-galaxy-btn { background: linear-gradient(135deg, var(--galaxy-dark), var(--galaxy-light)); }
+        .theme-rainbow-btn { background: linear-gradient(135deg, var(--rainbow-start), var(--rainbow-middle), var(--rainbow-end)); }
+        
+        .main-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        body.theme-dark .main-card,
+        body.theme-neon .main-card,
+        body.theme-galaxy .main-card {
+            background: rgba(30, 30, 46, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .main-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            color: white;
+            font-weight: 700;
+            padding: 20px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .card-header:hover::before {
+            left: 100%;
+        }
+        
+        body.theme-neon .card-header {
+            background: linear-gradient(90deg, #0a0a0a, #1a1a2e, #2d2d5c);
+            border-bottom: 2px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.3);
+        }
+        
+        body.theme-galaxy .card-header {
+            background: linear-gradient(90deg, var(--galaxy-dark), var(--galaxy-light), var(--galaxy-accent));
+        }
+        
+        .card-header h4 {
+            margin: 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title {
+            background: linear-gradient(90deg, rgba(13, 27, 42, 0.1), rgba(27, 38, 59, 0.1));
+            padding: 15px 25px;
+            border-left: 5px solid var(--accent-color);
+            margin: 25px 0;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+        
+        body.theme-dark .section-title,
+        body.theme-neon .section-title,
+        body.theme-galaxy .section-title {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .intervention-card {
+            border: 2px solid rgba(13, 27, 42, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        body.theme-dark .intervention-card,
+        body.theme-neon .intervention-card,
+        body.theme-galaxy .intervention-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .intervention-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
+            border-color: var(--accent-color);
+        }
+        
+        body.theme-neon .intervention-card:hover {
+            box-shadow: 0 0 25px rgba(0, 180, 216, 0.3);
+            border-color: var(--neon-blue);
+        }
+        
+        .cult-type-badge {
+            background: linear-gradient(90deg, var(--accent-color), var(--light-blue));
+            color: white;
+            padding: 5px 12px;
+            border-radius: 25px;
+            font-size: 0.85em;
+            margin-right: 10px;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body.theme-neon .cult-type-badge {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 6px 15px rgba(27, 38, 59, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary-custom:hover {
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(27, 38, 59, 0.4);
+            color: white;
+        }
+        
+        .btn-success-custom {
+            background: linear-gradient(90deg, var(--neon-green), #2d8c00);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 6px 15px rgba(56, 176, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-success-custom:hover {
+            background: linear-gradient(90deg, #2d8c00, var(--neon-green));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(56, 176, 0, 0.4);
+        }
+        
+        .btn-group-custom {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid rgba(13, 27, 42, 0.1);
+            padding: 12px 18px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.theme-dark .form-control,
+        body.theme-dark .form-select,
+        body.theme-neon .form-control,
+        body.theme-neon .form-select,
+        body.theme-galaxy .form-control,
+        body.theme-galaxy .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.3rem rgba(65, 90, 119, 0.25);
+            background: white;
+        }
+        
+        body.theme-neon .form-control:focus,
+        body.theme-neon .form-select:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 0.3rem rgba(0, 180, 216, 0.25);
+        }
+        
+        .checkbox-group {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(13, 27, 42, 0.1);
+        }
+        
+        body.theme-dark .checkbox-group,
+        body.theme-neon .checkbox-group,
+        body.theme-galaxy .checkbox-group {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-check-label {
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        body.theme-dark .form-check-label,
+        body.theme-neon .form-check-label,
+        body.theme-galaxy .form-check-label {
+            color: #f8f9fa;
+        }
+        
+        .whatsapp-share {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .whatsapp-share:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
+        }
+        
+        .intervention-icon {
+            color: var(--accent-color);
+            font-size: 1.3rem;
+            margin-right: 10px;
+            background: rgba(65, 90, 119, 0.1);
+            padding: 8px;
+            border-radius: 10px;
+        }
+        
+        body.theme-neon .intervention-icon {
+            color: var(--neon-blue);
+            background: rgba(0, 180, 216, 0.1);
+        }
+        
+        .date-display {
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.1), rgba(27, 38, 59, 0.1));
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(13, 27, 42, 0.1);
+        }
+        
+        body.theme-dark .date-display,
+        body.theme-neon .date-display,
+        body.theme-galaxy .date-display {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .intervenant-select {
+            width: 100%;
+        }
+        
+        .alert-custom {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 9999;
+            min-width: 400px;
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 5px solid;
+            animation: slideInRight 0.5s ease;
+        }
+        
+        body.theme-dark .alert-custom,
+        body.theme-neon .alert-custom,
+        body.theme-galaxy .alert-custom {
+            background: rgba(30, 30, 46, 0.95);
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+            color: #aaa;
+            font-weight: 700;
+            position: relative;
+            z-index: 2;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        body.theme-dark .step,
+        body.theme-neon .step,
+        body.theme-galaxy .step {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+        
+        .step.active {
+            color: white;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            box-shadow: 0 8px 20px rgba(27, 38, 59, 0.4);
+        }
+        
+        body.theme-neon .step.active {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.5);
+        }
+        
+        .step-number {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .step.active .step-number {
+            background: white;
+            color: var(--secondary-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .step-line {
+            width: 80px;
+            height: 4px;
+            background: #eee;
+            margin: 0 10px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        
+        .step.active ~ .step-line {
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+        
+        body.theme-neon .step.active ~ .step-line {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+        }
+        
+        .step-content {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        .modal-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .excel-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            background: rgba(248, 249, 250, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 2px solid rgba(13, 27, 42, 0.1);
+        }
+        
+        body.theme-dark .excel-preview,
+        body.theme-neon .excel-preview,
+        body.theme-galaxy .excel-preview {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .share-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .share-btn {
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 200px;
+            justify-content: center;
+        }
+        
+        .ad-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.9), rgba(27, 38, 59, 0.9));
+            border-radius: 20px;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ad-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .ad-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ad-header p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .add-intervenant-btn {
+            background: linear-gradient(90deg, var(--neon-purple), #7b2cbf);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .add-intervenant-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(157, 78, 221, 0.4);
+        }
+        
+        .intervenant-form {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px dashed rgba(13, 27, 42, 0.2);
+        }
+        
+        body.theme-dark .intervenant-form,
+        body.theme-neon .intervenant-form,
+        body.theme-galaxy .intervenant-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .select2-container--default .select2-selection--single {
+            border-radius: 12px;
+            border: 2px solid rgba(13, 27, 42, 0.1);
+            height: 50px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.theme-dark .select2-container--default .select2-selection--single,
+        body.theme-neon .select2-container--default .select2-selection--single,
+        body.theme-galaxy .select2-container--default .select2-selection--single {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 35px;
+            font-weight: 500;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 48px;
+        }
+        
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        body.theme-neon .glow-text {
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            z-index: 999;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .btn-row .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid d-flex align-items-center">
+            <a class="navbar-brand" href="#">
+                <div class="logo-container">
+                    <div class="logo-text">
+                        <div class="logo-ad">AD</div>
+                        <div class="logo-subtitle">ASSEMBLÉES DE DIEU</div>
+                    </div>
+                </div>
+                <span class="glow-text">Planificateur d'Interventions</span>
+            </a>
+
+            <div class="theme-selector">
+                <div class="theme-btn theme-light-btn" title="Clair" onclick="changeTheme('light')"></div>
+                <div class="theme-btn theme-dark-btn" title="Sombre" onclick="changeTheme('dark')"></div>
+                <div class="theme-btn theme-neon-btn" title="Néon" onclick="changeTheme('neon')"></div>
+                <div class="theme-btn theme-galaxy-btn" title="Galaxie" onclick="changeTheme('galaxy')"></div>
+                <div class="theme-btn theme-rainbow-btn" title="Arc-en-ciel" onclick="changeTheme('rainbow')"></div>
+            </div>
+
+            <div class="navbar-text me-3">
+                <span class="badge bg-warning text-dark">Église BERACA</span>
+            </div>
+
+            <!-- Logo AD à droite -->
+            <div>
+                <img src="AD.jpeg" alt="Logo AD" class="img-fluid" style="max-height: 50px; border-radius: 8px;">
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- En-tête AD -->
+        <div class="ad-header">
+            <h1><i class="fas fa-church me-2"></i>ASSEMBLÉES DE DIEU DU BÉNIN</h1>
+            <p>Plan d'Action Trimestriel - Gestion des Interventions</p>
+        </div>
+        
+        <!-- Indicateur d'étapes -->
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <span>Configuration</span>
+            </div>
+            <div class="step-line" style="left: calc(25% - 40px);"></div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <span>Interventions</span>
+            </div>
+            <div class="step-line" style="left: calc(75% - 40px);"></div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <span>Export</span>
+            </div>
+        </div>
+        
+        <!-- Étape 1: Configuration -->
+        <div class="step-content active" id="step1-content">
+            <!-- Informations Générales -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-info-circle me-2"></i>Informations Générales</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-lock me-2"></i>
+                        Les informations générales sont protégées. Pour les modifier, entrez le mot de passe de développeur.
+                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" id="unlock-general-info">
+                            <i class="fas fa-unlock me-1"></i>Modifier
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="church-name" class="form-label">Nom de l'Église *</label>
+                            <input type="text" class="form-control" id="church-name"
+                                   value="EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU DU BENIN" required disabled>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="region" class="form-label">Région *</label>
+                            <input type="text" class="form-control" id="region" value="ATACORA" required disabled>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="section" class="form-label">Section *</label>
+                            <input type="text" class="form-control" id="section" value="NATITINGOU" required disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="temple" class="form-label">Temple *</label>
+                            <input type="text" class="form-control" id="temple" value="BERACA" required disabled>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="year" class="form-label">Année *</label>
+                            <input type="number" class="form-control" id="year" value="2025" min="2020" max="2030" required disabled>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="quarter" class="form-label">Trimestre *</label>
+                            <select class="form-select" id="quarter" required disabled>
+                                <option value="1">1er trimestre</option>
+                                <option value="2">2ème trimestre</option>
+                                <option value="3">3ème trimestre</option>
+                                <option value="4" selected>4ème trimestre</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configuration des Types de Cultes -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-calendar-alt me-2"></i>Configuration des Types de Cultes/Réunions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Jours de la semaine -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="mb-3"><i class="fas fa-calendar-day me-2"></i>Jours de la semaine</h5>
+                            <div class="checkbox-group">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="day-sunday" value="Dimanche" checked>
+                                            <label class="form-check-label" for="day-sunday">
+                                                <span class="cult-type-badge">Dimanche</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="day-monday" value="Lundi">
+                                            <label class="form-check-label" for="day-monday">
+                                                <span class="cult-type-badge">Lundi</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="day-tuesday" value="Mardi" checked>
+                                            <label class="form-check-label" for="day-tuesday">
+                                                <span class="cult-type-badge">Mardi</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="day-wednesday" value="Mercredi" checked>
+                                            <label class="form-check-label" for="day-wednesday">
+                                                <span class="cult-type-badge">Mercredi</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="day-thursday" value="Jeudi" checked>
+                                            <label class="form-check-label" for="day-thursday">
+                                                <span class="cult-type-badge">Jeudi</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="day-friday" value="Vendredi" checked>
+                                            <label class="form-check-label" for="day-friday">
+                                                <span class="cult-type-badge">Vendredi</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="day-saturday" value="Samedi">
+                                            <label class="form-check-label" for="day-saturday">
+                                                <span class="cult-type-badge">Samedi</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Types de Culte -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="mb-3"><i class="fas fa-pray me-2"></i>Types de Culte</h5>
+                            <div class="checkbox-group">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-principal" value="Principal" checked>
+                                    <label class="form-check-label" for="type-principal">
+                                        Culte Principal
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-enseignement" value="Enseignement" checked>
+                                    <label class="form-check-label" for="type-enseignement">
+                                        Enseignement
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-temoignage" value="Témoignage/Action de grâce/Prière" checked>
+                                    <label class="form-check-label" for="type-temoignage">
+                                        Témoignage/Action de grâce/Prière
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-priere-hebdo" value="Prière hebdomadaire" checked>
+                                    <label class="form-check-label" for="type-priere-hebdo">
+                                        Prière hebdomadaire
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-jeune-priere" value="Jeune et Prière">
+                                    <label class="form-check-label" for="type-jeune-priere">
+                                        Jeune et Prière
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-veille-priere" value="Veillée de prière">
+                                    <label class="form-check-label" for="type-veille-priere">
+                                        Veillée de prière
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-reunion" value="Réunion" checked>
+                                    <label class="form-check-label" for="type-reunion">
+                                        Réunion
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-culte-enfants" value="Culte des enfants" checked>
+                                    <label class="form-check-label" for="type-culte-enfants">
+                                        Culte des enfants
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-culte-ados" value="Culte des Adolescents">
+                                    <label class="form-check-label" for="type-culte-ados">
+                                        Culte des Adolescents
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="type-other" value="Autre">
+                                    <label class="form-check-label" for="type-other">
+                                        Autre
+                                    </label>
+                                    <input type="text" class="form-control mt-2" id="type-other-specify" placeholder="Précisez le type de réunion" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lieux d'intervention -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Lieux d'Intervention</h5>
+                            <div class="checkbox-group">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="place-beraca" value="BERACA" checked>
+                                            <label class="form-check-label" for="place-beraca">
+                                                BERACA
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="place-kpoteyei" value="KPOTEYEI" checked>
+                                            <label class="form-check-label" for="place-kpoteyei">
+                                                KPOTEYEI
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="place-gros-porteur" value="GROS PORTEUR" checked>
+                                            <label class="form-check-label" for="place-gros-porteur">
+                                                GROS PORTEUR
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="place-winke" value="WINKE" checked>
+                                            <label class="form-check-label" for="place-winke">
+                                                WINKE
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="place-other" value="Autre">
+                                            <label class="form-check-label" for="place-other">
+                                                Autre lieu
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="place-other-specify" placeholder="Précisez le lieu d'intervention" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-row">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetConfiguration()">
+                                <i class="fas fa-redo me-2"></i>Réinitialiser
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="manage-profiles-btn">
+                                <i class="fas fa-folder-open me-2"></i>Gérer les profils
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-primary-custom" id="next-step-1">
+                            <i class="fas fa-arrow-right me-2"></i>Suivant
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Étape 2: Ajout d'interventions -->
+        <div class="step-content" id="step2-content">
+            <!-- Formulaire pour ajouter un nouvel intervenant -->
+            <div class="card main-card mb-4">
+                <div class="card-header">
+                    <h4><i class="fas fa-user-plus me-2"></i>Ajouter un Nouvel Intervenant</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="new-title" class="form-label">Titre</label>
+                            <select class="form-select" id="new-title">
+                                <option value="">Aucun</option>
+                                <option value="Pasteur">Pasteur</option>
+                                <option value="Diacre">Diacre</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Mme">Mme</option>
+                                <option value="Mlle">Mlle</option>
+                                <option value="Frère">Frère</option>
+                                <option value="Sœur">Sœur</option>
+                                <option value="Ancien">Ancien</option>
+                                <option value="Évangeliste">Évangeliste</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="new-firstname" class="form-label">Prénom *</label>
+                            <input type="text" class="form-control" id="new-firstname" placeholder="Entrez le prénom" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="new-lastname" class="form-label">Nom de famille *</label>
+                            <input type="text" class="form-control" id="new-lastname" placeholder="Entrez le nom" required>
+                        </div>
+                        <div class="col-md-1 mb-3 d-flex align-items-end">
+                            <button type="button" class="btn btn-success w-100" id="add-new-intervenant">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Les intervenants ajoutés seront disponibles dans les listes déroulantes ci-dessous.
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-primary" id="manage-intervenants-btn">
+                            <i class="fas fa-users-cog me-2"></i>Gérer les intervenants
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulaire d'ajout d'intervention -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-calendar-plus me-2"></i>Ajouter une Intervention</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="intervention-date" class="form-label">Date *</label>
+                            <input type="date" class="form-control" id="intervention-date" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="day-of-week" class="form-label">Jour de la semaine</label>
+                            <div class="date-display" id="day-of-week-display">---</div>
+                            <input type="hidden" id="day-of-week">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="intervention-place" class="form-label">Lieu d'intervention *</label>
+                            <select class="form-select" id="intervention-place" required>
+                                <option value="">Sélectionnez un lieu...</option>
+                                <!-- Rempli dynamiquement -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="cult-type-select" class="form-label">Type de culte/réunion *</label>
+                            <select class="form-select" id="cult-type-select" required>
+                                <option value="">Sélectionnez un type...</option>
+                                <!-- Rempli dynamiquement -->
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cult-theme" class="form-label">Thème/Description</label>
+                            <input type="text" class="form-control" id="cult-theme" 
+                                   placeholder="Ex: Semaine de l'EDL, Pâques, Noël...">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="intervenant-title" class="form-label">Titre</label>
+                            <select class="form-select" id="intervenant-title">
+                                <option value="">Aucun</option>
+                                <option value="Pasteur">Pasteur</option>
+                                <option value="Diacre">Diacre</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Mme">Mme</option>
+                                <option value="Mlle">Mlle</option>
+                                <option value="Frère">Frère</option>
+                                <option value="Sœur">Sœur</option>
+                                <option value="Ancien">Ancien</option>
+                                <option value="Évangeliste">Évangeliste</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="intervenant-firstname" class="form-label">Prénom *</label>
+                            <select class="form-select intervenant-select" id="intervenant-firstname" required>
+                                <option value="">Sélectionnez...</option>
+                                <!-- Rempli dynamiquement depuis la base -->
+                            </select>
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label for="intervenant-lastname" class="form-label">Nom de famille *</label>
+                            <select class="form-select intervenant-select" id="intervenant-lastname" required>
+                                <option value="">Sélectionnez...</option>
+                                <!-- Rempli dynamiquement depuis la base -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="observations" class="form-label">Observations spécifiques</label>
+                            <textarea class="form-control" id="observations" rows="2" 
+                                      placeholder="Ex: Témoignage personnel, Prière pour la nation, Enseignement sur..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-row">
+                        <button type="button" class="btn btn-outline-secondary" id="prev-step-2">
+                            <i class="fas fa-arrow-left me-2"></i>Retour
+                        </button>
+                        <div class="btn-group-custom">
+                            <button type="button" class="btn btn-primary-custom" id="add-intervention-btn">
+                                <i class="fas fa-plus me-2"></i>Ajouter cette intervention
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="add-multiple-btn">
+                                <i class="fas fa-plus-circle me-2"></i>Ajouter 4 interventions
+                            </button>
+                            <button type="button" class="btn btn-outline-success" id="auto-plan-btn">
+                                <i class="fas fa-robot me-2"></i>Planification automatique
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liste des interventions -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-list-alt me-2"></i>Interventions Planifiées <span class="badge bg-secondary" id="intervention-count">0</span></h4>
+                </div>
+                <div class="card-body">
+                    <!-- Barre de recherche et filtres -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="search-input" placeholder="Rechercher une intervention (intervenant, lieu, type, observations)...">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="filter-day">
+                                <option value="">Tous les jours</option>
+                                <option value="Dimanche">Dimanche</option>
+                                <option value="Lundi">Lundi</option>
+                                <option value="Mardi">Mardi</option>
+                                <option value="Mercredi">Mercredi</option>
+                                <option value="Jeudi">Jeudi</option>
+                                <option value="Vendredi">Vendredi</option>
+                                <option value="Samedi">Samedi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="filter-type">
+                                <option value="">Tous les types</option>
+                                <!-- Rempli dynamiquement -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="filter-place">
+                                <option value="">Tous les lieux</option>
+                                <!-- Rempli dynamiquement -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="interventions-list">
+                        <p class="text-muted text-center py-4">
+                            <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                            Aucune intervention ajoutée pour le moment.<br>
+                            Commencez par ajouter des interventions ci-dessus.
+                        </p>
+                    </div>
+
+                    <div class="btn-row">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-danger" id="clear-all-btn">
+                                <i class="fas fa-trash-alt me-2"></i>Vider la liste
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clear-filters-btn">
+                                <i class="fas fa-filter-circle-xmark me-2"></i>Effacer filtres
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="import-excel-btn">
+                                <i class="fas fa-file-import me-2"></i>Importer Excel
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-success-custom" id="next-step-2">
+                            <i class="fas fa-file-excel me-2"></i>Générer Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Étape 3: Export et partage -->
+        <div class="step-content" id="step3-content">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-file-export me-2"></i>Export et Partage</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h5>Prévisualisation du fichier Excel</h5>
+                            <div class="excel-preview" id="excel-preview">
+                                <p class="text-muted">Générez un aperçu pour voir le contenu du fichier Excel.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card main-card">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Résumé</h6>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-church me-2"></i>Église: <span id="summary-church">--</span></li>
+                                        <li class="mb-2"><i class="fas fa-calendar me-2"></i>Trimestre: <span id="summary-quarter">--</span></li>
+                                        <li class="mb-2"><i class="fas fa-users me-2"></i>Interventions: <span id="summary-count">0</span></li>
+                                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>Lieux: <span id="summary-places">--</span></li>
+                                        <li class="mb-2"><i class="fas fa-user-friends me-2"></i>Intervenants: <span id="summary-intervenants">0</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="share-buttons">
+                        <button type="button" class="btn btn-success-custom" id="generate-excel-btn">
+                            <i class="fas fa-file-excel me-2"></i>Générer le fichier Excel
+                        </button>
+
+                        <button type="button" class="btn btn-outline-success" id="preview-excel-btn">
+                            <i class="fas fa-eye me-2"></i>Prévisualiser
+                        </button>
+
+                        <button type="button" class="btn btn-outline-danger" id="generate-pdf-btn">
+                            <i class="fas fa-file-pdf me-2"></i>Exporter en PDF
+                        </button>
+
+                        <button type="button" class="btn btn-outline-primary" id="generate-csv-btn">
+                            <i class="fas fa-file-csv me-2"></i>Exporter en CSV
+                        </button>
+
+                        <button type="button" class="btn btn-outline-primary" id="whatsapp-share-btn" style="display: none; background: linear-gradient(135deg, #25D366, #128C7E); border: none; color: white;">
+                            <i class="fab fa-whatsapp me-2"></i>Partager
+                        </button>
+                    </div>
+                    
+                    <div class="btn-row">
+                        <button type="button" class="btn btn-outline-secondary" id="prev-step-3">
+                            <i class="fas fa-arrow-left me-2"></i>Retour aux interventions
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="new-planning-btn">
+                            <i class="fas fa-plus me-2"></i>Nouveau planning
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bouton de partage WhatsApp (flottant) -->
+        <a href="#" class="whatsapp-share" id="whatsapp-share-float" style="display: none;">
+            <i class="fab fa-whatsapp fa-2x"></i>
+        </a>
+        
+        <!-- Bouton retour en haut -->
+        <button class="floating-btn btn btn-primary-custom" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+
+    <!-- Modal de prévisualisation Excel -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-excel me-2"></i>Prévisualisation Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-excel-preview"></div>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Fermer
+                        </button>
+                        <button type="button" class="btn btn-success" id="download-excel-btn">
+                            <i class="fas fa-download me-2"></i>Télécharger
+                        </button>
+                        <button type="button" class="btn btn-success" id="whatsapp-modal-share" style="background: linear-gradient(135deg, #25D366, #128C7E); border: none;">
+                            <i class="fab fa-whatsapp me-2"></i>Partager sur WhatsApp
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        // Données globales
+        let interventions = [];
+        let currentStep = 1;
+        let excelFileBlob = null;
+        let generatedFileName = "";
+        let intervenantsDB = [
+            { id: 1, title: "Pasteur", firstName: "Christophe", lastName: "SATCHI AKOUETE" },
+            { id: 2, title: "Diacre", firstName: "Dieudonné", lastName: "N'DIMONTE" },
+            { id: 3, title: "Mr", firstName: "Joël", lastName: "SENOUWA" },
+            { id: 4, title: "Mr", firstName: "Michel", lastName: "MOUDA" },
+            { id: 5, title: "Mr", firstName: "Jonas", lastName: "KPANATCHE" },
+            { id: 6, title: "Mr", firstName: "Ekué", lastName: "DAVI" },
+            { id: 7, title: "Mme", firstName: "ODETTE", lastName: "N'TCHA" },
+            { id: 8, title: "Mme", firstName: "SYLVIE", lastName: "DOKO" },
+            { id: 9, title: "Diacre", firstName: "Robert", lastName: "NOUGBONAGNI" },
+            { id: 10, title: "Mme", firstName: "Rébecca", lastName: "N'DAH" },
+            { id: 11, title: "Mme", firstName: "Pierrette", lastName: "ALOYA" },
+            { id: 12, title: "Mr", firstName: "GuY", lastName: "LOKOSSOU" },
+            { id: 13, title: "Mme", firstName: "Grace", lastName: "PASTEUR" },
+            { id: 14, title: "Mr", firstName: "Ezéchiel", lastName: "AKOMEDI" },
+            { id: 15, title: "Diacre", firstName: "Jonas", lastName: "MEMEGNON" },
+            { id: 16, title: "Mme", firstName: "Reine", lastName: "N'DIMONTE" },
+            { id: 17, title: "Mme", firstName: "Rebecca", lastName: "SENOUWA" },
+            { id: 18, title: "Mme", firstName: "KOMBETO", lastName: "" },
+            { id: 19, title: "Mme", firstName: "N'DAH", lastName: "REBECCA" },
+            { id: 20, title: "Mlle", firstName: "Sandra", lastName: "DJIHENTO" }
+        ];
+        
+        // Jours de la semaine en français
+        const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+        
+        // Configuration des types de cultes par jour
+        const cultTypesByDay = {
+            'Dimanche': ['Principal', 'Enseignement', 'Culte des enfants', 'Culte des Adolescents'],
+            'Lundi': ['Réunion'],
+            'Mardi': ['Prière hebdomadaire', 'Enseignement'],
+            'Mercredi': ['Enseignement', 'Réunion', 'Culte des Adolescents'],
+            'Jeudi': ['Témoignage/Action de grâce/Prière', 'Réunion'],
+            'Vendredi': ['Enseignement', 'Veillée de prière', 'Réunion'],
+            'Samedi': ['Jeune et Prière', 'Veillée de prière', 'Culte des Adolescents']
+        };
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            populateIntervenantsSelect();
+            
+            // Configurer Select2 pour les listes déroulantes
+            $('.intervenant-select').select2({
+                placeholder: "Sélectionnez...",
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Afficher la date d'aujourd'hui par défaut
+            const today = new Date();
+            document.getElementById('intervention-date').valueAsDate = today;
+            updateDayOfWeek();
+        });
+        
+        function initializeApp() {
+            // Mettre à jour les listes déroulantes
+            updatePlaceSelect();
+            updateCultTypeSelect();
+        }
+        
+        function setupEventListeners() {
+            // Navigation entre les étapes
+            document.getElementById('next-step-1').addEventListener('click', () => goToStep(2));
+            document.getElementById('next-step-2').addEventListener('click', () => goToStep(3));
+            document.getElementById('prev-step-2').addEventListener('click', () => goToStep(1));
+            document.getElementById('prev-step-3').addEventListener('click', () => goToStep(2));
+            
+            // Date change
+            document.getElementById('intervention-date').addEventListener('change', updateDayOfWeek);
+            
+            // Type autre
+            document.getElementById('type-other').addEventListener('change', function() {
+                const otherSpecify = document.getElementById('type-other-specify');
+                otherSpecify.disabled = !this.checked;
+                if (this.checked) otherSpecify.focus();
+            });
+            
+            // Lieu autre
+            document.getElementById('place-other').addEventListener('change', function() {
+                const otherSpecify = document.getElementById('place-other-specify');
+                otherSpecify.disabled = !this.checked;
+                if (this.checked) otherSpecify.focus();
+            });
+            
+            // Quand on modifie le type autre
+            document.getElementById('type-other-specify').addEventListener('input', function() {
+                updateCultTypeSelect();
+            });
+            
+            // Quand on modifie le lieu autre
+            document.getElementById('place-other-specify').addEventListener('input', function() {
+                updatePlaceSelect();
+            });
+            
+            // Ajout d'intervention
+            document.getElementById('add-intervention-btn').addEventListener('click', addIntervention);
+            document.getElementById('add-multiple-btn').addEventListener('click', addMultipleInterventions);
+            
+            // Ajout d'intervenant
+            document.getElementById('add-new-intervenant').addEventListener('click', addNewIntervenant);
+            
+            // Boutons d'action
+            document.getElementById('clear-all-btn').addEventListener('click', clearAllInterventions);
+            document.getElementById('generate-excel-btn').addEventListener('click', generateExcel);
+            document.getElementById('preview-excel-btn').addEventListener('click', previewExcel);
+            document.getElementById('new-planning-btn').addEventListener('click', newPlanning);
+            
+            // Téléchargement et partage
+            document.getElementById('download-excel-btn').addEventListener('click', downloadExcel);
+            document.getElementById('whatsapp-share-btn').addEventListener('click', shareViaWhatsApp);
+            document.getElementById('whatsapp-modal-share').addEventListener('click', shareViaWhatsApp);
+            document.getElementById('whatsapp-share-float').addEventListener('click', shareViaWhatsApp);
+
+            // Importation Excel
+            document.getElementById('import-excel-btn').addEventListener('click', showImportModal);
+
+            // Exportations
+            document.getElementById('generate-pdf-btn').addEventListener('click', generatePDF);
+            document.getElementById('generate-csv-btn').addEventListener('click', generateCSV);
+
+            // Gestion des intervenants
+            document.getElementById('manage-intervenants-btn').addEventListener('click', showManageIntervenantsModal);
+
+            // Planification automatique
+            document.getElementById('auto-plan-btn').addEventListener('click', showAutoPlanModal);
+
+            // Gestion des profils
+            document.getElementById('manage-profiles-btn').addEventListener('click', showManageProfilesModal);
+
+            // Déverrouillage des informations générales
+            document.getElementById('unlock-general-info').addEventListener('click', unlockGeneralInfo);
+
+            // Recherche et filtres
+            document.getElementById('search-input').addEventListener('input', applyFilters);
+            document.getElementById('filter-day').addEventListener('change', applyFilters);
+            document.getElementById('filter-type').addEventListener('change', applyFilters);
+            document.getElementById('filter-place').addEventListener('change', applyFilters);
+            document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
+
+            // Changement des configurations
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateDynamicSelects);
+            });
+
+            // Sauvegarde automatique
+            window.addEventListener('beforeunload', saveToLocalStorage);
+
+            // Charger les données sauvegardées
+            setTimeout(loadFromLocalStorage, 100);
+        }
+        
+        function changeTheme(theme) {
+            document.body.className = 'theme-' + theme;
+            saveToLocalStorage();
+        }
+        
+        function goToStep(step) {
+            // Mettre à jour l'indicateur d'étapes
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
+            
+            currentStep = step;
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`step${step}-content`).classList.add('active');
+            
+            // Actions spécifiques à chaque étape
+            if (step === 2) {
+                updateCultTypeSelect();
+                updatePlaceSelect();
+            } else if (step === 3) {
+                updateSummary();
+                generateExcelPreview();
+            }
+        }
+        
+        function updateDayOfWeek() {
+            const dateInput = document.getElementById('intervention-date');
+            const dayDisplay = document.getElementById('day-of-week-display');
+            const dayInput = document.getElementById('day-of-week');
+            
+            if (dateInput.value) {
+                const date = new Date(dateInput.value);
+                const dayIndex = date.getDay();
+                const dayName = daysOfWeek[dayIndex];
+                
+                dayDisplay.textContent = dayName;
+                dayInput.value = dayName;
+                
+                // Mettre à jour les types de culte disponibles pour ce jour
+                updateCultTypeSelect();
+            } else {
+                dayDisplay.textContent = '---';
+                dayInput.value = '';
+            }
+        }
+        
+        function updatePlaceSelect() {
+            const placeSelect = document.getElementById('intervention-place');
+            const currentValue = placeSelect.value;
+            placeSelect.innerHTML = '<option value="">Sélectionnez un lieu...</option>';
+            
+            // Ajouter les lieux cochés
+            document.querySelectorAll('input[id^="place-"]:checked').forEach(checkbox => {
+                if (checkbox.id === 'place-other' && checkbox.checked) {
+                    const otherValue = document.getElementById('place-other-specify').value;
+                    if (otherValue) {
+                        placeSelect.innerHTML += `<option value="${otherValue}">${otherValue}</option>`;
+                    }
+                } else if (checkbox.id !== 'place-other') {
+                    const placeValue = checkbox.value;
+                    placeSelect.innerHTML += `<option value="${placeValue}">${placeValue}</option>`;
+                }
+            });
+            
+            // Restaurer la valeur précédente si elle existe toujours
+            if (currentValue && Array.from(placeSelect.options).some(opt => opt.value === currentValue)) {
+                placeSelect.value = currentValue;
+            }
+        }
+        
+        function updateCultTypeSelect() {
+            const cultTypeSelect = document.getElementById('cult-type-select');
+            const currentDay = document.getElementById('day-of-week').value;
+            const currentValue = cultTypeSelect.value;
+            
+            cultTypeSelect.innerHTML = '<option value="">Sélectionnez un type...</option>';
+            
+            if (!currentDay) return;
+            
+            // Récupérer tous les types cochés
+            const checkedTypes = [];
+            document.querySelectorAll('input[id^="type-"]:checked').forEach(checkbox => {
+                if (checkbox.id === 'type-other' && checkbox.checked) {
+                    const otherValue = document.getElementById('type-other-specify').value;
+                    if (otherValue) {
+                        checkedTypes.push(otherValue);
+                    }
+                } else if (checkbox.id !== 'type-other') {
+                    checkedTypes.push(checkbox.value);
+                }
+            });
+            
+            // Filtrer les types disponibles pour ce jour
+            const availableTypes = cultTypesByDay[currentDay] || [];
+            
+            // Ajouter les types disponibles qui sont cochés
+            checkedTypes.forEach(type => {
+                if (availableTypes.includes(type) || !cultTypesByDay[currentDay]) {
+                    cultTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+                }
+            });
+            
+            // Restaurer la valeur précédente si elle existe toujours
+            if (currentValue && Array.from(cultTypeSelect.options).some(opt => opt.value === currentValue)) {
+                cultTypeSelect.value = currentValue;
+            }
+        }
+        
+        function updateDynamicSelects() {
+            updatePlaceSelect();
+            updateCultTypeSelect();
+        }
+        
+        function populateIntervenantsSelect() {
+            const firstnameSelect = document.getElementById('intervenant-firstname');
+            const lastnameSelect = document.getElementById('intervenant-lastname');
+            
+            // Remplir les prénoms (uniques)
+            const uniqueFirstnames = [...new Set(intervenantsDB
+                .map(i => i.firstName)
+                .filter(name => name && name.trim() !== ''))];
+            
+            firstnameSelect.innerHTML = '<option value="">Sélectionnez...</option>';
+            uniqueFirstnames.sort().forEach(firstname => {
+                firstnameSelect.innerHTML += `<option value="${firstname}">${firstname}</option>`;
+            });
+            
+            // Remplir les noms (uniques)
+            const uniqueLastnames = [...new Set(intervenantsDB
+                .map(i => i.lastName)
+                .filter(name => name && name.trim() !== ''))];
+            
+            lastnameSelect.innerHTML = '<option value="">Sélectionnez...</option>';
+            uniqueLastnames.sort().forEach(lastname => {
+                lastnameSelect.innerHTML += `<option value="${lastname}">${lastname}</option>`;
+            });
+            
+            // Mettre à jour Select2
+            $('#intervenant-firstname').trigger('change.select2');
+            $('#intervenant-lastname').trigger('change.select2');
+        }
+        
+        function addNewIntervenant() {
+            const title = document.getElementById('new-title').value;
+            const firstName = document.getElementById('new-firstname').value.trim();
+            const lastName = document.getElementById('new-lastname').value.trim();
+            
+            if (!firstName || !lastName) {
+                showAlert('Veuillez entrer au moins un prénom et un nom.', 'danger');
+                return;
+            }
+            
+            // Vérifier si l'intervenant existe déjà
+            const exists = intervenantsDB.some(i => 
+                i.firstName === firstName && i.lastName === lastName
+            );
+            
+            if (exists) {
+                showAlert('Cet intervenant existe déjà dans la base.', 'warning');
+                return;
+            }
+            
+            // Ajouter à la base de données
+            const newIntervenant = {
+                id: Date.now(),
+                title: title,
+                firstName: firstName,
+                lastName: lastName
+            };
+            
+            intervenantsDB.push(newIntervenant);
+            
+            // Mettre à jour les listes déroulantes
+            populateIntervenantsSelect();
+            
+            // Réinitialiser le formulaire
+            document.getElementById('new-title').value = '';
+            document.getElementById('new-firstname').value = '';
+            document.getElementById('new-lastname').value = '';
+            
+            showAlert(`Intervenant ${firstName} ${lastName} ajouté avec succès!`, 'success');
+            saveToLocalStorage();
+        }
+        
+        function addIntervention() {
+            if (!validateInterventionForm()) {
+                return;
+            }
+            
+            const intervention = getInterventionFromForm();
+            interventions.push(intervention);
+            
+            updateInterventionsList();
+            resetInterventionForm();
+            saveToLocalStorage();
+            
+            showAlert('Intervention ajoutée avec succès!', 'success');
+        }
+        
+        function addMultipleInterventions() {
+            if (!validateInterventionForm()) {
+                return;
+            }
+            
+            const baseIntervention = getInterventionFromForm();
+            let baseDate = new Date(document.getElementById('intervention-date').value);
+            
+            for (let i = 0; i < 4; i++) {
+                const date = new Date(baseDate);
+                date.setDate(date.getDate() + (i * 7));
+                
+                const intervention = {...baseIntervention};
+                intervention.id = Date.now() + i;
+                intervention.date = date.toISOString().split('T')[0];
+                intervention.formattedDate = intervention.date + ' 00:00:00';
+                intervention.dayOfWeek = daysOfWeek[date.getDay()];
+                
+                interventions.push(intervention);
+            }
+            
+            updateInterventionsList();
+            resetInterventionForm();
+            saveToLocalStorage();
+            
+            showAlert('4 interventions hebdomadaires ajoutées!', 'success');
+        }
+        
+        function getInterventionFromForm() {
+            const date = document.getElementById('intervention-date').value;
+            const dayOfWeek = document.getElementById('day-of-week').value;
+            const place = document.getElementById('intervention-place').value;
+            const cultType = document.getElementById('cult-type-select').value;
+            const theme = document.getElementById('cult-theme').value;
+            const title = document.getElementById('intervenant-title').value;
+            const firstName = document.getElementById('intervenant-firstname').value;
+            const lastName = document.getElementById('intervenant-lastname').value;
+            const observations = document.getElementById('observations').value;
+            
+            // Trouver le titre correspondant dans la base de données
+            const intervenant = intervenantsDB.find(i => 
+                i.firstName === firstName && i.lastName === lastName
+            );
+            
+            const actualTitle = intervenant ? intervenant.title : title;
+            
+            // Formater le nom complet
+            let fullName = '';
+            if (actualTitle) {
+                fullName += actualTitle + ' ';
+            }
+            fullName += firstName + ' ' + lastName;
+            
+            // Déterminer le label de groupe
+            let groupLabel = '';
+            
+            if (cultType === 'Principal' && place === 'BERACA') {
+                groupLabel = 'Les intervenants culte Dimanche BERACA';
+            } else if (cultType === 'Culte des enfants') {
+                groupLabel = 'Les intervenants du culte des enfants';
+            } else if (cultType === 'Culte des Adolescents') {
+                groupLabel = 'Les intervenants du culte des Adolescents';
+            } else if (place === 'KPOTEYEI') {
+                if (dayOfWeek === 'Dimanche') {
+                    groupLabel = 'Les intervenants de Dimanche à KPOTEYEI';
+                } else if (dayOfWeek === 'Mercredi') {
+                    groupLabel = 'Les intervenants de Mercredi à KPOTEYEI';
+                } else if (dayOfWeek === 'Vendredi') {
+                    groupLabel = 'Les intervenants de Vendredi à KPOTEYEI';
+                }
+            } else if (place === 'GROS PORTEUR' && dayOfWeek === 'Mercredi') {
+                groupLabel = 'Les intervenants de Mercredi à GROS PORTEUR';
+            } else if (place === 'WINKE' && dayOfWeek === 'Mercredi') {
+                groupLabel = 'Les intervenants de Mercredi à WINKE';
+            } else if (cultType === 'Témoignage/Action de grâce/Prière' && dayOfWeek === 'Jeudi') {
+                groupLabel = 'Intervenants de Jeudi';
+            } else if (cultType === 'Prière hebdomadaire' && dayOfWeek === 'Mardi') {
+                groupLabel = 'Intervenants de Mardi';
+            } else if (cultType === 'Jeune et Prière') {
+                groupLabel = 'Intervenants de Jeune et Prière';
+            } else if (cultType === 'Veillée de prière') {
+                groupLabel = 'Intervenants de Veillée de Prière';
+            } else {
+                groupLabel = `Intervenants de ${dayOfWeek}`;
+            }
+            
+            return {
+                id: Date.now(),
+                date: date,
+                formattedDate: date + ' 00:00:00',
+                dayOfWeek: dayOfWeek,
+                place: place,
+                cultType: cultType,
+                theme: theme,
+                title: actualTitle,
+                firstName: firstName,
+                lastName: lastName,
+                fullName: fullName,
+                observations: observations,
+                groupLabel: groupLabel
+            };
+        }
+        
+        function validateInterventionForm() {
+            const requiredFields = [
+                'intervention-date', 'intervention-place', 'cult-type-select',
+                'intervenant-firstname', 'intervenant-lastname'
+            ];
+            
+            for (const fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                if (!field.value) {
+                    const label = field.previousElementSibling ? field.previousElementSibling.textContent : fieldId;
+                    showAlert(`Le champ "${label}" est requis.`, 'danger');
+                    field.focus();
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        function resetInterventionForm() {
+            // Incrémenter la date de 7 jours pour la prochaine intervention
+            const currentDate = new Date(document.getElementById('intervention-date').value);
+            currentDate.setDate(currentDate.getDate() + 7);
+            document.getElementById('intervention-date').valueAsDate = currentDate;
+            
+            // Réinitialiser les autres champs
+            document.getElementById('cult-theme').value = '';
+            document.getElementById('intervenant-title').value = '';
+            $('#intervenant-firstname').val(null).trigger('change');
+            $('#intervenant-lastname').val(null).trigger('change');
+            document.getElementById('observations').value = '';
+            
+            // Mettre à jour le jour de la semaine
+            updateDayOfWeek();
+        }
+        
+        function updateInterventionsList() {
+            const listContainer = document.getElementById('interventions-list');
+            const countElement = document.getElementById('intervention-count');
+            
+            countElement.textContent = interventions.length;
+            
+            if (interventions.length === 0) {
+                listContainer.innerHTML = `
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                        Aucune intervention ajoutée pour le moment.<br>
+                        Commencez par ajouter des interventions ci-dessus.
+                    </p>
+                `;
+                return;
+            }
+            
+            // Trier par date
+            interventions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Grouper par label
+            const grouped = {};
+            interventions.forEach(intervention => {
+                if (!grouped[intervention.groupLabel]) {
+                    grouped[intervention.groupLabel] = [];
+                }
+                grouped[intervention.groupLabel].push(intervention);
+            });
+            
+            // Générer le HTML
+            let html = '';
+            
+            for (const [groupName, groupInterventions] of Object.entries(grouped)) {
+                html += `
+                    <div class="section-title">
+                        <h5><i class="fas fa-folder-open me-2"></i>${groupName}</h5>
+                    </div>
+                `;
+                
+                groupInterventions.forEach(intervention => {
+                    const dateObj = new Date(intervention.date);
+                    const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+                    
+                    html += `
+                        <div class="intervention-card" data-id="${intervention.id}">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <div class="date-display">
+                                        <i class="fas fa-calendar-day intervention-icon"></i>
+                                        ${formattedDate}<br>
+                                        <small>${intervention.dayOfWeek}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><i class="fas fa-user intervention-icon"></i>Intervenant:</strong><br>
+                                    ${intervention.fullName}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><i class="fas fa-church intervention-icon"></i>Type:</strong><br>
+                                    ${intervention.cultType} - ${intervention.place}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><i class="fas fa-comment intervention-icon"></i>Observations:</strong><br>
+                                    ${intervention.observations || intervention.theme || '-'}
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <button class="btn btn-sm btn-outline-danger delete-intervention" data-id="${intervention.id}" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            listContainer.innerHTML = html;
+            
+            // Ajouter les événements de suppression
+            document.querySelectorAll('.delete-intervention').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteIntervention(id);
+                });
+            });
+        }
+        
+        function deleteIntervention(id) {
+            if (confirm('Voulez-vous vraiment supprimer cette intervention ?')) {
+                interventions = interventions.filter(intervention => intervention.id !== id);
+                updateInterventionsList();
+                saveToLocalStorage();
+                showAlert('Intervention supprimée.', 'warning');
+            }
+        }
+        
+        function clearAllInterventions() {
+            if (interventions.length === 0) return;
+            
+            if (confirm(`Voulez-vous vraiment supprimer toutes les ${interventions.length} interventions ?`)) {
+                interventions = [];
+                updateInterventionsList();
+                saveToLocalStorage();
+                showAlert('Toutes les interventions ont été supprimées.', 'warning');
+            }
+        }
+        
+        function generateExcelPreview() {
+            const previewContainer = document.getElementById('excel-preview');
+            
+            if (interventions.length === 0) {
+                previewContainer.innerHTML = '<p class="text-muted">Aucune intervention à afficher.</p>';
+                return;
+            }
+            
+            const data = prepareExcelData();
+            let html = `
+                <div style="text-align: center; font-weight: bold; margin-bottom: 10px;">
+                    <div style="font-size: 16px; color: #1a237e;">ASSEMBLÉES DE DIEU</div>
+                    <div style="font-size: 20px; color: #283593; font-weight: bold;">AD</div>
+                </div>
+                <div style="text-align: center; margin-bottom: 10px;">
+                    ${data.churchName}
+                </div>
+                <div style="text-align: center; margin-bottom: 10px;">
+                    Région : ${data.region} | Section : ${data.section} | Temple : ${data.temple}
+                </div>
+                <div style="text-align: center; font-weight: bold; margin-bottom: 10px;">
+                    PLAN D'ACTION TRIMESTRIEL ${data.year}
+                </div>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    ${data.quarter}
+                </div>
+            `;
+            
+            // Afficher quelques interventions en exemple
+            const sampleInterventions = interventions.slice(0, 3);
+            html += '<table style="width: 100%;"><tr><th>Date</th><th>Intervenant</th><th>Type</th></tr>';
+            
+            sampleInterventions.forEach(item => {
+                const dateObj = new Date(item.date);
+                const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+                
+                html += `<tr>
+                    <td>${formattedDate}</td>
+                    <td>${item.fullName}</td>
+                    <td>${item.cultType}</td>
+                </tr>`;
+            });
+            
+            if (interventions.length > 3) {
+                html += `<tr><td colspan="3" style="text-align: center; font-style: italic;">... et ${interventions.length - 3} autres interventions</td></tr>`;
+            }
+            
+            html += '</table>';
+            previewContainer.innerHTML = html;
+        }
+        
+        function previewExcel() {
+            if (interventions.length === 0) {
+                showAlert('Aucune intervention à prévisualiser.', 'warning');
+                return;
+            }
+            
+            const data = prepareExcelData();
+            const modalPreview = document.getElementById('modal-excel-preview');
+            
+            let html = `
+                <div class="excel-preview">
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <div style="font-size: 18px; color: #1a237e; font-weight: bold;">ASSEMBLÉES DE DIEU</div>
+                        <div style="font-size: 24px; color: #283593; font-weight: bold; margin-bottom: 5px;">AD</div>
+                        <div style="font-size: 14px; color: #666;">BÉNIN</div>
+                    </div>
+                    <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 10px;">
+                        ${data.churchName}
+                    </div>
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        Région : ${data.region}                   Section : ${data.section}                   Temple : ${data.temple}
+                    </div>
+                    <div style="text-align: center; font-weight: bold; margin-bottom: 10px;">
+                        PLAN D'ACTION TRIMESTRIEL ${data.year}
+                    </div>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        ${data.quarter}
+                    </div>
+            `;
+            
+            Object.entries(data.groups).forEach(([groupName, items]) => {
+                html += `
+                    <div style="margin-top: 20px;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">${groupName}</div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 1px solid #000;">
+                                <th style="text-align: left; padding: 5px; width: 30%;">DATES</th>
+                                <th style="text-align: left; padding: 5px; width: 50%;">Noms et Prénoms</th>
+                                <th style="text-align: left; padding: 5px; width: 20%;">Observations</th>
+                            </tr>
+                `;
+                
+                items.forEach(item => {
+                    html += `
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 5px;">${item.formattedDate}</td>
+                            <td style="padding: 5px;">${item.fullName}</td>
+                            <td style="padding: 5px;">${item.observations || item.theme || ''}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</table></div>`;
+            });
+            
+            html += `</div>`;
+            modalPreview.innerHTML = html;
+            
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+        }
+        
+        function generateExcel() {
+            if (interventions.length === 0) {
+                showAlert('Aucune intervention à exporter.', 'warning');
+                return;
+            }
+
+            try {
+                const data = prepareExcelData();
+
+                // Créer le fichier Excel
+                const wb = XLSX.utils.book_new();
+                const wsData = [];
+
+                // En-tête avec logo AD
+                wsData.push(['ASSEMBLÉES DE DIEU']);
+                wsData.push(['AD']);
+                wsData.push(['BÉNIN']);
+                wsData.push([]);
+                wsData.push([data.churchName]);
+                wsData.push([]);
+                wsData.push([`Région : ${data.region}                   Section : ${data.section}                   Temple : ${data.temple}`]);
+                wsData.push([]);
+                wsData.push([`PLAN D'ACTION TRIMESTRIEL ${data.year}`]);
+                wsData.push([data.quarter]);
+                wsData.push([]);
+                wsData.push(['DATES', 'Noms et Prénoms', 'Observations']);
+
+                // Ajouter les groupes
+                Object.entries(data.groups).forEach(([groupName, items]) => {
+                    wsData.push([]);
+                    wsData.push([groupName]);
+
+                    items.forEach(item => {
+                        wsData.push([item.formattedDate, item.fullName, item.observations || item.theme || '']);
+                    });
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                // Fusionner les cellules pour le logo AD
+                ws['!merges'] = [
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
+                    { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
+                    { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } },
+                    { s: { r: 4, c: 0 }, e: { r: 4, c: 2 } },
+                    { s: { r: 6, c: 0 }, e: { r: 6, c: 2 } },
+                    { s: { r: 8, c: 0 }, e: { r: 8, c: 2 } },
+                    { s: { r: 9, c: 0 }, e: { r: 9, c: 2 } }
+                ];
+
+                // Définir les largeurs de colonnes
+                ws['!cols'] = [
+                    { wch: 25 },
+                    { wch: 40 },
+                    { wch: 25 }
+                ];
+
+                // Appliquer le style de police Cambria Math
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    for (let C = range.s.c; C <= range.e.c; ++C) {
+                        const cell_address = { c: C, r: R };
+                        const cell_ref = XLSX.utils.encode_cell(cell_address);
+
+                        if (!ws[cell_ref]) continue;
+
+                        // Appliquer le style de police
+                        if (!ws[cell_ref].s) ws[cell_ref].s = {};
+                        ws[cell_ref].s.font = {
+                            name: 'Cambria Math',
+                            sz: 14
+                        };
+                    }
+                }
+
+                XLSX.utils.book_append_sheet(wb, ws, 'Plan d\'action');
+
+                // Générer le blob pour le partage
+                const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                excelFileBlob = new Blob([wbout], { type: 'application/octet-stream' });
+
+                // Générer le nom de fichier
+                const quarterNumber = data.quarter.charAt(0);
+                generatedFileName = `Plan_Action_AD_${data.year}_T${quarterNumber}_${data.temple}.xlsx`;
+
+                // Télécharger automatiquement
+                XLSX.writeFile(wb, generatedFileName);
+
+                // Afficher les boutons de partage
+                document.getElementById('whatsapp-share-btn').style.display = 'inline-block';
+                document.getElementById('whatsapp-share-float').style.display = 'flex';
+
+                showAlert(`Fichier "${generatedFileName}" généré avec succès!`, 'success');
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur lors de la génération du fichier.', 'danger');
+            }
+        }
+        
+        function downloadExcel() {
+            if (!excelFileBlob) {
+                generateExcel();
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(excelFileBlob);
+            link.download = generatedFileName;
+            link.click();
+        }
+        
+        function shareViaWhatsApp() {
+            if (!excelFileBlob) {
+                showAlert('Veuillez d\'abord générer le fichier Excel.', 'warning');
+                return;
+            }
+            
+            // Convertir le blob en data URL
+            const reader = new FileReader();
+            reader.onload = function() {
+                const base64data = reader.result.split(',')[1];
+                
+                // Créer un message pour WhatsApp
+                const message = `*ASSEMBLÉES DE DIEU - Plan d'Action*\n\n` +
+                               `Fichier: ${generatedFileName}\n` +
+                               `Interventions: ${interventions.length}\n` +
+                               `Trimestre: ${document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text}\n\n` +
+                               `Généré via l'application de planification.`;
+                
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappURL = `https://wa.me/?text=${encodedMessage}`;
+                
+                window.open(whatsappURL, '_blank');
+            };
+            
+            reader.readAsDataURL(excelFileBlob);
+            showAlert('Prêt à partager sur WhatsApp!', 'info');
+        }
+        
+        function prepareExcelData() {
+            const churchName = document.getElementById('church-name').value;
+            const region = document.getElementById('region').value;
+            const section = document.getElementById('section').value;
+            const temple = document.getElementById('temple').value;
+            const year = document.getElementById('year').value;
+            const quarter = document.getElementById('quarter').value;
+            
+            const quarterLabels = {
+                '1': 'Premier trimestre',
+                '2': 'Deuxième trimestre',
+                '3': 'Troisième trimestre',
+                '4': 'Quatrième trimestre'
+            };
+            
+            // Trier les interventions
+            interventions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Grouper par label
+            const groupedData = {};
+            interventions.forEach(intervention => {
+                if (!groupedData[intervention.groupLabel]) {
+                    groupedData[intervention.groupLabel] = [];
+                }
+                groupedData[intervention.groupLabel].push(intervention);
+            });
+            
+            return {
+                churchName,
+                region,
+                section,
+                temple,
+                year,
+                quarter: quarterLabels[quarter],
+                groups: groupedData
+            };
+        }
+        
+        function updateSummary() {
+            document.getElementById('summary-church').textContent = document.getElementById('church-name').value;
+            document.getElementById('summary-quarter').textContent = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
+            document.getElementById('summary-count').textContent = interventions.length;
+            
+            // Compter les lieux uniques
+            const uniquePlaces = [...new Set(interventions.map(i => i.place))];
+            document.getElementById('summary-places').textContent = uniquePlaces.join(', ') || 'Aucun';
+            
+            // Compter les intervenants uniques
+            const uniqueIntervenants = [...new Set(interventions.map(i => i.fullName))];
+            document.getElementById('summary-intervenants').textContent = uniqueIntervenants.length;
+        }
+        
+        function newPlanning() {
+            if (confirm('Voulez-vous commencer un nouveau planning ? Les données actuelles seront sauvegardées.')) {
+                saveToLocalStorage();
+                
+                // Réinitialiser les interventions
+                interventions = [];
+                updateInterventionsList();
+                
+                // Retourner à l'étape 1
+                goToStep(1);
+                
+                showAlert('Nouveau planning créé. Les données précédentes sont sauvegardées.', 'info');
+            }
+        }
+        
+        function resetConfiguration() {
+            if (confirm('Voulez-vous réinitialiser la configuration ?')) {
+                // Réinitialiser les cases à cocher
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    if (cb.id === 'day-sunday' || cb.id === 'day-tuesday' || cb.id === 'day-wednesday' || 
+                        cb.id === 'day-thursday' || cb.id === 'day-friday' || cb.id === 'type-principal' ||
+                        cb.id === 'type-enseignement' || cb.id === 'type-temoignage' || 
+                        cb.id === 'type-priere-hebdo' || cb.id === 'type-reunion' || 
+                        cb.id === 'type-culte-enfants' || cb.id === 'place-beraca' || 
+                        cb.id === 'place-kpoteyei' || cb.id === 'place-gros-porteur' || 
+                        cb.id === 'place-winke') {
+                        cb.checked = true;
+                    } else {
+                        cb.checked = false;
+                    }
+                });
+                
+                // Réinitialiser les champs autres
+                document.getElementById('type-other-specify').value = '';
+                document.getElementById('type-other-specify').disabled = true;
+                document.getElementById('place-other-specify').value = '';
+                document.getElementById('place-other-specify').disabled = true;
+                
+                // Mettre à jour les listes
+                updateDynamicSelects();
+                
+                showAlert('Configuration réinitialisée.', 'info');
+            }
+        }
+        
+        function showAlert(message, type) {
+            // Supprimer les alertes existantes
+            document.querySelectorAll('.alert-custom').forEach(alert => alert.remove());
+            
+            // Définir les couleurs par type
+            const colors = {
+                'success': '#27ae60',
+                'danger': '#e74c3c',
+                'warning': '#f39c12',
+                'info': '#3498db'
+            };
+            
+            // Créer la nouvelle alerte
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-custom alert-dismissible fade show`;
+            alertDiv.style.borderLeftColor = colors[type];
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Supprimer automatiquement après 5 secondes
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        function saveToLocalStorage() {
+            const data = {
+                theme: document.body.className.replace('theme-', ''),
+                generalInfo: {
+                    churchName: document.getElementById('church-name').value,
+                    region: document.getElementById('region').value,
+                    section: document.getElementById('section').value,
+                    temple: document.getElementById('temple').value,
+                    year: document.getElementById('year').value,
+                    quarter: document.getElementById('quarter').value
+                },
+                configurations: {
+                    days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                    types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                    places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                    otherType: document.getElementById('type-other-specify').value,
+                    otherPlace: document.getElementById('place-other-specify').value
+                },
+                intervenants: intervenantsDB,
+                interventions: interventions,
+                lastSaved: new Date().toISOString()
+            };
+            
+            localStorage.setItem('churchPlanningData', JSON.stringify(data));
+        }
+        
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('churchPlanningData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    
+                    // Restaurer le thème
+                    if (data.theme) {
+                        changeTheme(data.theme);
+                    }
+                    
+                    // Restaurer les informations générales
+                    if (data.generalInfo) {
+                        document.getElementById('church-name').value = data.generalInfo.churchName || '';
+                        document.getElementById('region').value = data.generalInfo.region || '';
+                        document.getElementById('section').value = data.generalInfo.section || '';
+                        document.getElementById('temple').value = data.generalInfo.temple || '';
+                        document.getElementById('year').value = data.generalInfo.year || '2025';
+                        document.getElementById('quarter').value = data.generalInfo.quarter || '4';
+                    }
+                    
+                    // Restaurer les configurations
+                    if (data.configurations) {
+                        // Jours
+                        document.querySelectorAll('input[id^="day-"]').forEach(cb => {
+                            cb.checked = data.configurations.days.includes(cb.value);
+                        });
+                        
+                        // Types
+                        document.querySelectorAll('input[id^="type-"]').forEach(cb => {
+                            cb.checked = data.configurations.types.includes(cb.value);
+                        });
+                        
+                        // Lieux
+                        document.querySelectorAll('input[id^="place-"]').forEach(cb => {
+                            cb.checked = data.configurations.places.includes(cb.value);
+                        });
+                        
+                        // Autres valeurs
+                        if (data.configurations.otherType) {
+                            document.getElementById('type-other-specify').value = data.configurations.otherType;
+                            document.getElementById('type-other').checked = true;
+                            document.getElementById('type-other-specify').disabled = false;
+                        }
+                        if (data.configurations.otherPlace) {
+                            document.getElementById('place-other-specify').value = data.configurations.otherPlace;
+                            document.getElementById('place-other').checked = true;
+                            document.getElementById('place-other-specify').disabled = false;
+                        }
+                    }
+                    
+                    // Restaurer les intervenants
+                    if (data.intervenants && Array.isArray(data.intervenants)) {
+                        intervenantsDB = data.intervenants;
+                        populateIntervenantsSelect();
+                    }
+                    
+                    // Restaurer les interventions
+                    if (data.interventions && Array.isArray(data.interventions)) {
+                        interventions = data.interventions;
+                        updateInterventionsList();
+                    }
+                    
+                    // Mettre à jour les listes déroulantes
+                    updateDynamicSelects();
+                    
+                    if (interventions.length > 0) {
+                        const lastSaved = new Date(data.lastSaved);
+                        showAlert(`${interventions.length} interventions restaurées (sauvegarde du ${lastSaved.toLocaleDateString()})`, 'info');
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur de chargement:', error);
+            }
+        }
+
+        // Fonctionnalités d'importation Excel
+        function showImportModal() {
+            // Créer une modale pour l'importation
+            const modalHTML = `
+                <div class="modal fade" id="importModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-file-import me-2"></i>Importer des interventions depuis Excel</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="excel-file" class="form-label">Sélectionnez un fichier Excel (.xlsx)</label>
+                                    <input type="file" class="form-control" id="excel-file" accept=".xlsx, .xls">
+                                    <div class="form-text">Le fichier doit avoir les colonnes: Date, Intervenant, Type de culte, Lieu, Observations</div>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Les données existantes seront conservées. Les nouvelles interventions seront ajoutées à la liste.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="button" class="btn btn-primary" id="import-file-btn">Importer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter la modale au DOM si elle n'existe pas déjà
+            if (!document.getElementById('importModal')) {
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                // Initialiser la modale Bootstrap
+                const importModal = new bootstrap.Modal(document.getElementById('importModal'));
+                importModal.show();
+
+                // Ajouter l'événement pour le bouton d'importation
+                document.getElementById('import-file-btn').addEventListener('click', function() {
+                    const fileInput = document.getElementById('excel-file');
+                    if (fileInput.files.length === 0) {
+                        showAlert('Veuillez sélectionner un fichier Excel.', 'warning');
+                        return;
+                    }
+
+                    const file = fileInput.files[0];
+                    importFromExcel(file);
+                    importModal.hide();
+                });
+
+                // Supprimer la modale quand elle est fermée
+                document.getElementById('importModal').addEventListener('hidden.bs.modal', function() {
+                    this.remove();
+                });
+            } else {
+                // Si la modale existe déjà, simplement l'afficher
+                const importModal = new bootstrap.Modal(document.getElementById('importModal'));
+                importModal.show();
+            }
+        }
+
+        function importFromExcel(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+
+                    // Supposons que la première feuille contient les données
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonData.length === 0) {
+                        showAlert('Aucune donnée trouvée dans le fichier Excel.', 'warning');
+                        return;
+                    }
+
+                    // Convertir les données Excel en interventions
+                    const importedInterventions = jsonData.map((row, index) => {
+                        // Générer un ID unique pour chaque intervention importée
+                        const id = Date.now() + index;
+
+                        // Extraire les données du fichier Excel
+                        // Les colonnes attendues sont : Date, Intervenant, Type de culte, Lieu, Observations
+                        const date = formatDateForInput(row['DATES'] || row['Date'] || row['date'] || '');
+                        const fullName = row['Noms et Prénoms'] || row['Intervenant'] || row['intervenant'] || '';
+                        const cultType = row['Type de culte'] || row['Type'] || row['type'] || '';
+                        const place = row['Lieu'] || row['lieu'] || '';
+                        const observations = row['Observations'] || row['observations'] || row['Observation'] || '';
+
+                        // Extraire le prénom et le nom à partir du nom complet
+                        const nameParts = fullName.trim().split(' ');
+                        const firstName = nameParts.length > 0 ? nameParts[0] : '';
+                        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+                        // Trouver le titre de l'intervenant dans la base de données
+                        let title = '';
+                        const existingIntervenant = intervenantsDB.find(i =>
+                            i.firstName === firstName && i.lastName === lastName
+                        );
+                        if (existingIntervenant) {
+                            title = existingIntervenant.title;
+                        }
+
+                        // Déterminer le jour de la semaine
+                        const dateObj = new Date(date);
+                        const dayOfWeek = daysOfWeek[dateObj.getDay()];
+
+                        // Déterminer le label de groupe
+                        let groupLabel = '';
+                        if (cultType === 'Principal' && place === 'BERACA') {
+                            groupLabel = 'Les intervenants culte Dimanche BERACA';
+                        } else if (cultType === 'Culte des enfants') {
+                            groupLabel = 'Les intervenants du culte des enfants';
+                        } else if (cultType === 'Culte des Adolescents') {
+                            groupLabel = 'Les intervenants du culte des Adolescents';
+                        } else if (place === 'KPOTEYEI') {
+                            if (dayOfWeek === 'Dimanche') {
+                                groupLabel = 'Les intervenants de Dimanche à KPOTEYEI';
+                            } else if (dayOfWeek === 'Mercredi') {
+                                groupLabel = 'Les intervenants de Mercredi à KPOTEYEI';
+                            } else if (dayOfWeek === 'Vendredi') {
+                                groupLabel = 'Les intervenants de Vendredi à KPOTEYEI';
+                            }
+                        } else if (place === 'GROS PORTEUR' && dayOfWeek === 'Mercredi') {
+                            groupLabel = 'Les intervenants de Mercredi à GROS PORTEUR';
+                        } else if (place === 'WINKE' && dayOfWeek === 'Mercredi') {
+                            groupLabel = 'Les intervenants de Mercredi à WINKE';
+                        } else if (cultType === 'Témoignage/Action de grâce/Prière' && dayOfWeek === 'Jeudi') {
+                            groupLabel = 'Intervenants de Jeudi';
+                        } else if (cultType === 'Prière hebdomadaire' && dayOfWeek === 'Mardi') {
+                            groupLabel = 'Intervenants de Mardi';
+                        } else if (cultType === 'Jeune et Prière') {
+                            groupLabel = 'Intervenants de Jeune et Prière';
+                        } else if (cultType === 'Veillée de prière') {
+                            groupLabel = 'Intervenants de Veillée de Prière';
+                        } else {
+                            groupLabel = `Intervenants de ${dayOfWeek}`;
+                        }
+
+                        return {
+                            id: id,
+                            date: date,
+                            formattedDate: date + ' 00:00:00',
+                            dayOfWeek: dayOfWeek,
+                            place: place,
+                            cultType: cultType,
+                            theme: '',
+                            title: title,
+                            firstName: firstName,
+                            lastName: lastName,
+                            fullName: fullName,
+                            observations: observations,
+                            groupLabel: groupLabel
+                        };
+                    });
+
+                    // Ajouter les interventions importées à la liste existante
+                    interventions = interventions.concat(importedInterventions);
+
+                    // Mettre à jour l'affichage
+                    updateInterventionsList();
+                    saveToLocalStorage();
+
+                    showAlert(`${importedInterventions.length} interventions importées avec succès!`, 'success');
+                } catch (error) {
+                    console.error('Erreur lors de l\'importation:', error);
+                    showAlert('Erreur lors de l\'importation du fichier Excel.', 'danger');
+                }
+            };
+
+            reader.onerror = function() {
+                showAlert('Erreur lors de la lecture du fichier Excel.', 'danger');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Fonction pour formater la date au format YYYY-MM-DD
+        function formatDateForInput(dateValue) {
+            if (!dateValue) return '';
+
+            let dateObj;
+            if (typeof dateValue === 'string') {
+                // Si c'est une chaîne de caractères, essayer de la parser
+                dateObj = new Date(dateValue);
+            } else if (dateValue instanceof Date) {
+                // Si c'est déjà un objet Date
+                dateObj = dateValue;
+            } else {
+                // Si c'est un nombre (format Excel), le convertir
+                dateObj = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
+            }
+
+            // Vérifier si la date est valide
+            if (isNaN(dateObj.getTime())) {
+                return new Date().toISOString().split('T')[0]; // Retourner la date d'aujourd'hui si invalide
+            }
+
+            // Formater au format YYYY-MM-DD
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        // Fonction pour mettre à jour les options des filtres
+        function updateFilterOptions() {
+            const typeFilter = document.getElementById('filter-type');
+            const placeFilter = document.getElementById('filter-place');
+
+            // Vider les options existantes
+            typeFilter.innerHTML = '<option value="">Tous les types</option>';
+            placeFilter.innerHTML = '<option value="">Tous les lieux</option>';
+
+            // Extraire les types et lieux uniques des interventions
+            const uniqueTypes = [...new Set(interventions.map(i => i.cultType))];
+            const uniquePlaces = [...new Set(interventions.map(i => i.place))];
+
+            // Ajouter les options
+            uniqueTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeFilter.appendChild(option);
+            });
+
+            uniquePlaces.forEach(place => {
+                const option = document.createElement('option');
+                option.value = place;
+                option.textContent = place;
+                placeFilter.appendChild(option);
+            });
+        }
+
+        // Fonction pour appliquer les filtres
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const selectedDay = document.getElementById('filter-day').value;
+            const selectedType = document.getElementById('filter-type').value;
+            const selectedPlace = document.getElementById('filter-place').value;
+
+            // Filtrer les interventions
+            const filteredInterventions = interventions.filter(intervention => {
+                const matchesSearch =
+                    intervention.fullName.toLowerCase().includes(searchTerm) ||
+                    intervention.place.toLowerCase().includes(searchTerm) ||
+                    intervention.cultType.toLowerCase().includes(searchTerm) ||
+                    intervention.observations.toLowerCase().includes(searchTerm) ||
+                    intervention.theme.toLowerCase().includes(searchTerm);
+
+                const matchesDay = !selectedDay || intervention.dayOfWeek === selectedDay;
+                const matchesType = !selectedType || intervention.cultType === selectedType;
+                const matchesPlace = !selectedPlace || intervention.place === selectedPlace;
+
+                return matchesSearch && matchesDay && matchesType && matchesPlace;
+            });
+
+            // Mettre à jour l'affichage avec les interventions filtrées
+            displayInterventions(filteredInterventions);
+        }
+
+        // Fonction pour afficher les interventions (modifiée pour prendre en compte un sous-ensemble)
+        function displayInterventions(interventionsToDisplay) {
+            const listContainer = document.getElementById('interventions-list');
+            const countElement = document.getElementById('intervention-count');
+
+            // Afficher le nombre d'interventions filtrées
+            const totalCount = interventions.length;
+            const displayedCount = interventionsToDisplay.length;
+            countElement.textContent = displayedCount;
+
+            // Ajouter un indicateur si des filtres sont appliqués
+            if (displayedCount !== totalCount) {
+                countElement.textContent += ` (sur ${totalCount})`;
+            }
+
+            if (interventionsToDisplay.length === 0) {
+                listContainer.innerHTML = `
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-search fa-2x mb-3 d-block"></i>
+                        Aucune intervention trouvée.<br>
+                        ${totalCount === 0 ? 'Commencez par ajouter des interventions ci-dessus.' : 'Essayez de modifier vos critères de recherche.'}
+                    </p>
+                `;
+                return;
+            }
+
+            // Trier par date
+            interventionsToDisplay.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Grouper par label
+            const grouped = {};
+            interventionsToDisplay.forEach(intervention => {
+                if (!grouped[intervention.groupLabel]) {
+                    grouped[intervention.groupLabel] = [];
+                }
+                grouped[intervention.groupLabel].push(intervention);
+            });
+
+            // Générer le HTML
+            let html = '';
+
+            for (const [groupName, groupInterventions] of Object.entries(grouped)) {
+                html += `
+                    <div class="section-title">
+                        <h5><i class="fas fa-folder-open me-2"></i>${groupName}</h5>
+                    </div>
+                `;
+
+                groupInterventions.forEach(intervention => {
+                    const dateObj = new Date(intervention.date);
+                    const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+
+                    html += `
+                        <div class="intervention-card" data-id="${intervention.id}">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <div class="date-display">
+                                        <i class="fas fa-calendar-day intervention-icon"></i>
+                                        ${formattedDate}<br>
+                                        <small>${intervention.dayOfWeek}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><i class="fas fa-user intervention-icon"></i>Intervenant:</strong><br>
+                                    ${intervention.fullName}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><i class="fas fa-church intervention-icon"></i>Type:</strong><br>
+                                    ${intervention.cultType} - ${intervention.place}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><i class="fas fa-comment intervention-icon"></i>Observations:</strong><br>
+                                    ${intervention.observations || intervention.theme || '-'}
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <button class="btn btn-sm btn-outline-danger delete-intervention" data-id="${intervention.id}" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            listContainer.innerHTML = html;
+
+            // Ajouter les événements de suppression
+            document.querySelectorAll('.delete-intervention').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteIntervention(id);
+                });
+            });
+        }
+
+        // Fonction pour effacer les filtres
+        function clearFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-day').value = '';
+            document.getElementById('filter-type').value = '';
+            document.getElementById('filter-place').value = '';
+            updateInterventionsList(); // Afficher toutes les interventions
+        }
+
+        // Remplacer la fonction updateInterventionsList pour utiliser la nouvelle fonction displayInterventions
+        function updateInterventionsList() {
+            updateFilterOptions();
+            displayInterventions(interventions);
+        }
+
+        // Fonction pour exporter en CSV
+        function generateCSV() {
+            if (interventions.length === 0) {
+                showAlert('Aucune intervention à exporter.', 'warning');
+                return;
+            }
+
+            try {
+                // Préparer les données
+                const data = prepareExcelData();
+
+                // Créer l'en-tête CSV
+                let csvContent = 'Date,Intervenant,Type de culte,Lieu,Observations\n';
+
+                // Ajouter les interventions groupées
+                Object.entries(data.groups).forEach(([groupName, items]) => {
+                    items.forEach(item => {
+                        const date = item.formattedDate.split(' ')[0]; // Extraire seulement la date sans l'heure
+                        const fullName = item.fullName.replace(/"/g, '""'); // Échaper les guillemets
+                        const cultType = item.cultType.replace(/"/g, '""');
+                        const place = item.place.replace(/"/g, '""');
+                        const observations = (item.observations || item.theme || '').replace(/"/g, '""');
+
+                        csvContent += `"${date}","${fullName}","${cultType}","${place}","${observations}"\n`;
+                    });
+                });
+
+                // Créer un blob et le télécharger
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Plan_Action_AD_${data.year}_T${data.quarter.charAt(0)}_${data.temple}.csv`;
+                link.click();
+
+                URL.revokeObjectURL(url);
+
+                showAlert('Fichier CSV généré avec succès!', 'success');
+            } catch (error) {
+                console.error('Erreur lors de l\'export CSV:', error);
+                showAlert('Erreur lors de la génération du fichier CSV.', 'danger');
+            }
+        }
+
+        // Fonction pour exporter en PDF
+        function generatePDF() {
+            if (interventions.length === 0) {
+                showAlert('Aucune intervention à exporter.', 'warning');
+                return;
+            }
+
+            // Créer un nouvel onglet/contenu pour le PDF
+            const printWindow = window.open('', '_blank');
+            const data = prepareExcelData();
+
+            // Générer le contenu HTML pour le PDF
+            let htmlContent = `
+                <html>
+                <head>
+                    <title>Plan d'Action - ${data.temple}</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Cambria+Math:wght@400;700&display=swap');
+                        body {
+                            font-family: 'Cambria Math', 'Times New Roman', serif;
+                            font-size: 14px;
+                            margin: 20px;
+                        }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .header h1 { color: #1a237e; font-size: 24px; }
+                        .header h2 { color: #283593; font-size: 20px; margin: 5px 0; }
+                        .info { text-align: center; margin-bottom: 20px; }
+                        .group-title { background-color: #f0f0f0; padding: 8px; margin-top: 15px; font-weight: bold; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td {
+                            border: 1px solid #ddd;
+                            padding: 8px;
+                            text-align: left;
+                            font-family: 'Cambria Math', 'Times New Roman', serif;
+                            font-size: 14px;
+                        }
+                        th { background-color: #f2f2f2; }
+                        tr:nth-child(even) { background-color: #f9f9f9; }
+                        @media (max-width: 768px) {
+                            body { font-size: 12px; margin: 10px; }
+                            .header h1 { font-size: 20px; }
+                            .header h2 { font-size: 16px; }
+                            th, td { padding: 5px; }
+                        }
+                        @media (max-width: 480px) {
+                            body { font-size: 10px; margin: 5px; }
+                            .header h1 { font-size: 16px; }
+                            .header h2 { font-size: 12px; }
+                            th, td { padding: 3px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>ASSEMBLÉES DE DIEU</h1>
+                        <h2>AD</h2>
+                        <h3>BÉNIN</h3>
+                    </div>
+                    <div class="info">
+                        <h3>${data.churchName}</h3>
+                        <p>Région : ${data.region} | Section : ${data.section} | Temple : ${data.temple}</p>
+                        <h4>PLAN D'ACTION TRIMESTRIEL ${data.year}</h4>
+                        <p>${data.quarter}</p>
+                    </div>
+            `;
+
+            // Ajouter les interventions groupées
+            Object.entries(data.groups).forEach(([groupName, items]) => {
+                htmlContent += `<div class="group-title">${groupName}</div>`;
+                htmlContent += '<table>';
+                htmlContent += '<tr><th>DATES</th><th>Noms et Prénoms</th><th>Observations</th></tr>';
+
+                items.forEach(item => {
+                    const date = item.formattedDate.split(' ')[0]; // Extraire seulement la date
+                    htmlContent += `<tr>
+                        <td>${date}</td>
+                        <td>${item.fullName}</td>
+                        <td>${item.observations || item.theme || ''}</td>
+                    </tr>`;
+                });
+
+                htmlContent += '</table>';
+            });
+
+            htmlContent += `
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+
+            // Attendre un peu pour s'assurer que le contenu est chargé
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+
+            showAlert('Fichier PDF généré avec succès! Vérifiez votre fenêtre d\'impression.', 'success');
+        }
+
+        // Fonction pour afficher la modale de gestion des intervenants
+        function showManageIntervenantsModal() {
+            // Créer la modale pour gérer les intervenants
+            const modalHTML = `
+                <div class="modal fade" id="manageIntervenantsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-users-cog me-2"></i>Gestion des Intervenants</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6>Liste des Intervenants</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="refresh-intervenants-btn">
+                                        <i class="fas fa-sync-alt me-1"></i>Actualiser
+                                    </button>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Titre</th>
+                                                <th>Prénom</th>
+                                                <th>Nom</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="intervenants-table-body">
+                                            <!-- Rempli dynamiquement -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="mt-4">
+                                    <h6>Ajouter un nouvel intervenant</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <select class="form-select" id="new-intervenant-title">
+                                                <option value="">Aucun</option>
+                                                <option value="Pasteur">Pasteur</option>
+                                                <option value="Diacre">Diacre</option>
+                                                <option value="Mr">Mr</option>
+                                                <option value="Mme">Mme</option>
+                                                <option value="Mlle">Mlle</option>
+                                                <option value="Frère">Frère</option>
+                                                <option value="Sœur">Sœur</option>
+                                                <option value="Ancien">Ancien</option>
+                                                <option value="Évangeliste">Évangeliste</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" id="new-intervenant-firstname" placeholder="Prénom">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" id="new-intervenant-lastname" placeholder="Nom">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-success" id="add-intervenant-to-db-btn">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter la modale au DOM si elle n'existe pas déjà
+            if (!document.getElementById('manageIntervenantsModal')) {
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                // Initialiser la modale Bootstrap
+                const manageModal = new bootstrap.Modal(document.getElementById('manageIntervenantsModal'));
+                manageModal.show();
+
+                // Remplir la table des intervenants
+                populateIntervenantsTable();
+
+                // Ajouter les événements
+                document.getElementById('refresh-intervenants-btn').addEventListener('click', populateIntervenantsTable);
+                document.getElementById('add-intervenant-to-db-btn').addEventListener('click', addIntervenantToDB);
+
+                // Supprimer la modale quand elle est fermée
+                document.getElementById('manageIntervenantsModal').addEventListener('hidden.bs.modal', function() {
+                    this.remove();
+                });
+            } else {
+                // Si la modale existe déjà, simplement l'afficher et rafraîchir les données
+                populateIntervenantsTable();
+                const manageModal = new bootstrap.Modal(document.getElementById('manageIntervenantsModal'));
+                manageModal.show();
+            }
+        }
+
+        // Fonction pour remplir la table des intervenants
+        function populateIntervenantsTable() {
+            const tableBody = document.getElementById('intervenants-table-body');
+            tableBody.innerHTML = '';
+
+            intervenantsDB.forEach(intervenant => {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${intervenant.title || ''}</td>
+                    <td>${intervenant.firstName}</td>
+                    <td>${intervenant.lastName}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-warning edit-intervenant-btn" data-id="${intervenant.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-intervenant-btn" data-id="${intervenant.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Ajouter les événements d'édition et de suppression
+            document.querySelectorAll('.edit-intervenant-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    editIntervenant(id);
+                });
+            });
+
+            document.querySelectorAll('.delete-intervenant-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteIntervenantFromDB(id);
+                });
+            });
+        }
+
+        // Fonction pour ajouter un intervenant à la base de données
+        function addIntervenantToDB() {
+            const title = document.getElementById('new-intervenant-title').value;
+            const firstName = document.getElementById('new-intervenant-firstname').value.trim();
+            const lastName = document.getElementById('new-intervenant-lastname').value.trim();
+
+            if (!firstName || !lastName) {
+                showAlert('Veuillez entrer au moins un prénom et un nom.', 'danger');
+                return;
+            }
+
+            // Vérifier si l'intervenant existe déjà
+            const exists = intervenantsDB.some(i =>
+                i.firstName === firstName && i.lastName === lastName
+            );
+
+            if (exists) {
+                showAlert('Cet intervenant existe déjà dans la base.', 'warning');
+                return;
+            }
+
+            // Ajouter à la base de données
+            const newIntervenant = {
+                id: Date.now(),
+                title: title,
+                firstName: firstName,
+                lastName: lastName
+            };
+
+            intervenantsDB.push(newIntervenant);
+
+            // Mettre à jour la table
+            populateIntervenantsTable();
+            // Mettre à jour les listes déroulantes
+            populateIntervenantsSelect();
+
+            // Réinitialiser le formulaire
+            document.getElementById('new-intervenant-title').value = '';
+            document.getElementById('new-intervenant-firstname').value = '';
+            document.getElementById('new-intervenant-lastname').value = '';
+
+            showAlert(`Intervenant ${firstName} ${lastName} ajouté avec succès!`, 'success');
+            saveToLocalStorage();
+        }
+
+        // Fonction pour éditer un intervenant
+        function editIntervenant(id) {
+            const intervenant = intervenantsDB.find(i => i.id === id);
+            if (!intervenant) {
+                showAlert('Intervenant non trouvé.', 'danger');
+                return;
+            }
+
+            // Créer une modale pour l'édition
+            const editModalHTML = `
+                <div class="modal fade" id="editIntervenantModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Éditer l'Intervenant</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Titre</label>
+                                    <select class="form-select" id="edit-title">
+                                        <option value="">Aucun</option>
+                                        <option value="Pasteur" ${intervenant.title === 'Pasteur' ? 'selected' : ''}>Pasteur</option>
+                                        <option value="Diacre" ${intervenant.title === 'Diacre' ? 'selected' : ''}>Diacre</option>
+                                        <option value="Mr" ${intervenant.title === 'Mr' ? 'selected' : ''}>Mr</option>
+                                        <option value="Mme" ${intervenant.title === 'Mme' ? 'selected' : ''}>Mme</option>
+                                        <option value="Mlle" ${intervenant.title === 'Mlle' ? 'selected' : ''}>Mlle</option>
+                                        <option value="Frère" ${intervenant.title === 'Frère' ? 'selected' : ''}>Frère</option>
+                                        <option value="Sœur" ${intervenant.title === 'Sœur' ? 'selected' : ''}>Sœur</option>
+                                        <option value="Ancien" ${intervenant.title === 'Ancien' ? 'selected' : ''}>Ancien</option>
+                                        <option value="Évangeliste" ${intervenant.title === 'Évangeliste' ? 'selected' : ''}>Évangeliste</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Prénom</label>
+                                    <input type="text" class="form-control" id="edit-firstname" value="${intervenant.firstName}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nom</label>
+                                    <input type="text" class="form-control" id="edit-lastname" value="${intervenant.lastName}">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="button" class="btn btn-primary" id="save-intervenant-btn">Sauvegarder</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter la modale d'édition au DOM
+            document.body.insertAdjacentHTML('beforeend', editModalHTML);
+
+            // Initialiser la modale Bootstrap
+            const editModal = new bootstrap.Modal(document.getElementById('editIntervenantModal'));
+            editModal.show();
+
+            // Gestionnaire pour sauvegarder les modifications
+            document.getElementById('save-intervenant-btn').addEventListener('click', function() {
+                const newTitle = document.getElementById('edit-title').value;
+                const newFirstname = document.getElementById('edit-firstname').value.trim();
+                const newLastname = document.getElementById('edit-lastname').value.trim();
+
+                if (!newFirstname || !newLastname) {
+                    showAlert('Veuillez entrer au moins un prénom et un nom.', 'danger');
+                    return;
+                }
+
+                // Mettre à jour l'intervenant
+                intervenant.title = newTitle;
+                intervenant.firstName = newFirstname;
+                intervenant.lastName = newLastname;
+
+                // Mettre à jour la table
+                populateIntervenantsTable();
+                // Mettre à jour les listes déroulantes
+                populateIntervenantsSelect();
+
+                showAlert(`Intervenant mis à jour avec succès!`, 'success');
+                saveToLocalStorage();
+
+                // Fermer la modale
+                editModal.hide();
+            });
+
+            // Supprimer la modale d'édition quand elle est fermée
+            document.getElementById('editIntervenantModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
+        // Fonction pour supprimer un intervenant de la base de données
+        function deleteIntervenantFromDB(id) {
+            if (confirm('Voulez-vous vraiment supprimer cet intervenant ?')) {
+                // Trouver l'index de l'intervenant
+                const index = intervenantsDB.findIndex(i => i.id === id);
+
+                if (index !== -1) {
+                    // Supprimer de la base de données
+                    const removedIntervenant = intervenantsDB.splice(index, 1)[0];
+
+                    // Mettre à jour la table
+                    populateIntervenantsTable();
+                    // Mettre à jour les listes déroulantes
+                    populateIntervenantsSelect();
+
+                    showAlert(`Intervenant ${removedIntervenant.firstName} ${removedIntervenant.lastName} supprimé.`, 'warning');
+                    saveToLocalStorage();
+                } else {
+                    showAlert('Intervenant non trouvé.', 'danger');
+                }
+            }
+        }
+
+        // Fonction pour afficher la modale de planification automatique
+        function showAutoPlanModal() {
+            // Créer la modale pour la planification automatique
+            const modalHTML = `
+                <div class="modal fade" id="autoPlanModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-robot me-2"></i>Planification Automatique</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-4">
+                                    <h6>Paramètres de la planification automatique</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="auto-plan-start-date" class="form-label">Date de début</label>
+                                            <input type="date" class="form-control" id="auto-plan-start-date">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="auto-plan-end-date" class="form-label">Date de fin</label>
+                                            <input type="date" class="form-control" id="auto-plan-end-date">
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <label class="form-label">Jours de la semaine à planifier</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-sunday" value="Dimanche" checked>
+                                                    <label class="form-check-label" for="auto-plan-sunday">Dimanche</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-monday" value="Lundi">
+                                                    <label class="form-check-label" for="auto-plan-monday">Lundi</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-tuesday" value="Mardi" checked>
+                                                    <label class="form-check-label" for="auto-plan-tuesday">Mardi</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-wednesday" value="Mercredi" checked>
+                                                    <label class="form-check-label" for="auto-plan-wednesday">Mercredi</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-thursday" value="Jeudi" checked>
+                                                    <label class="form-check-label" for="auto-plan-thursday">Jeudi</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-friday" value="Vendredi" checked>
+                                                    <label class="form-check-label" for="auto-plan-friday">Vendredi</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-saturday" value="Samedi">
+                                                    <label class="form-check-label" for="auto-plan-saturday">Samedi</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <label class="form-label">Types d'intervention à planifier</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-principal" value="Principal" checked>
+                                                    <label class="form-check-label" for="auto-plan-type-principal">Culte Principal</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-enseignement" value="Enseignement" checked>
+                                                    <label class="form-check-label" for="auto-plan-type-enseignement">Enseignement</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-temoignage" value="Témoignage/Action de grâce/Prière" checked>
+                                                    <label class="form-check-label" for="auto-plan-type-temoignage">Témoignage/Action de grâce/Prière</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-priere-hebdo" value="Prière hebdomadaire" checked>
+                                                    <label class="form-check-label" for="auto-plan-type-priere-hebdo">Prière hebdomadaire</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-jeune-priere" value="Jeune et Prière">
+                                                    <label class="form-check-label" for="auto-plan-type-jeune-priere">Jeune et Prière</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-veille-priere" value="Veillée de prière">
+                                                    <label class="form-check-label" for="auto-plan-type-veille-priere">Veillée de prière</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-reunion" value="Réunion" checked>
+                                                    <label class="form-check-label" for="auto-plan-type-reunion">Réunion</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="auto-plan-type-culte-enfants" value="Culte des enfants" checked>
+                                                    <label class="form-check-label" for="auto-plan-type-culte-enfants">Culte des enfants</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <label for="auto-plan-place" class="form-label">Lieu d'intervention</label>
+                                        <select class="form-select" id="auto-plan-place">
+                                            <option value="BERACA" selected>BERACA</option>
+                                            <option value="KPOTEYEI">KPOTEYEI</option>
+                                            <option value="GROS PORTEUR">GROS PORTEUR</option>
+                                            <option value="WINKE">WINKE</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    La planification automatique va distribuer les interventions de manière équitable parmi les intervenants disponibles.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="button" class="btn btn-success" id="execute-auto-plan-btn">Planifier</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter la modale au DOM si elle n'existe pas déjà
+            if (!document.getElementById('autoPlanModal')) {
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                // Initialiser la modale Bootstrap
+                const autoPlanModal = new bootstrap.Modal(document.getElementById('autoPlanModal'));
+                autoPlanModal.show();
+
+                // Définir la date de début à aujourd'hui et la date de fin à 3 mois plus tard
+                const today = new Date();
+                const endDate = new Date();
+                endDate.setMonth(today.getMonth() + 3);
+
+                document.getElementById('auto-plan-start-date').valueAsDate = today;
+                document.getElementById('auto-plan-end-date').valueAsDate = endDate;
+
+                // Ajouter l'événement pour le bouton de planification
+                document.getElementById('execute-auto-plan-btn').addEventListener('click', executeAutoPlan);
+
+                // Supprimer la modale quand elle est fermée
+                document.getElementById('autoPlanModal').addEventListener('hidden.bs.modal', function() {
+                    this.remove();
+                });
+            } else {
+                // Si la modale existe déjà, simplement l'afficher
+                const autoPlanModal = new bootstrap.Modal(document.getElementById('autoPlanModal'));
+                autoPlanModal.show();
+            }
+        }
+
+        // Fonction pour exécuter la planification automatique
+        function executeAutoPlan() {
+            // Récupérer les paramètres
+            const startDate = new Date(document.getElementById('auto-plan-start-date').value);
+            const endDate = new Date(document.getElementById('auto-plan-end-date').value);
+
+            // Jours sélectionnés
+            const selectedDays = [];
+            document.querySelectorAll('input[id^="auto-plan-"][id*="-day"]:checked').forEach(checkbox => {
+                selectedDays.push(checkbox.value);
+            });
+
+            // Si aucun jour n'est sélectionné, utiliser tous les jours cochés
+            if (selectedDays.length === 0) {
+                // Utiliser les jours par défaut
+                selectedDays.push('Dimanche', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi');
+            }
+
+            // Types sélectionnés
+            const selectedTypes = [];
+            document.querySelectorAll('input[id^="auto-plan-type-"]:checked').forEach(checkbox => {
+                selectedTypes.push(checkbox.value);
+            });
+
+            const place = document.getElementById('auto-plan-place').value;
+
+            // Vérifier que les dates sont valides
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                showAlert('Veuillez entrer des dates valides.', 'danger');
+                return;
+            }
+
+            if (startDate > endDate) {
+                showAlert('La date de début doit être antérieure à la date de fin.', 'danger');
+                return;
+            }
+
+            // Générer les dates
+            const dates = [];
+            const currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) {
+                const dayOfWeek = daysOfWeek[currentDate.getDay()];
+
+                if (selectedDays.includes(dayOfWeek)) {
+                    dates.push(new Date(currentDate));
+                }
+
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            // Vérifier s'il y a des dates à planifier
+            if (dates.length === 0) {
+                showAlert('Aucune date ne correspond aux critères sélectionnés.', 'warning');
+                return;
+            }
+
+            // Vérifier s'il y a des intervenants disponibles
+            if (intervenantsDB.length === 0) {
+                showAlert('Aucun intervenant disponible pour la planification.', 'warning');
+                return;
+            }
+
+            // Planifier les interventions
+            let intervenantIndex = 0;
+            let typeIndex = 0;
+
+            dates.forEach(date => {
+                // Sélectionner un intervenant (rotation équitable)
+                const intervenant = intervenantsDB[intervenantIndex % intervenantsDB.length];
+
+                // Sélectionner un type (rotation)
+                const cultType = selectedTypes[typeIndex % selectedTypes.length];
+
+                // Créer l'intervention
+                const intervention = {
+                    id: Date.now() + dates.indexOf(date),
+                    date: date.toISOString().split('T')[0],
+                    formattedDate: date.toISOString(),
+                    dayOfWeek: daysOfWeek[date.getDay()],
+                    place: place,
+                    cultType: cultType,
+                    theme: '',
+                    title: intervenant.title,
+                    firstName: intervenant.firstName,
+                    lastName: intervenant.lastName,
+                    fullName: (intervenant.title ? intervenant.title + ' ' : '') + intervenant.firstName + ' ' + intervenant.lastName,
+                    observations: '',
+                    groupLabel: getGroupLabel(cultType, place, daysOfWeek[date.getDay()])
+                };
+
+                // Ajouter à la liste des interventions
+                interventions.push(intervention);
+
+                // Passer à l'intervenant et au type suivants
+                intervenantIndex++;
+                typeIndex++;
+            });
+
+            // Mettre à jour l'affichage
+            updateInterventionsList();
+            saveToLocalStorage();
+
+            // Fermer la modale
+            const autoPlanModal = bootstrap.Modal.getInstance(document.getElementById('autoPlanModal'));
+            if (autoPlanModal) {
+                autoPlanModal.hide();
+            }
+
+            showAlert(`${dates.length} interventions planifiées automatiquement!`, 'success');
+        }
+
+        // Fonction pour déterminer le label de groupe
+        function getGroupLabel(cultType, place, dayOfWeek) {
+            if (cultType === 'Principal' && place === 'BERACA') {
+                return 'Les intervenants culte Dimanche BERACA';
+            } else if (cultType === 'Culte des enfants') {
+                return 'Les intervenants du culte des enfants';
+            } else if (cultType === 'Culte des Adolescents') {
+                return 'Les intervenants du culte des Adolescents';
+            } else if (place === 'KPOTEYEI') {
+                if (dayOfWeek === 'Dimanche') {
+                    return 'Les intervenants de Dimanche à KPOTEYEI';
+                } else if (dayOfWeek === 'Mercredi') {
+                    return 'Les intervenants de Mercredi à KPOTEYEI';
+                } else if (dayOfWeek === 'Vendredi') {
+                    return 'Les intervenants de Vendredi à KPOTEYEI';
+                }
+            } else if (place === 'GROS PORTEUR' && dayOfWeek === 'Mercredi') {
+                return 'Les intervenants de Mercredi à GROS PORTEUR';
+            } else if (place === 'WINKE' && dayOfWeek === 'Mercredi') {
+                return 'Les intervenants de Mercredi à WINKE';
+            } else if (cultType === 'Témoignage/Action de grâce/Prière' && dayOfWeek === 'Jeudi') {
+                return 'Intervenants de Jeudi';
+            } else if (cultType === 'Prière hebdomadaire' && dayOfWeek === 'Mardi') {
+                return 'Intervenants de Mardi';
+            } else if (cultType === 'Jeune et Prière') {
+                return 'Intervenants de Jeune et Prière';
+            } else if (cultType === 'Veillée de prière') {
+                return 'Intervenants de Veillée de Prière';
+            } else {
+                return `Intervenants de ${dayOfWeek}`;
+            }
+        }
+
+        // Fonction pour gérer les profils de configuration
+        function showManageProfilesModal() {
+            // Créer la modale pour gérer les profils
+            const modalHTML = `
+                <div class="modal fade" id="manageProfilesModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-folder-open me-2"></i>Gestion des Profils de Configuration</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-4">
+                                    <h6>Enregistrer un nouveau profil</h6>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="profile-name" placeholder="Nom du profil">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button type="button" class="btn btn-success w-100" id="save-profile-btn">
+                                                <i class="fas fa-save me-1"></i>Enregistrer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6>Profils existants</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="refresh-profiles-btn">
+                                            <i class="fas fa-sync-alt me-1"></i>Actualiser
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nom du profil</th>
+                                                    <th>Date de création</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="profiles-table-body">
+                                                <!-- Rempli dynamiquement -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Les profils de configuration permettent de sauvegarder et de charger facilement des configurations spécifiques.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter la modale au DOM si elle n'existe pas déjà
+            if (!document.getElementById('manageProfilesModal')) {
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                // Initialiser la modale Bootstrap
+                const manageProfilesModal = new bootstrap.Modal(document.getElementById('manageProfilesModal'));
+                manageProfilesModal.show();
+
+                // Charger les profils existants
+                loadSavedProfiles();
+
+                // Ajouter les événements
+                document.getElementById('save-profile-btn').addEventListener('click', saveCurrentProfile);
+                document.getElementById('refresh-profiles-btn').addEventListener('click', loadSavedProfiles);
+
+                // Supprimer la modale quand elle est fermée
+                document.getElementById('manageProfilesModal').addEventListener('hidden.bs.modal', function() {
+                    this.remove();
+                });
+            } else {
+                // Si la modale existe déjà, simplement l'afficher et rafraîchir les données
+                loadSavedProfiles();
+                const manageProfilesModal = new bootstrap.Modal(document.getElementById('manageProfilesModal'));
+                manageProfilesModal.show();
+            }
+        }
+
+        // Fonction pour charger les profils sauvegardés
+        function loadSavedProfiles() {
+            const tableBody = document.getElementById('profiles-table-body');
+            tableBody.innerHTML = '';
+
+            // Récupérer les profils depuis localStorage
+            const profiles = JSON.parse(localStorage.getItem('churchPlanningProfiles') || '[]');
+
+            if (profiles.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Aucun profil enregistré</td></tr>';
+                return;
+            }
+
+            profiles.forEach((profile, index) => {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${profile.name}</td>
+                    <td>${new Date(profile.timestamp).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary load-profile-btn" data-index="${index}">
+                            <i class="fas fa-download"></i> Charger
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-profile-btn" data-index="${index}">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Ajouter les événements de chargement et de suppression
+            document.querySelectorAll('.load-profile-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    loadProfile(index);
+                });
+            });
+
+            document.querySelectorAll('.delete-profile-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteProfile(index);
+                });
+            });
+        }
+
+        // Fonction pour sauvegarder le profil actuel
+        function saveCurrentProfile() {
+            const profileName = document.getElementById('profile-name').value.trim();
+
+            if (!profileName) {
+                showAlert('Veuillez entrer un nom pour le profil.', 'danger');
+                return;
+            }
+
+            // Récupérer les données actuelles
+            const profileData = {
+                name: profileName,
+                timestamp: Date.now(),
+                generalInfo: {
+                    churchName: document.getElementById('church-name').value,
+                    region: document.getElementById('region').value,
+                    section: document.getElementById('section').value,
+                    temple: document.getElementById('temple').value,
+                    year: document.getElementById('year').value,
+                    quarter: document.getElementById('quarter').value
+                },
+                configurations: {
+                    days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                    types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                    places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                    otherType: document.getElementById('type-other-specify').value,
+                    otherPlace: document.getElementById('place-other-specify').value
+                },
+                intervenants: intervenantsDB
+            };
+
+            // Récupérer les profils existants
+            const profiles = JSON.parse(localStorage.getItem('churchPlanningProfiles') || '[]');
+
+            // Vérifier si un profil avec ce nom existe déjà
+            const existingIndex = profiles.findIndex(p => p.name === profileName);
+            if (existingIndex !== -1) {
+                if (!confirm('Un profil avec ce nom existe déjà. Voulez-vous le remplacer ?')) {
+                    return;
+                }
+                profiles[existingIndex] = profileData;
+            } else {
+                profiles.push(profileData);
+            }
+
+            // Sauvegarder dans localStorage
+            localStorage.setItem('churchPlanningProfiles', JSON.stringify(profiles));
+
+            // Réinitialiser le champ
+            document.getElementById('profile-name').value = '';
+
+            // Rafraîchir la liste
+            loadSavedProfiles();
+
+            showAlert(`Profil "${profileName}" sauvegardé avec succès!`, 'success');
+        }
+
+        // Fonction pour charger un profil
+        function loadProfile(index) {
+            const profiles = JSON.parse(localStorage.getItem('churchPlanningProfiles') || '[]');
+
+            if (index < 0 || index >= profiles.length) {
+                showAlert('Profil non trouvé.', 'danger');
+                return;
+            }
+
+            const profile = profiles[index];
+
+            // Charger les informations générales
+            document.getElementById('church-name').value = profile.generalInfo.churchName || '';
+            document.getElementById('region').value = profile.generalInfo.region || '';
+            document.getElementById('section').value = profile.generalInfo.section || '';
+            document.getElementById('temple').value = profile.generalInfo.temple || '';
+            document.getElementById('year').value = profile.generalInfo.year || '2025';
+            document.getElementById('quarter').value = profile.generalInfo.quarter || '4';
+
+            // Charger les configurations
+            // Jours
+            document.querySelectorAll('input[id^="day-"]').forEach(cb => {
+                cb.checked = profile.configurations.days.includes(cb.value);
+            });
+
+            // Types
+            document.querySelectorAll('input[id^="type-"]').forEach(cb => {
+                cb.checked = profile.configurations.types.includes(cb.value);
+            });
+
+            // Lieux
+            document.querySelectorAll('input[id^="place-"]').forEach(cb => {
+                cb.checked = profile.configurations.places.includes(cb.value);
+            });
+
+            // Autres valeurs
+            if (profile.configurations.otherType) {
+                document.getElementById('type-other-specify').value = profile.configurations.otherType;
+                document.getElementById('type-other').checked = true;
+                document.getElementById('type-other-specify').disabled = false;
+            } else {
+                document.getElementById('type-other').checked = false;
+                document.getElementById('type-other-specify').disabled = true;
+                document.getElementById('type-other-specify').value = '';
+            }
+
+            if (profile.configurations.otherPlace) {
+                document.getElementById('place-other-specify').value = profile.configurations.otherPlace;
+                document.getElementById('place-other').checked = true;
+                document.getElementById('place-other-specify').disabled = false;
+            } else {
+                document.getElementById('place-other').checked = false;
+                document.getElementById('place-other-specify').disabled = true;
+                document.getElementById('place-other-specify').value = '';
+            }
+
+            // Charger les intervenants
+            if (profile.intervenants && Array.isArray(profile.intervenants)) {
+                intervenantsDB = profile.intervenants;
+                populateIntervenantsSelect();
+            }
+
+            // Mettre à jour les listes déroulantes
+            updateDynamicSelects();
+
+            // Fermer la modale
+            const manageProfilesModal = bootstrap.Modal.getInstance(document.getElementById('manageProfilesModal'));
+            if (manageProfilesModal) {
+                manageProfilesModal.hide();
+            }
+
+            showAlert(`Profil "${profile.name}" chargé avec succès!`, 'success');
+        }
+
+        // Fonction pour supprimer un profil
+        function deleteProfile(index) {
+            if (confirm('Voulez-vous vraiment supprimer ce profil ?')) {
+                const profiles = JSON.parse(localStorage.getItem('churchPlanningProfiles') || '[]');
+
+                if (index < 0 || index >= profiles.length) {
+                    showAlert('Profil non trouvé.', 'danger');
+                    return;
+                }
+
+                const profileName = profiles[index].name;
+                profiles.splice(index, 1);
+
+                // Sauvegarder dans localStorage
+                localStorage.setItem('churchPlanningProfiles', JSON.stringify(profiles));
+
+                // Rafraîchir la liste
+                loadSavedProfiles();
+
+                showAlert(`Profil "${profileName}" supprimé.`, 'warning');
+            }
+        }
+
+        // Fonction pour déverrouiller les informations générales
+        function unlockGeneralInfo() {
+            const password = prompt('Veuillez entrer le mot de passe de développeur pour modifier les informations générales :');
+
+            if (password === 'Martial1989') {
+                // Déverrouiller les champs
+                document.getElementById('church-name').disabled = false;
+                document.getElementById('region').disabled = false;
+                document.getElementById('section').disabled = false;
+                document.getElementById('temple').disabled = false;
+                document.getElementById('year').disabled = false;
+                document.getElementById('quarter').disabled = false;
+
+                // Changer le message d'alerte
+                const alertElement = document.querySelector('.alert.alert-info');
+                if (alertElement) {
+                    alertElement.innerHTML = `
+                        <i class="fas fa-unlock me-2"></i>
+                        Les informations générales sont maintenant modifiables.
+                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="lock-general-info">
+                            <i class="fas fa-lock me-1"></i>Verrouiller
+                        </button>
+                    `;
+
+                    // Ajouter l'événement pour verrouiller à nouveau
+                    document.getElementById('lock-general-info').addEventListener('click', lockGeneralInfo);
+                }
+
+                showAlert('Accès aux informations générales autorisé.', 'success');
+            } else if (password !== null) { // Si l'utilisateur a annulé, ne pas afficher de message d'erreur
+                showAlert('Mot de passe incorrect. Accès refusé.', 'danger');
+            }
+        }
+
+        // Fonction pour verrouiller les informations générales
+        function lockGeneralInfo() {
+            // Verrouiller les champs
+            document.getElementById('church-name').disabled = true;
+            document.getElementById('region').disabled = true;
+            document.getElementById('section').disabled = true;
+            document.getElementById('temple').disabled = true;
+            document.getElementById('year').disabled = true;
+            document.getElementById('quarter').disabled = true;
+
+            // Changer le message d'alerte
+            const alertElement = document.querySelector('.alert.alert-info');
+            if (alertElement) {
+                alertElement.innerHTML = `
+                    <i class="fas fa-lock me-2"></i>
+                    Les informations générales sont protégées. Pour les modifier, entrez le mot de passe de développeur.
+                    <button type="button" class="btn btn-sm btn-outline-primary ms-2" id="unlock-general-info">
+                        <i class="fas fa-unlock me-1"></i>Modifier
+                    </button>
+                `;
+
+                // Réajouter l'événement pour déverrouiller
+                document.getElementById('unlock-general-info').addEventListener('click', unlockGeneralInfo);
+            }
+
+            showAlert('Informations générales verrouillées.', 'info');
+        }
+    </script>
+</body>
+</html>
