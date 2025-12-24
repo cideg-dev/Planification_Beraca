@@ -2055,102 +2055,130 @@
             }
         }
         
-        function generatePDF() {
+        async function generatePDF() {
             if (interventions.length === 0) {
                 showAlert('Aucune intervention à exporter.', 'warning');
                 return null;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Couleurs de la charte
-            const primaryColor = [13, 27, 42]; // #0d1b2a
-            const accentColor = [157, 78, 221]; // #9d4edd
+            // Afficher un indicateur de chargement
+            const btn = document.getElementById('generate-pdf-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Génération...';
+            btn.disabled = true;
 
-            // --- EN-TÊTE ---
-            // Fond bleu foncé
-            doc.setFillColor(...primaryColor);
-            doc.rect(0, 0, 210, 40, 'F');
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Couleurs de la charte
+                const primaryColor = [13, 27, 42]; // #0d1b2a
+                
+                // --- EN-TÊTE ---
+                // Fond bleu foncé
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, 210, 40, 'F');
 
-            // Texte blanc
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.text("EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU", 105, 15, { align: 'center' });
-            
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'normal');
-            doc.text("Temple BERACA de Natitingou", 105, 25, { align: 'center' });
-            
-            // Informations du trimestre
-            const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
-            const year = document.getElementById('year').value;
-            doc.setFontSize(12);
-            doc.setTextColor(200, 200, 200);
-            doc.text(`Planning des Interventions - ${quarter} ${year}`, 105, 35, { align: 'center' });
-
-            // --- TABLEAU ---
-            const columns = ["Date", "Lieu", "Type", "Intervenant", "Observations"];
-            const rows = interventions.map(item => {
-                const dateObj = new Date(item.date);
-                const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
-                return [
-                    `${formattedDate}\n${item.dayOfWeek}`,
-                    item.place,
-                    item.cultType,
-                    item.fullName,
-                    item.observations || ""
-                ];
-            });
-
-            doc.autoTable({
-                head: [columns],
-                body: rows,
-                startY: 45,
-                theme: 'grid',
-                headStyles: {
-                    fillColor: primaryColor,
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    halign: 'center'
-                },
-                bodyStyles: {
-                    textColor: [50, 50, 50],
-                    lineColor: [200, 200, 200]
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 245, 245]
-                },
-                columnStyles: {
-                    0: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, // Date
-                    1: { cellWidth: 30 }, // Lieu
-                    2: { cellWidth: 40 }, // Type
-                    3: { cellWidth: 50, fontStyle: 'bold' }, // Intervenant
-                    4: { cellWidth: 'auto' } // Obs
-                },
-                didDrawPage: function (data) {
-                    // Pied de page
-                    doc.setFontSize(8);
-                    doc.setTextColor(150, 150, 150);
-                    const footerText = `Généré le ${new Date().toLocaleDateString()} via Planificateur AD Beraca`;
-                    doc.text(footerText, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                    
-                    const pageCount = doc.internal.getNumberOfPages();
-                    doc.text('Page ' + pageCount, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10);
+                // Tenter de charger le logo
+                try {
+                    const logoData = await getBase64ImageFromUrl('AD.jpeg');
+                    if (logoData) {
+                        // Ajouter le logo (x, y, width, height)
+                        doc.addImage(logoData, 'JPEG', 10, 5, 30, 30);
+                    }
+                } catch (error) {
+                    console.warn("Impossible de charger le logo AD.jpeg", error);
                 }
-            });
 
-            // Sauvegarde
-            const fileName = `Planning_BERACA_${year}_${Date.now()}.pdf`;
-            doc.save(fileName);
-            
-            addToHistory("PDF", fileName);
-            showAlert('Fichier PDF (Pro) généré avec succès !', 'success');
-            return fileName;
+                // Texte blanc
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                // Décalage du texte vers la droite pour laisser la place au logo
+                doc.text("EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU", 115, 15, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'normal');
+                doc.text("Temple BERACA de Natitingou", 115, 25, { align: 'center' });
+                
+                // Informations du trimestre
+                const quarter = document.getElementById('quarter').options[document.getElementById('quarter').selectedIndex].text;
+                const year = document.getElementById('year').value;
+                doc.setFontSize(12);
+                doc.setTextColor(200, 200, 200);
+                doc.text(`Planning des Interventions - ${quarter} ${year}`, 115, 35, { align: 'center' });
+
+                // --- TABLEAU ---
+                const columns = ["Date", "Lieu", "Type", "Intervenant", "Observations"];
+                const rows = interventions.map(item => {
+                    const dateObj = new Date(item.date);
+                    const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+                    return [
+                        `${formattedDate}\n${item.dayOfWeek}`,
+                        item.place,
+                        item.cultType,
+                        item.fullName,
+                        item.observations || ""
+                    ];
+                });
+
+                doc.autoTable({
+                    head: [columns],
+                    body: rows,
+                    startY: 45,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: primaryColor,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        halign: 'center'
+                    },
+                    bodyStyles: {
+                        textColor: [50, 50, 50],
+                        lineColor: [200, 200, 200]
+                    },
+                    alternateRowStyles: {
+                        fillColor: [245, 245, 245]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, // Date
+                        1: { cellWidth: 30 }, // Lieu
+                        2: { cellWidth: 40 }, // Type
+                        3: { cellWidth: 50, fontStyle: 'bold' }, // Intervenant
+                        4: { cellWidth: 'auto' } // Obs
+                    },
+                    didDrawPage: function (data) {
+                        // Pied de page
+                        doc.setFontSize(8);
+                        doc.setTextColor(150, 150, 150);
+                        const footerText = `Généré le ${new Date().toLocaleDateString()} via Planificateur AD Beraca`;
+                        doc.text(footerText, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                        
+                        const pageCount = doc.internal.getNumberOfPages();
+                        doc.text('Page ' + pageCount, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10);
+                    }
+                });
+
+                // Sauvegarde
+                const fileName = `Planning_BERACA_${year}_${Date.now()}.pdf`;
+                doc.save(fileName);
+                
+                addToHistory("PDF", fileName);
+                showAlert('Fichier PDF (Pro) généré avec succès !', 'success');
+                return fileName;
+
+            } catch (err) {
+                console.error(err);
+                showAlert('Erreur lors de la génération du PDF: ' + err.message, 'danger');
+                return null;
+            } finally {
+                // Rétablir le bouton
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
-        function shareViaWhatsApp() {
+        async function shareViaWhatsApp() {
             if (interventions.length === 0) {
                 showAlert('Veuillez d\'abord créer un planning.', 'warning');
                 return;
@@ -2159,8 +2187,8 @@
             // Demander confirmation et explication du flux
             if (confirm("Pour partager le planning sur WhatsApp :\n\n1. Nous allons d'abord générer et télécharger le fichier PDF.\n2. Ensuite, WhatsApp s'ouvrira.\n3. Vous n'aurez plus qu'à joindre le fichier téléchargé à votre message.\n\nVoulez-vous continuer ?")) {
                 
-                // 1. Générer le fichier
-                const fileName = generatePDF();
+                // 1. Générer le fichier (await car c'est async maintenant)
+                const fileName = await generatePDF();
                 
                 if (fileName) {
                     // 2. Préparer le message texte
@@ -2177,6 +2205,31 @@
                     }, 1500);
                 }
             }
+        }
+
+        function getBase64ImageFromUrl(url) {
+            return new Promise((resolve, reject) => {
+                var img = new Image();
+                img.setAttribute('crossOrigin', 'anonymous');
+                
+                img.onload = function () {
+                    var canvas = document.createElement("canvas");
+                    canvas.width = this.width;
+                    canvas.height = this.height;
+                    
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(this, 0, 0);
+                    
+                    var dataURL = canvas.toDataURL("image/jpeg");
+                    resolve(dataURL);
+                };
+                
+                img.onerror = function () {
+                    reject(new Error("Impossible de charger l'image " + url));
+                };
+                
+                img.src = url;
+            });
         }
 
         function addToHistory(type, fileName) {
