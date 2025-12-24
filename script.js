@@ -128,6 +128,7 @@ function setupEventListeners() {
     addSafeListener('customize-pdf-btn', 'click', showPdfCustomizationModal);
     addSafeListener('generate-pdf-btn', 'click', generatePDF);
     addSafeListener('generate-csv-btn', 'click', generateCSV);
+    addSafeListener('show-reports-btn', 'click', showReports);
     addSafeListener('email-share-btn', 'click', () => showAlert('Fonctionnalité Email bientôt disponible', 'info'));
 
     // Gestion des intervenants
@@ -2230,6 +2231,215 @@ function clearFilters() {
     document.getElementById('filter-start-date').value = '';
     document.getElementById('filter-end-date').value = '';
     updateInterventionsList(); // Afficher toutes les interventions
+}
+
+// Fonction pour générer des statistiques
+function generateStats() {
+    if (interventions.length === 0) {
+        return {
+            totalInterventions: 0,
+            interventionsByType: {},
+            interventionsByPlace: {},
+            interventionsByDay: {},
+            interventionsByIntervenant: {},
+            interventionsByMonth: {}
+        };
+    }
+
+    const stats = {
+        totalInterventions: interventions.length,
+        interventionsByType: {},
+        interventionsByPlace: {},
+        interventionsByDay: {},
+        interventionsByIntervenant: {},
+        interventionsByMonth: {}
+    };
+
+    interventions.forEach(intervention => {
+        // Statistiques par type
+        stats.interventionsByType[intervention.cultType] = (stats.interventionsByType[intervention.cultType] || 0) + 1;
+
+        // Statistiques par lieu
+        stats.interventionsByPlace[intervention.place] = (stats.interventionsByPlace[intervention.place] || 0) + 1;
+
+        // Statistiques par jour
+        stats.interventionsByDay[intervention.dayOfWeek] = (stats.interventionsByDay[intervention.dayOfWeek] || 0) + 1;
+
+        // Statistiques par intervenant
+        stats.interventionsByIntervenant[intervention.fullName] = (stats.interventionsByIntervenant[intervention.fullName] || 0) + 1;
+
+        // Statistiques par mois
+        const date = new Date(intervention.date);
+        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        stats.interventionsByMonth[monthKey] = (stats.interventionsByMonth[monthKey] || 0) + 1;
+    });
+
+    return stats;
+}
+
+// Fonction pour afficher les rapports
+function showReports() {
+    const stats = generateStats();
+
+    // Créer une modale pour afficher les rapports
+    const modalHTML = `
+        <div class="modal fade" id="reportsModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-chart-bar me-2"></i>Rapports et Analyses</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Résumé Général</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Total des interventions:</strong> ${stats.totalInterventions}</p>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Interventions par Type</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        ${Object.entries(stats.interventionsByType).map(([type, count]) =>
+                                            `<p><span class="badge bg-primary me-2">${type}</span> <span class="float-end">${count}</span></p>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Interventions par Jour</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        ${Object.entries(stats.interventionsByDay).map(([day, count]) =>
+                                            `<p><span class="badge bg-info me-2">${day}</span> <span class="float-end">${count}</span></p>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Interventions par Lieu</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        ${Object.entries(stats.interventionsByPlace).map(([place, count]) =>
+                                            `<p><span class="badge bg-success me-2">${place}</span> <span class="float-end">${count}</span></p>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Interventions par Intervenant</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        ${Object.entries(stats.interventionsByIntervenant).map(([intervenant, count]) =>
+                                            `<p><span class="badge bg-warning me-2">${intervenant}</span> <span class="float-end">${count}</span></p>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Interventions par Mois</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        ${Object.entries(stats.interventionsByMonth).map(([month, count]) =>
+                                            `<p><span class="badge bg-secondary me-2">${month}</span> <span class="float-end">${count}</span></p>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-outline-primary" id="export-reports-btn">
+                            <i class="fas fa-file-export me-2"></i>Exporter les rapports
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Supprimer la modale existante si elle existe
+    const existingModal = document.getElementById('reportsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Ajouter la modale au DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Initialiser la modale Bootstrap
+    const reportsModal = new bootstrap.Modal(document.getElementById('reportsModal'));
+    reportsModal.show();
+
+    // Ajouter l'événement pour exporter les rapports
+    document.getElementById('export-reports-btn').addEventListener('click', () => exportReports(stats));
+
+    // Supprimer la modale quand elle est fermée
+    document.getElementById('reportsModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Fonction pour exporter les rapports
+function exportReports(stats) {
+    let reportContent = `Rapport d'Analyse des Interventions\n`;
+    reportContent += `Généré le: ${new Date().toLocaleString()}\n\n`;
+
+    reportContent += `Total des interventions: ${stats.totalInterventions}\n\n`;
+
+    reportContent += `Interventions par type:\n`;
+    Object.entries(stats.interventionsByType).forEach(([type, count]) => {
+        reportContent += `- ${type}: ${count}\n`;
+    });
+    reportContent += `\n`;
+
+    reportContent += `Interventions par lieu:\n`;
+    Object.entries(stats.interventionsByPlace).forEach(([place, count]) => {
+        reportContent += `- ${place}: ${count}\n`;
+    });
+    reportContent += `\n`;
+
+    reportContent += `Interventions par jour:\n`;
+    Object.entries(stats.interventionsByDay).forEach(([day, count]) => {
+        reportContent += `- ${day}: ${count}\n`;
+    });
+    reportContent += `\n`;
+
+    reportContent += `Interventions par intervenant:\n`;
+    Object.entries(stats.interventionsByIntervenant).forEach(([intervenant, count]) => {
+        reportContent += `- ${intervenant}: ${count}\n`;
+    });
+    reportContent += `\n`;
+
+    reportContent += `Interventions par mois:\n`;
+    Object.entries(stats.interventionsByMonth).forEach(([month, count]) => {
+        reportContent += `- ${month}: ${count}\n`;
+    });
+
+    // Créer un blob et le télécharger
+    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Rapport_Analyses_${new Date().toISOString().slice(0, 10)}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    showAlert('Rapport exporté avec succès !', 'success');
 }
 
 // Fonction pour exporter en CSV
