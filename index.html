@@ -2110,7 +2110,16 @@
             btn.disabled = true;
 
             try {
-                const { jsPDF } = window.jspdf;
+                // Initialisation robuste de jsPDF
+                let jsPDF;
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    jsPDF = window.jspdf.jsPDF;
+                } else if (window.jsPDF) {
+                    jsPDF = window.jsPDF;
+                } else {
+                    throw new Error("La bibliothèque jsPDF n'est pas chargée correctement.");
+                }
+
                 const doc = new jsPDF();
                 
                 // Couleurs de la charte
@@ -2121,15 +2130,19 @@
                 doc.setFillColor(...primaryColor);
                 doc.rect(0, 0, 210, 40, 'F');
 
-                // Tenter de charger le logo
+                // Tenter de charger le logo avec sécurité
                 try {
-                    const logoData = await getBase64ImageFromUrl('AD.jpeg');
+                    const logoPromise = getBase64ImageFromUrl('AD.jpeg');
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout image")), 2000));
+                    
+                    const logoData = await Promise.race([logoPromise, timeoutPromise]);
+
                     if (logoData) {
                         // Ajouter le logo (x, y, width, height)
                         doc.addImage(logoData, 'JPEG', 10, 2, 38, 38);
                     }
                 } catch (error) {
-                    console.warn("Impossible de charger le logo AD.jpeg", error);
+                    console.warn("Impossible de charger le logo AD.jpeg (continu sans)", error);
                 }
 
                 // Texte blanc
@@ -3373,7 +3386,16 @@
             }
 
             try {
-                const { jsPDF } = window.jspdf;
+                // Initialisation robuste de jsPDF
+                let jsPDF;
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    jsPDF = window.jspdf.jsPDF;
+                } else if (window.jsPDF) {
+                    jsPDF = window.jsPDF;
+                } else {
+                    throw new Error("La bibliothèque jsPDF n'est pas chargée correctement.");
+                }
+
                 const doc = new jsPDF();
                 const primaryColor = [13, 27, 42]; 
                 
@@ -3381,10 +3403,19 @@
                 doc.setFillColor(...primaryColor);
                 doc.rect(0, 0, 210, 40, 'F');
 
+                // Tenter de charger le logo avec un timeout de 2 secondes
                 try {
-                    const logoData = await getBase64ImageFromUrl('AD.jpeg');
-                    if (logoData) doc.addImage(logoData, 'JPEG', 10, 2, 38, 38);
-                } catch (error) { console.warn("Logo non chargé", error); }
+                    const logoPromise = getBase64ImageFromUrl('AD.jpeg');
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout image")), 2000));
+                    
+                    const logoData = await Promise.race([logoPromise, timeoutPromise]);
+                    
+                    if (logoData) {
+                        doc.addImage(logoData, 'JPEG', 10, 2, 38, 38);
+                    }
+                } catch (error) {
+                    console.warn("Le logo n'a pas pu être chargé (continu sans logo)", error);
+                }
 
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(18);
