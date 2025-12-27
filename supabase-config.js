@@ -1,10 +1,11 @@
 // Configuration Supabase
 // Remplacez ces valeurs avec vos propres informations Supabase
-const SUPABASE_URL = 'VOTRE_URL_SUPABASE';
-const SUPABASE_ANON_KEY = 'VOTRE_CLE_SUPABASE';
+const SUPABASE_URL = 'https://supywgkoghcphlynktmr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_S5gpJnrrWvc6QtTgbuD6gg_dtOFU8y4';
 
 // Initialiser Supabase
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { createClient } = supabase;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Fonction pour sauvegarder les données dans Supabase
 async function saveToSupabase() {
