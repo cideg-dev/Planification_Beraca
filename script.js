@@ -1302,6 +1302,29 @@ function saveToLocalStorage() {
 
         localStorage.setItem('churchPlanningData', JSON.stringify(data));
 
+        // Sauvegarder aussi dans une clé spécifique pour la synchronisation avec la page de rapport
+        localStorage.setItem('planningData', JSON.stringify({
+            interventions: interventions,
+            intervenantsDB: intervenantsDB,
+            generalInfo: {
+                churchName: document.getElementById('church-name').value,
+                region: document.getElementById('region').value,
+                section: document.getElementById('section').value,
+                temple: document.getElementById('temple').value,
+                year: document.getElementById('year').value,
+                quarter: document.getElementById('quarter').value
+            },
+            configurations: {
+                days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                otherType: document.getElementById('type-other-specify').value,
+                otherPlace: document.getElementById('place-other-specify').value
+            },
+            theme: document.body.className.replace('theme-', ''),
+            savedAt: new Date().toISOString()
+        }));
+
         // Sauvegarder dans l'historique (conserver les 5 dernières sauvegardes)
         const history = JSON.parse(localStorage.getItem('churchPlanningHistory') || '[]');
         history.unshift({

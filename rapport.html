@@ -54,6 +54,18 @@
                     <i class="fas fa-edit"></i> Planification
                 </button>
             </div>
+
+            <div class="ms-3">
+                <button class="btn btn-outline-primary" id="publish-btn" title="Publier les données">
+                    <i class="fas fa-share-alt"></i> Publier
+                </button>
+            </div>
+
+            <div class="ms-3">
+                <button class="btn btn-outline-info" id="sync-data-btn" title="Synchroniser les données">
+                    <i class="fas fa-sync-alt"></i> Sync
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -662,6 +674,42 @@
                     console.error('Erreur lors du chargement des données publiées:', error);
                     showAlert('Erreur lors du chargement des données publiées: ' + error.message, 'danger');
                 }
+            } else {
+                // Charger les données sauvegardées localement si aucune donnée n'est fournie via l'URL
+                loadFromLocalStorage();
+            }
+        }
+
+        // Fonction pour synchroniser les données depuis la page de planification
+        function syncFromPlanification() {
+            // Vérifier si l'utilisateur est authentifié
+            const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
+
+            if (!isAuthenticated) {
+                alert('Accès refusé. Veuillez vous authentifier d\'abord sur la page de planification.');
+                window.location.href = 'index.html'; // Rediriger vers la page d'accueil
+                return;
+            }
+
+            // Charger les données de la page de planification depuis le stockage local
+            try {
+                const savedData = localStorage.getItem('planningData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    interventions = data.interventions || [];
+                    intervenantsDB = data.intervenantsDB || intervenantsDB;
+
+                    // Mettre à jour l'affichage
+                    updateFilterOptions();
+                    displayInterventions(interventions);
+
+                    showAlert('Données synchronisées depuis la planification !', 'success');
+                } else {
+                    showAlert('Aucune donnée de planification trouvée dans le stockage local.', 'info');
+                }
+            } catch (e) {
+                console.error('Erreur lors de la synchronisation:', e);
+                showAlert('Erreur lors de la synchronisation des données: ' + e.message, 'danger');
             }
         }
 
@@ -781,6 +829,18 @@
             const exportPdfBtn = document.getElementById('export-pdf-btn');
             if (exportPdfBtn) {
                 exportPdfBtn.addEventListener('click', showPdfCustomizationModal);
+            }
+
+            // Bouton de publication
+            const publishBtn = document.getElementById('publish-btn');
+            if (publishBtn) {
+                publishBtn.addEventListener('click', publishData);
+            }
+
+            // Bouton de synchronisation
+            const syncBtn = document.getElementById('sync-data-btn');
+            if (syncBtn) {
+                syncBtn.addEventListener('click', syncFromPlanification);
             }
 
             // Événements pour la personnalisation PDF
@@ -1199,6 +1259,153 @@
                 alert('Code administrateur incorrect. Accès refusé.');
             }
             // Si l'utilisateur annule, ne rien faire
+        }
+
+        // Fonction pour publier les données
+        function publishData() {
+            // Vérifier s'il y a des interventions à publier
+            if (interventions.length === 0) {
+                showAlert('Veuillez créer au moins une intervention avant de publier.', 'warning');
+                return;
+            }
+
+            // Récupérer toutes les données nécessaires
+            const dataToPublish = {
+                interventions: interventions,
+                intervenantsDB: intervenantsDB,
+                generalInfo: {
+                    churchName: 'EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU DU BENIN', // Valeurs par défaut
+                    region: 'ATACORA',
+                    section: 'NATITINGOU',
+                    temple: 'BERACA',
+                    year: '2025',
+                    quarter: '4'
+                },
+                configurations: {
+                    days: [],
+                    types: [],
+                    places: [],
+                    otherType: '',
+                    otherPlace: ''
+                },
+                theme: document.body.className.replace('theme-', ''),
+                publishedAt: new Date().toISOString()
+            };
+
+            // Récupérer les configurations cochées (pour les besoins de la publication)
+            document.querySelectorAll('input[id^="day-"]:checked').forEach(checkbox => {
+                dataToPublish.configurations.days.push(checkbox.value);
+            });
+
+            document.querySelectorAll('input[id^="type-"]:checked').forEach(checkbox => {
+                dataToPublish.configurations.types.push(checkbox.value);
+            });
+
+            document.querySelectorAll('input[id^="place-"]:checked').forEach(checkbox => {
+                dataToPublish.configurations.places.push(checkbox.value);
+            });
+
+            try {
+                // Convertir les données en chaîne JSON
+                const dataStr = JSON.stringify(dataToPublish);
+
+                // Encoder les données pour l'URL (compression et encodage sécurisé)
+                const encodedData = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                }));
+
+                // Générer l'URL de partage
+                const currentUrl = window.location.href.split('?')[0]; // Retirer les paramètres existants
+                const publishUrl = `${currentUrl}?data=${encodedData}`;
+
+                // Afficher une modale avec le lien de partage
+                showPublishModal(publishUrl);
+
+                // Ajouter les données au stockage local sans date d'expiration
+                const storageKey = `published_data_${Date.now()}`;
+                const storedData = {
+                    data: dataToPublish,
+                    createdAt: new Date().toISOString(),
+                    isPermanent: true // Indique que cette publication est permanente
+                };
+
+                localStorage.setItem(storageKey, JSON.stringify(storedData));
+
+                // Sauvegarder la clé dans une liste pour gestion future
+                let publishedKeys = JSON.parse(localStorage.getItem('published_keys') || '[]');
+                publishedKeys.push({
+                    key: storageKey,
+                    url: publishUrl,
+                    createdAt: new Date().toISOString(),
+                    isPermanent: true
+                });
+                localStorage.setItem('published_keys', JSON.stringify(publishedKeys));
+
+                showAlert('Données publiées avec succès !', 'success');
+            } catch (error) {
+                console.error('Erreur lors de la publication:', error);
+                showAlert('Erreur lors de la publication des données: ' + error.message, 'danger');
+            }
+        }
+
+        // Fonction pour afficher la modale de publication
+        function showPublishModal(publishUrl) {
+            // Créer la modale si elle n'existe pas
+            let modal = document.getElementById('publishModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'publishModal';
+                modal.className = 'modal fade';
+                modal.tabIndex = -1;
+                modal.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-share-alt me-2"></i>Publication des Données</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Voici le lien pour accéder à ces données publiées :</p>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="publish-link" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" id="copy-link-btn">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Ce lien permet d'accéder aux données planifiées.
+                                    Les données sont stockées localement et accessibles via ce lien.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            // Mettre à jour le lien dans la modale
+            document.getElementById('publish-link').value = publishUrl;
+
+            // Configurer le bouton de copie
+            document.getElementById('copy-link-btn').onclick = function() {
+                const linkInput = document.getElementById('publish-link');
+                linkInput.select();
+                document.execCommand('copy');
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i> Copié!';
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 2000);
+                showAlert('Lien copié dans le presse-papiers', 'success');
+            };
+
+            // Afficher la modale
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
         }
     </script>
 </body>
