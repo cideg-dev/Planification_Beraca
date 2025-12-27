@@ -292,6 +292,13 @@
             // Afficher toutes les interventions initialement
             displayInterventions(interventions);
 
+            // Afficher un message selon le nombre d'interventions
+            if (interventions.length === 0) {
+                showAlert("Aucune donnée disponible. Si vous avez un lien de publication, assurez-vous qu'il est correct.", "info");
+            } else {
+                showAlert(`${interventions.length} intervention(s) chargée(s) avec succès.`, "success");
+            }
+
             // Configurer les événements
             setupRapportEventListeners();
         }
