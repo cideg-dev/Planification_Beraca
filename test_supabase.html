@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test de connexion Supabase</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test de connexion Supabase</h1>
+    <div id="result"></div>
+    
+    <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://supywgkoghcphlynktmr.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_S5gpJnrrWvc6QtTgbuD6gg_dtOFU8y4';
+        
+        // Initialiser Supabase
+        const { createClient } = supabase;
+        const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test de connexion en cours...';
+            
+            try {
+                // Test de lecture de la table
+                const { data, error } = await client
+                    .from('planning_data')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    resultDiv.innerHTML = `Erreur: ${error.message}`;
+                    console.error('Erreur Supabase:', error);
+                } else {
+                    resultDiv.innerHTML = `Connexion réussie ! Trouvé ${data.length} enregistrement(s).`;
+                    console.log('Données récupérées:', data);
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `Erreur de connexion: ${err.message}`;
+                console.error('Erreur de connexion:', err);
+            }
+        }
+        
+        // Exécuter le test
+        testConnection();
+    </script>
+</body>
+</html>
