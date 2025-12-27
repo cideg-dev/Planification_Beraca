@@ -674,6 +674,31 @@
             } else {
                 // Charger les données sauvegardées localement si aucune donnée n'est fournie via l'URL
                 loadFromLocalStorage();
+
+                // Charger les données synchronisées automatiquement si aucune donnée n'est encore présente
+                if (interventions.length === 0) {
+                    loadAutoSyncData();
+                }
+            }
+        }
+
+        // Fonction pour charger les données synchronisées automatiquement
+        function loadAutoSyncData() {
+            try {
+                const syncData = localStorage.getItem('autoSyncData');
+                if (syncData) {
+                    const data = JSON.parse(syncData);
+                    interventions = data.interventions || [];
+                    intervenantsDB = data.intervenantsDB || intervenantsDB;
+
+                    // Mettre à jour les interfaces
+                    updateFilterOptions();
+                    displayInterventions(interventions);
+
+                    console.log(`Données synchronisées automatiquement chargées: ${interventions.length} interventions`);
+                }
+            } catch (e) {
+                console.error('Erreur lors du chargement des données synchronisées:', e);
             }
         }
 

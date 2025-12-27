@@ -394,20 +394,21 @@ function addNewIntervenant() {
 
     showAlert(`Intervenant ${firstName} ${lastName} ajouté avec succès!`, 'success');
     saveToLocalStorage();
+    autoSyncToReport(); // Synchroniser avec la page de rapport
 }
 
 function addIntervention() {
     if (!validateInterventionForm()) {
         return;
     }
-    
+
     const intervention = getInterventionFromForm();
     interventions.push(intervention);
-    
+
     updateInterventionsList();
     resetInterventionForm();
     saveToLocalStorage();
-    
+
     showAlert('Intervention ajoutée avec succès!', 'success');
 }
 
@@ -435,7 +436,8 @@ function addMultipleInterventions() {
     updateInterventionsList();
     resetInterventionForm();
     saveToLocalStorage();
-    
+    autoSyncToReport(); // Synchroniser avec la page de rapport
+
     showAlert('4 interventions hebdomadaires ajoutées!', 'success');
 }
 
@@ -553,6 +555,24 @@ function resetInterventionForm() {
 function updateInterventionsList() {
     updateFilterOptions();
     displayInterventions(interventions);
+
+    // Sauvegarder automatiquement les données pour synchronisation avec la page de rapport
+    autoSyncToReport();
+}
+
+// Fonction pour synchroniser automatiquement les données avec la page de rapport
+function autoSyncToReport() {
+    try {
+        const syncData = {
+            interventions: interventions,
+            intervenantsDB: intervenantsDB,
+            lastSync: new Date().toISOString()
+        };
+
+        localStorage.setItem('autoSyncData', JSON.stringify(syncData));
+    } catch (error) {
+        console.error('Erreur lors de la synchronisation automatique:', error);
+    }
 }
 
 function deleteIntervention(id) {
@@ -560,6 +580,7 @@ function deleteIntervention(id) {
         interventions = interventions.filter(intervention => intervention.id !== id);
         updateInterventionsList();
         saveToLocalStorage();
+        autoSyncToReport(); // Synchroniser avec la page de rapport
         showAlert('Intervention supprimée.', 'warning');
     }
 }
@@ -571,6 +592,7 @@ function clearAllInterventions() {
         interventions = [];
         updateInterventionsList();
         saveToLocalStorage();
+        autoSyncToReport(); // Synchroniser avec la page de rapport
         showAlert('Toutes les interventions ont été supprimées.', 'warning');
     }
 }
@@ -1303,7 +1325,8 @@ function saveToLocalStorage() {
         localStorage.setItem('churchPlanningData', JSON.stringify(data));
 
         // Sauvegarder aussi dans une clé spécifique pour la synchronisation avec la page de rapport
-        localStorage.setItem('planningData', JSON.stringify({
+        // Sauvegarder les données pour la synchronisation avec la page de rapport
+        const syncData = {
             interventions: interventions,
             intervenantsDB: intervenantsDB,
             generalInfo: {
@@ -1323,6 +1346,15 @@ function saveToLocalStorage() {
             },
             theme: document.body.className.replace('theme-', ''),
             savedAt: new Date().toISOString()
+        };
+
+        localStorage.setItem('planningData', JSON.stringify(syncData));
+
+        // Sauvegarder également dans une clé spécifique pour la synchronisation automatique
+        localStorage.setItem('autoSyncData', JSON.stringify({
+            interventions: interventions,
+            intervenantsDB: intervenantsDB,
+            lastSync: new Date().toISOString()
         }));
 
         // Sauvegarder dans l'historique (conserver les 5 dernières sauvegardes)
