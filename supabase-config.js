@@ -5,7 +5,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_S5gpJnrrWvc6QtTgbuD6gg_dtOFU8y4';
 
 // Initialiser Supabase
 const { createClient } = supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Fonction pour sauvegarder les données dans Supabase
 async function saveToSupabase() {
@@ -33,7 +33,7 @@ async function saveToSupabase() {
         };
 
         // Sauvegarder ou mettre à jour la ligne dans la table
-        const { data: result, error } = await supabase
+        const { data: result, error } = await supabaseClient
             .from('planning_data')  // Remplacez par le nom de votre table
             .upsert([{
                 id: 'current',  // Utiliser un ID fixe pour la ligne actuelle
@@ -55,7 +55,7 @@ async function saveToSupabase() {
 // Fonction pour charger les données depuis Supabase
 async function loadFromSupabase() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('planning_data')  // Remplacez par le nom de votre table
             .select('*')
             .eq('id', 'current');  // Utiliser l'ID fixe
@@ -90,7 +90,7 @@ async function loadFromSupabase() {
 // Fonction pour charger les données depuis Supabase (spécifique à la page de rapport)
 async function loadFromSupabaseForReport() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('planning_data')  // Remplacez par le nom de votre table
             .select('*')
             .eq('id', 'current');  // Utiliser l'ID fixe
