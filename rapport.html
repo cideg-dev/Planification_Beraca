@@ -1165,6 +1165,17 @@
             });
         }
 
+        // Fonction pour afficher la modale de personnalisation PDF
+        function showPdfCustomizationModal() {
+            // Pré-remplir le nom du fichier
+            const defaultName = `Rapport_Interventions_${new Date().toISOString().slice(0, 10)}`;
+            document.getElementById('pdf-filename').value = defaultName;
+
+            // Ouvrir la modale
+            const modal = new bootstrap.Modal(document.getElementById('pdfCustomizationModal'));
+            modal.show();
+        }
+
         // Fonction pour vérifier l'accès à la planification (ajoutée pour la compatibilité avec les liens éventuels)
         function checkAccessToPlanification() {
             // Vérifier si l'utilisateur est déjà authentifié
