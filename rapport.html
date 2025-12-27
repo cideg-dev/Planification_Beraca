@@ -14,7 +14,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid d-flex align-items-center">
-            <a class="navbar-brand" href="accueil.html">
+            <a class="navbar-brand" href="index.html">
                 <img src="AD.jpeg" alt="Logo AD" class="img-fluid" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; margin-right: 15px;">
                 <span class="glow-text">Rapport Détaillé</span>
             </a>
@@ -47,6 +47,12 @@
                     <li><a class="dropdown-item" href="#" onclick="changeLanguage('fr')">Français</a></li>
                     <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
                 </ul>
+            </div>
+
+            <div class="ms-3">
+                <button class="btn btn-outline-primary" onclick="checkAccessToPlanification()" title="Accéder à la planification">
+                    <i class="fas fa-edit"></i> Planification
+                </button>
             </div>
         </div>
     </nav>
@@ -1157,6 +1163,31 @@
                 month: '2-digit',
                 year: 'numeric'
             });
+        }
+
+        // Fonction pour vérifier l'accès à la planification (ajoutée pour la compatibilité avec les liens éventuels)
+        function checkAccessToPlanification() {
+            // Vérifier si l'utilisateur est déjà authentifié
+            const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
+
+            if (isAuthenticated) {
+                // Accès direct si déjà authentifié
+                window.location.href = 'planification.html';
+                return;
+            }
+
+            const adminCode = 'BeraComi26';
+            const enteredCode = prompt('Veuillez entrer le code administrateur pour accéder à la planification :');
+
+            if (enteredCode === adminCode) {
+                // Stocker l'état d'authentification
+                localStorage.setItem('adminAccess', 'true');
+                // Rediriger vers la page de planification
+                window.location.href = 'planification.html';
+            } else if (enteredCode !== null) {
+                alert('Code administrateur incorrect. Accès refusé.');
+            }
+            // Si l'utilisateur annule, ne rien faire
         }
     </script>
 </body>
