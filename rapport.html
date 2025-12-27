@@ -49,11 +49,6 @@
                 </ul>
             </div>
 
-            <div class="ms-3">
-                <button class="btn btn-outline-primary" onclick="checkAccessToPlanification()" title="Accéder à la planification">
-                    <i class="fas fa-edit"></i> Planification
-                </button>
-            </div>
 
             <div class="ms-3">
                 <button class="btn btn-outline-primary" id="publish-btn" title="Publier les données">
@@ -61,11 +56,6 @@
                 </button>
             </div>
 
-            <div class="ms-3">
-                <button class="btn btn-outline-info" id="sync-data-btn" title="Synchroniser les données">
-                    <i class="fas fa-sync-alt"></i> Sync
-                </button>
-            </div>
         </div>
     </nav>
 
@@ -680,38 +670,6 @@
             }
         }
 
-        // Fonction pour synchroniser les données depuis la page de planification
-        function syncFromPlanification() {
-            // Vérifier si l'utilisateur est authentifié
-            const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
-
-            if (!isAuthenticated) {
-                alert('Accès refusé. Veuillez vous authentifier d\'abord sur la page de planification.');
-                window.location.href = 'index.html'; // Rediriger vers la page d'accueil
-                return;
-            }
-
-            // Charger les données de la page de planification depuis le stockage local
-            try {
-                const savedData = localStorage.getItem('planningData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    interventions = data.interventions || [];
-                    intervenantsDB = data.intervenantsDB || intervenantsDB;
-
-                    // Mettre à jour l'affichage
-                    updateFilterOptions();
-                    displayInterventions(interventions);
-
-                    showAlert('Données synchronisées depuis la planification !', 'success');
-                } else {
-                    showAlert('Aucune donnée de planification trouvée dans le stockage local.', 'info');
-                }
-            } catch (e) {
-                console.error('Erreur lors de la synchronisation:', e);
-                showAlert('Erreur lors de la synchronisation des données: ' + e.message, 'danger');
-            }
-        }
 
         // Fonction pour mettre à jour les options de filtre
         function updateFilterOptions() {
@@ -835,12 +793,6 @@
             const publishBtn = document.getElementById('publish-btn');
             if (publishBtn) {
                 publishBtn.addEventListener('click', publishData);
-            }
-
-            // Bouton de synchronisation
-            const syncBtn = document.getElementById('sync-data-btn');
-            if (syncBtn) {
-                syncBtn.addEventListener('click', syncFromPlanification);
             }
 
             // Événements pour la personnalisation PDF
@@ -1236,30 +1188,6 @@
             modal.show();
         }
 
-        // Fonction pour vérifier l'accès à la planification (ajoutée pour la compatibilité avec les liens éventuels)
-        function checkAccessToPlanification() {
-            // Vérifier si l'utilisateur est déjà authentifié
-            const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
-
-            if (isAuthenticated) {
-                // Accès direct si déjà authentifié
-                window.location.href = 'planification.html';
-                return;
-            }
-
-            const adminCode = 'BeraComi26';
-            const enteredCode = prompt('Veuillez entrer le code administrateur pour accéder à la planification :');
-
-            if (enteredCode === adminCode) {
-                // Stocker l'état d'authentification
-                localStorage.setItem('adminAccess', 'true');
-                // Rediriger vers la page de planification
-                window.location.href = 'planification.html';
-            } else if (enteredCode !== null) {
-                alert('Code administrateur incorrect. Accès refusé.');
-            }
-            // Si l'utilisateur annule, ne rien faire
-        }
 
         // Fonction pour publier les données
         function publishData() {
