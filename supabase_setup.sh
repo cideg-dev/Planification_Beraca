@@ -26,23 +26,40 @@ SQL_STATEMENTS="
 -- Désactiver temporairement RLS pour la table
 ALTER TABLE planning_data DISABLE ROW LEVEL SECURITY;
 
+-- Supprimer les politiques existantes si elles existent déjà
+DROP POLICY IF EXISTS \"Allow read access to planning_data\" ON planning_data;
+DROP POLICY IF EXISTS \"Allow insert access to planning_data\" ON planning_data;
+DROP POLICY IF EXISTS \"Allow update access to planning_data\" ON planning_data;
+DROP POLICY IF EXISTS \"Allow delete access to planning_data\" ON planning_data;
+
 -- Créer des politiques spécifiques
-CREATE POLICY IF NOT EXISTS \"Allow read access to planning_data\" ON planning_data
+CREATE POLICY \"Allow read access to planning_data\" ON planning_data
 FOR SELECT TO authenticated, anon
 USING (true);
 
-CREATE POLICY IF NOT EXISTS \"Allow insert access to planning_data\" ON planning_data
+CREATE POLICY \"Allow insert access to planning_data\" ON planning_data
 FOR INSERT TO authenticated, anon
 WITH CHECK (true);
 
-CREATE POLICY IF NOT EXISTS \"Allow update access to planning_data\" ON planning_data
+CREATE POLICY \"Allow update access to planning_data\" ON planning_data
 FOR UPDATE TO authenticated, anon
 USING (true);
 
--- Vérifier que la table existe
+-- Politique pour permettre la suppression (facultatif, selon vos besoins)
+CREATE POLICY \"Allow delete access to planning_data\" ON planning_data
+FOR DELETE TO authenticated, anon
+USING (true);
+
+-- Vérifier que la table existe et afficher sa structure
 SELECT column_name, data_type
 FROM information_schema.columns
-WHERE table_name = 'planning_data';
+WHERE table_name = 'planning_data'
+ORDER BY ordinal_position;
+
+-- Afficher les politiques créées
+SELECT policyname, permissive, roles, cmd, row_security
+FROM pg_policies
+WHERE tablename = 'planning_data';
 "
 
 # Sauvegarder les commandes SQL dans un fichier temporaire
