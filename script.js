@@ -1372,9 +1372,9 @@ function saveToLocalStorage() {
 
         localStorage.setItem('churchPlanningHistory', JSON.stringify(history));
 
-        // Sauvegarder aussi sur Firebase si disponible
-        if (typeof saveToFirebase === 'function') {
-            saveToFirebase();
+        // Sauvegarder aussi sur Supabase si disponible
+        if (typeof saveToSupabase === 'function') {
+            saveToSupabase();
         }
 
     } catch (error) {
@@ -4307,9 +4307,9 @@ function publishData() {
         });
         localStorage.setItem('published_keys', JSON.stringify(publishedKeys));
 
-        // Sauvegarder aussi sur Firebase
-        if (typeof saveToFirebase === 'function') {
-            saveToFirebase();
+        // Sauvegarder aussi sur Supabase
+        if (typeof saveToSupabase === 'function') {
+            saveToSupabase();
         }
 
         showAlert('Données publiées avec succès !', 'success');
