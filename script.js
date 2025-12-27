@@ -60,12 +60,35 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
+    // Vérifier l'authentification sur la page de planification
+    if (!isPlanificationAccessible()) {
+        return; // Arrêter l'initialisation si non authentifié
+    }
+
     // Mettre à jour les listes déroulantes
     updatePlaceSelect();
     updateCultTypeSelect();
 
     // Initialiser la langue
     initializeLanguage();
+
+    // Charger les données publiées si présentes dans l'URL
+    loadPublishedData();
+
+    // Nettoyer les données expirées
+    cleanupExpiredData();
+}
+
+// Fonction pour vérifier l'accessibilité de la page de planification
+function isPlanificationAccessible() {
+    const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
+
+    if (!isAuthenticated) {
+        alert('Accès refusé. Veuillez vous authentifier sur la page d\'accueil.');
+        window.location.href = 'accueil.html';
+        return false;
+    }
+    return true;
 }
 
 function setupEventListeners() {
@@ -154,6 +177,8 @@ function setupEventListeners() {
     addSafeListener('export-data-btn', 'click', exportData);
     addSafeListener('import-data-btn', 'click', importData);
     addSafeListener('sync-data-btn', 'click', syncData);
+    addSafeListener('publish-btn', 'click', publishData);
+    addSafeListener('show-published-list-btn', 'click', showPublishedList);
 
     // Déverrouillage des informations générales
     addSafeListener('unlock-general-info', 'click', unlockGeneralInfo);
@@ -3939,4 +3964,587 @@ function lockGeneralInfo() {
     }
 
     showAlert('Informations générales verrouillées.', 'info');
+}
+
+// Fonction pour générer un PDF spécifique pour la page de rapport
+async function generatePDFReport(interventionsToShow, options = {}, fileName = 'Rapport_Interventions') {
+    if (interventionsToShow.length === 0) {
+        showAlert('Aucune intervention à exporter.', 'warning');
+        return null;
+    }
+
+    try {
+        // Initialisation robuste de jsPDF
+        let jsPDF;
+        if (window.jspdf && window.jspdf.jsPDF) {
+            jsPDF = window.jspdf.jsPDF;
+        } else if (window.jsPDF) {
+            jsPDF = window.jsPDF;
+        } else {
+            throw new Error("La bibliothèque jsPDF n'est pas chargée correctement.");
+        }
+
+        // Utiliser les options de personnalisation ou les valeurs par défaut
+        const orientation = options.orientation || 'portrait';
+        const format = options.format || 'a4';
+        const margins = options.margins || { top: 10, right: 10, bottom: 10, left: 10 };
+        const includeLogo = options.hasOwnProperty('includeLogo') ? options.includeLogo : true;
+
+        // Créer le document PDF
+        const doc = new jsPDF(orientation, 'mm', format);
+
+        // Dimensions de la page
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+
+        // Position de départ
+        let yPosition = margins.top;
+
+        // Ajouter le logo si demandé
+        if (includeLogo) {
+            try {
+                const logo = new Image();
+                logo.src = 'AD.jpeg';
+
+                // Attendre le chargement de l'image
+                await new Promise((resolve, reject) => {
+                    logo.onload = resolve;
+                    logo.onerror = reject;
+                });
+
+                // Calculer les dimensions du logo (max 30mm de hauteur)
+                const logoMaxHeight = 30;
+                const logoMaxWidth = 30;
+                let logoWidth = logo.width * (logoMaxHeight / logo.height);
+                let logoHeight = logoMaxHeight;
+
+                if (logoWidth > logoMaxWidth) {
+                    logoWidth = logoMaxWidth;
+                    logoHeight = logo.height * (logoMaxWidth / logo.width);
+                }
+
+                // Positionner le logo en haut à gauche
+                doc.addImage(logo, 'JPEG', margins.left, yPosition, logoWidth, logoHeight);
+
+                // Mettre à jour la position verticale
+                yPosition += Math.max(logoHeight, 20) + 5;
+            } catch (error) {
+                console.warn("Impossible de charger le logo:", error);
+                // Continuer sans le logo
+                yPosition += 10;
+            }
+        }
+
+        // Ajouter le titre
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text("RAPPORT DÉTAILLÉ DES INTERVENTIONS", pageWidth / 2, yPosition, { align: 'center' });
+
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        yPosition += 8;
+        doc.text("Assemblées de Dieu du Bénin - Église BERACA", pageWidth / 2, yPosition, { align: 'center' });
+
+        // Ajouter la date de génération
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, pageWidth / 2, yPosition, { align: 'center' });
+
+        yPosition += 12;
+
+        // Générer le tableau des interventions
+        const tableData = interventionsToShow.map((intervention, index) => {
+            // Trouver les informations de l'intervenant
+            const intervenant = intervenantsDB.find(i =>
+                i.firstName === intervention.firstName && i.lastName === intervention.lastName
+            );
+
+            const categoryLabels = {
+                'clergy': 'Clergé',
+                'members': 'Membres',
+                'singers': 'Chanteurs',
+                'musicians': 'Musiciens',
+                'technical': 'Technique',
+                'volunteers': 'Bénévoles'
+            };
+
+            const category = intervenant ? categoryLabels[intervenant.category] || intervenant.category : 'Inconnue';
+
+            return [
+                (index + 1).toString(),
+                formatDateForDisplay(intervention.date),
+                intervention.dayOfWeek,
+                intervention.cultType,
+                intervention.place,
+                intervention.theme,
+                intervention.fullName,
+                category,
+                intervention.observations || ''
+            ];
+        });
+
+        // En-têtes du tableau
+        const headers = [
+            "#",
+            "Date",
+            "Jour",
+            "Type de culte",
+            "Lieu",
+            "Thème",
+            "Intervenant",
+            "Catégorie",
+            "Observations"
+        ];
+
+        // Vérifier si jspdf-autotable est disponible
+        if (typeof doc.autoTable !== 'function') {
+            throw new Error("jspdf-autotable n'est pas chargé correctement.");
+        }
+
+        // Ajouter le tableau
+        doc.autoTable({
+            head: [headers],
+            body: tableData,
+            startY: yPosition,
+            margin: { top: margins.top, right: margins.right, bottom: margins.bottom, left: margins.left },
+            styles: {
+                fontSize: 8,
+                cellPadding: 3
+            },
+            headStyles: {
+                fillColor: [41, 128, 185],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0]
+            },
+            alternateRowStyles: {
+                fillColor: [240, 240, 240]
+            },
+            columnStyles: {
+                0: { cellWidth: 10 }, // Numéro
+                1: { cellWidth: 25 }, // Date
+                2: { cellWidth: 20 }, // Jour
+                3: { cellWidth: 30 }, // Type de culte
+                4: { cellWidth: 25 }, // Lieu
+                5: { cellWidth: 35 }, // Thème
+                6: { cellWidth: 40 }, // Intervenant
+                7: { cellWidth: 25 }, // Catégorie
+                8: { cellWidth: 35 }  // Observations
+            },
+            didDrawPage: function(data) {
+                // Ajouter les numéros de page
+                const pageCount = doc.getNumberOfPages();
+                doc.setFontSize(10);
+                const pageText = `Page ${data.pageNumber} sur ${pageCount}`;
+                doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: 'center' });
+            }
+        });
+
+        // Sauvegarder le PDF
+        doc.save(`${fileName}.pdf`);
+
+        // Afficher une alerte de succès
+        showAlert(`PDF "${fileName}.pdf" généré avec succès!`, 'success');
+
+        return doc;
+    } catch (error) {
+        console.error("Erreur lors de la génération du PDF:", error);
+        showAlert(`Erreur lors de la génération du PDF: ${error.message}`, 'danger');
+        return null;
+    }
+}
+
+// Fonction pour publier les données
+function publishData() {
+    // Vérifier s'il y a des interventions à publier
+    if (interventions.length === 0) {
+        showAlert('Veuillez créer au moins une intervention avant de publier.', 'warning');
+        return;
+    }
+
+    // Récupérer toutes les données nécessaires
+    const dataToPublish = {
+        interventions: interventions,
+        intervenantsDB: intervenantsDB,
+        generalInfo: {
+            churchName: document.getElementById('church-name').value,
+            region: document.getElementById('region').value,
+            section: document.getElementById('section').value,
+            temple: document.getElementById('temple').value,
+            year: document.getElementById('year').value,
+            quarter: document.getElementById('quarter').value
+        },
+        configurations: {
+            days: [],
+            types: [],
+            places: [],
+            otherType: '',
+            otherPlace: ''
+        },
+        theme: document.body.className.replace('theme-', ''),
+        publishedAt: new Date().toISOString()
+    };
+
+    // Récupérer les configurations cochées
+    document.querySelectorAll('input[id^="day-"]:checked').forEach(checkbox => {
+        dataToPublish.configurations.days.push(checkbox.value);
+    });
+
+    document.querySelectorAll('input[id^="type-"]:checked').forEach(checkbox => {
+        dataToPublish.configurations.types.push(checkbox.value);
+    });
+
+    document.querySelectorAll('input[id^="place-"]:checked').forEach(checkbox => {
+        dataToPublish.configurations.places.push(checkbox.value);
+    });
+
+    // Récupérer les valeurs "autres"
+    const otherTypeInput = document.getElementById('type-other-specify');
+    if (otherTypeInput && !otherTypeInput.disabled) {
+        dataToPublish.configurations.otherType = otherTypeInput.value;
+    }
+
+    const otherPlaceInput = document.getElementById('place-other-specify');
+    if (otherPlaceInput && !otherPlaceInput.disabled) {
+        dataToPublish.configurations.otherPlace = otherPlaceInput.value;
+    }
+
+    try {
+        // Convertir les données en chaîne JSON
+        const dataStr = JSON.stringify(dataToPublish);
+
+        // Encoder les données pour l'URL (compression et encodage sécurisé)
+        const encodedData = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+
+        // Générer l'URL de partage
+        const currentUrl = window.location.href.split('?')[0]; // Retirer les paramètres existants
+        const publishUrl = `${currentUrl}?data=${encodedData}`;
+
+        // Afficher une modale avec le lien de partage
+        showPublishModal(publishUrl);
+
+        // Ajouter les données au stockage local sans date d'expiration
+        const storageKey = `published_data_${Date.now()}`;
+        const storedData = {
+            data: dataToPublish,
+            createdAt: new Date().toISOString(),
+            isPermanent: true // Indique que cette publication est permanente
+        };
+
+        localStorage.setItem(storageKey, JSON.stringify(storedData));
+
+        // Sauvegarder la clé dans une liste pour gestion future
+        let publishedKeys = JSON.parse(localStorage.getItem('published_keys') || '[]');
+        publishedKeys.push({
+            key: storageKey,
+            url: publishUrl,
+            createdAt: new Date().toISOString(),
+            isPermanent: true
+        });
+        localStorage.setItem('published_keys', JSON.stringify(publishedKeys));
+
+        showAlert('Données publiées avec succès !', 'success');
+    } catch (error) {
+        console.error('Erreur lors de la publication:', error);
+        showAlert('Erreur lors de la publication des données: ' + error.message, 'danger');
+    }
+}
+
+// Fonction pour afficher la modale de publication
+function showPublishModal(publishUrl) {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('publishModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'publishModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-share-alt me-2"></i>Publication des Données</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Voici le lien pour accéder à ces données publiées :</p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="publish-link" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="copy-link-btn">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Ce lien permet d'accéder aux données planifiées.
+                            Les données seront disponibles pendant 7 jours.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Mettre à jour le lien dans la modale
+    document.getElementById('publish-link').value = publishUrl;
+
+    // Configurer le bouton de copie
+    document.getElementById('copy-link-btn').onclick = function() {
+        const linkInput = document.getElementById('publish-link');
+        linkInput.select();
+        document.execCommand('copy');
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check"></i> Copié!';
+        setTimeout(() => {
+            this.innerHTML = originalText;
+        }, 2000);
+        showAlert('Lien copié dans le presse-papiers', 'success');
+    };
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour charger les données publiées à partir de l'URL
+function loadPublishedData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedData = urlParams.get('data');
+
+    if (encodedData) {
+        try {
+            // Décoder les données
+            const decodedData = decodeURIComponent(atob(encodedData).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            const data = JSON.parse(decodedData);
+
+            // Charger les données dans l'application
+            interventions = data.interventions || [];
+            intervenantsDB = data.intervenantsDB || intervenantsDB;
+
+            // Charger les informations générales
+            if (data.generalInfo) {
+                document.getElementById('church-name').value = data.generalInfo.churchName || '';
+                document.getElementById('region').value = data.generalInfo.region || '';
+                document.getElementById('section').value = data.generalInfo.section || '';
+                document.getElementById('temple').value = data.generalInfo.temple || '';
+                document.getElementById('year').value = data.generalInfo.year || '2025';
+                document.getElementById('quarter').value = data.generalInfo.quarter || '4';
+            }
+
+            // Charger les configurations
+            if (data.configurations) {
+                // Désélectionner tout d'abord
+                document.querySelectorAll('input[id^="day-"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[id^="type-"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[id^="place-"]').forEach(cb => cb.checked = false);
+
+                // Jours
+                data.configurations.days.forEach(dayValue => {
+                    const checkbox = document.querySelector(`input[id^="day-"][value="${dayValue}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+
+                // Types
+                data.configurations.types.forEach(typeValue => {
+                    const checkbox = document.querySelector(`input[id^="type-"][value="${typeValue}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+
+                // Lieux
+                data.configurations.places.forEach(placeValue => {
+                    const checkbox = document.querySelector(`input[id^="place-"][value="${placeValue}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+
+                // Autres valeurs
+                if (data.configurations.otherType) {
+                    document.getElementById('type-other-specify').value = data.configurations.otherType;
+                    document.getElementById('type-other').checked = true;
+                    document.getElementById('type-other-specify').disabled = false;
+                } else {
+                    document.getElementById('type-other-specify').value = '';
+                    document.getElementById('type-other').checked = false;
+                    document.getElementById('type-other-specify').disabled = true;
+                }
+                if (data.configurations.otherPlace) {
+                    document.getElementById('place-other-specify').value = data.configurations.otherPlace;
+                    document.getElementById('place-other').checked = true;
+                    document.getElementById('place-other-specify').disabled = false;
+                } else {
+                    document.getElementById('place-other-specify').value = '';
+                    document.getElementById('place-other').checked = false;
+                    document.getElementById('place-other-specify').disabled = true;
+                }
+            }
+
+            // Charger le thème
+            if (data.theme) {
+                changeTheme(data.theme);
+            }
+
+            // Mettre à jour les interfaces
+            populateIntervenantsSelect();
+            updateDynamicSelects();
+            updateInterventionsList();
+
+            showAlert('Données publiées chargées avec succès !', 'success');
+        } catch (error) {
+            console.error('Erreur lors du chargement des données publiées:', error);
+            showAlert('Erreur lors du chargement des données publiées: ' + error.message, 'danger');
+        }
+    }
+}
+
+// Fonction pour nettoyer les données expirées
+function cleanupExpiredData() {
+    // Pour le moment, ne fait rien car les publications sont permanentes
+    // Cette fonction est conservée pour une éventuelle utilisation future
+    // avec des publications temporaires
+}
+
+// Fonction pour supprimer une publication spécifique
+function unpublishData(storageKey) {
+    try {
+        // Supprimer les données de stockage local
+        localStorage.removeItem(storageKey);
+
+        // Mettre à jour la liste des publications
+        let publishedKeys = JSON.parse(localStorage.getItem('published_keys') || '[]');
+        publishedKeys = publishedKeys.filter(item => item.key !== storageKey);
+        localStorage.setItem('published_keys', JSON.stringify(publishedKeys));
+
+        showAlert('Publication supprimée avec succès !', 'success');
+        return true;
+    } catch (error) {
+        console.error('Erreur lors de la suppression de la publication:', error);
+        showAlert('Erreur lors de la suppression de la publication: ' + error.message, 'danger');
+        return false;
+    }
+}
+
+// Fonction pour afficher les publications existantes
+function showPublishedList() {
+    try {
+        const publishedKeys = JSON.parse(localStorage.getItem('published_keys') || '[]');
+
+        if (publishedKeys.length === 0) {
+            showAlert('Aucune publication active.', 'info');
+            return;
+        }
+
+        showPublishedListModal(publishedKeys);
+    } catch (error) {
+        console.error('Erreur lors de l\'affichage des publications:', error);
+        showAlert('Erreur lors de l\'affichage des publications: ' + error.message, 'danger');
+    }
+}
+
+// Fonction pour afficher la modale de liste des publications
+function showPublishedListModal(publishedKeys) {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('publishedListModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'publishedListModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-list me-2"></i>Liste des Publications</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="published-list-content">
+                            <p>Voici la liste des publications actives :</p>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Date de publication</th>
+                                            <th>Lien</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="published-list-body">
+                                        <!-- Contenu généré dynamiquement -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Mettre à jour le contenu de la modale
+    const tbody = document.getElementById('published-list-body');
+    tbody.innerHTML = '';
+
+    publishedKeys.forEach(item => {
+        const row = document.createElement('tr');
+        const date = new Date(item.createdAt).toLocaleString('fr-FR');
+
+        row.innerHTML = `
+            <td>${date}</td>
+            <td>
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-sm" value="${item.url}" readonly>
+                    <button class="btn btn-outline-secondary btn-sm copy-url-btn" type="button" data-url="${item.url}">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </td>
+            <td>
+                <button class="btn btn-danger btn-sm" type="button" onclick="unpublishData('${item.key}')">
+                    <i class="fas fa-trash-alt"></i> Supprimer
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Ajouter les événements de copie
+    document.querySelectorAll('.copy-url-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            navigator.clipboard.writeText(url).then(() => {
+                const originalHtml = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    this.innerHTML = originalHtml;
+                }, 2000);
+                showAlert('Lien copié dans le presse-papiers', 'success');
+            });
+        });
+    });
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour activer le bouton de publication
+function setupPublishButton() {
+    const publishBtn = document.getElementById('publish-btn');
+    if (publishBtn) {
+        publishBtn.addEventListener('click', publishData);
+    }
 }

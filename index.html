@@ -14,7 +14,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid d-flex align-items-center">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="accueil.html">
                 <img src="AD.jpeg" alt="Logo AD" class="img-fluid" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; margin-right: 15px;">
                 <span class="glow-text">Planificateur d'Interventions</span>
             </a>
@@ -48,6 +48,12 @@
                     <li><a class="dropdown-item" href="#" onclick="changeLanguage('fr')">Français</a></li>
                     <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
                 </ul>
+            </div>
+
+            <div class="ms-3">
+                <a class="btn btn-outline-success" href="rapport.html" title="Accéder au rapport">
+                    <i class="fas fa-chart-bar"></i> Rapport
+                </a>
             </div>
         </div>
     </nav>
@@ -332,6 +338,12 @@
                             </button>
                             <button type="button" class="btn btn-outline-success" id="sync-data-btn">
                                 <i class="fas fa-sync-alt me-2"></i>Synchroniser
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="publish-btn">
+                                <i class="fas fa-share-alt me-2"></i>Publier
+                            </button>
+                            <button type="button" class="btn btn-outline-info" id="show-published-list-btn">
+                                <i class="fas fa-list me-2"></i>Voir publications
                             </button>
                         </div>
                         <button type="button" class="btn btn-primary-custom" id="next-step-1">
@@ -852,4 +864,16 @@
     <input type="file" id="whatsapp-file-picker" style="display: none;" accept=".pdf, .xlsx, .xls, .application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/pdf">
 
     <script src="script.js"></script>
+    <script>
+        // Vérifier l'authentification au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier si l'utilisateur est authentifié
+            const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
+
+            if (!isAuthenticated) {
+                alert('Accès refusé. Veuillez vous authentifier sur la page d\'accueil.');
+                window.location.href = 'accueil.html';
+            }
+        });
+    </script>
 </body>
