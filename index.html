@@ -198,7 +198,7 @@
                 // Stocker l'état d'authentification
                 localStorage.setItem('adminAccess', 'true');
                 // Rediriger vers la page de planification
-                window.location.href = 'index.html';
+                window.location.href = 'planification.html';
             } else if (enteredCode !== null) {
                 alert('Code administrateur incorrect. Accès refusé.');
             }
@@ -212,7 +212,7 @@
             if (!isAuthenticated) {
                 // Rediriger vers la page d'accueil si non authentifié
                 alert('Accès refusé. Veuillez vous authentifier sur la page d\'accueil.');
-                window.location.href = 'accueil.html';
+                window.location.href = 'index.html';
                 return false;
             }
             return true;
