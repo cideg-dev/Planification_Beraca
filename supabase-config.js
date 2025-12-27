@@ -12,7 +12,7 @@ async function saveToSupabase() {
     try {
         const data = {
             interventions: JSON.stringify(interventions),
-            intervenantsDB: JSON.stringify(intervenantsDB),
+            intervenantsdb: JSON.stringify(intervenantsDB),  // Colonne en minuscules pour correspondre à la table
             general_info: JSON.stringify({
                 churchName: document.getElementById('church-name')?.value || 'EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU DU BENIN',
                 region: document.getElementById('region')?.value || 'ATACORA',
@@ -66,14 +66,14 @@ async function loadFromSupabase() {
 
         if (data && data.length > 0) {
             const record = data[0];
-            
+
             // Charger les données dans l'application
             interventions = JSON.parse(record.interventions);
-            intervenantsDB = JSON.parse(record.intervenantsDB);
-            
+            intervenantsDB = JSON.parse(record.intervenantsdb);  // Colonne en minuscules
+
             // Mettre à jour les interfaces
             updateInterventionsList();
-            
+
             console.log('Données chargées depuis Supabase avec succès');
             return true;
         } else {
@@ -101,11 +101,11 @@ async function loadFromSupabaseForReport() {
 
         if (data && data.length > 0) {
             const record = data[0];
-            
+
             // Charger les données dans l'application
             interventions = JSON.parse(record.interventions);
-            intervenantsDB = JSON.parse(record.intervenantsDB);
-            
+            intervenantsDB = JSON.parse(record.intervenantsdb);  // Colonne en minuscules
+
             // Charger le thème
             if (record.theme) {
                 changeTheme(record.theme);
@@ -114,7 +114,7 @@ async function loadFromSupabaseForReport() {
             // Mettre à jour les interfaces
             updateFilterOptions();
             displayInterventions(interventions);
-            
+
             console.log('Données chargées depuis Supabase avec succès');
             showAlert(`${interventions.length} intervention(s) chargée(s) depuis le serveur.`, 'success');
             return true;
