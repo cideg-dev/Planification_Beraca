@@ -57,7 +57,7 @@ WHERE table_name = 'planning_data'
 ORDER BY ordinal_position;
 
 -- Afficher les politiques créées
-SELECT policyname, permissive, roles, cmd, row_security
+SELECT policyname, permissive, roles, cmd
 FROM pg_policies
 WHERE tablename = 'planning_data';
 "
