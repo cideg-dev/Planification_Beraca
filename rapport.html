@@ -1368,5 +1368,17 @@
             bootstrapModal.show();
         }
     </script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Charger les données depuis Firebase au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromFirebaseForReport();
+        });
+    </script>
 </body>
 </html>
