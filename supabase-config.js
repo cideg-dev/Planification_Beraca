@@ -4,8 +4,7 @@ const SUPABASE_URL = 'https://supywgkoghcphlynktmr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_S5gpJnrrWvc6QtTgbuD6gg_dtOFU8y4';
 
 // Initialiser Supabase
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Fonction pour sauvegarder les données dans Supabase
 async function saveToSupabase() {
@@ -32,16 +31,36 @@ async function saveToSupabase() {
             saved_at: new Date().toISOString()
         };
 
-        // Sauvegarder ou mettre à jour la ligne dans la table
-        const { data: result, error } = await supabaseClient
-            .from('planning_data')  // Remplacez par le nom de votre table
-            .upsert([{
-                id: 'current',  // Utiliser un ID fixe pour la ligne actuelle
-                ...data
-            }], { onConflict: 'id' });
+        // Vérifier si l'enregistrement existe déjà
+        const { data: existingRecord, error: selectError } = await supabaseClient
+            .from('planning_data')
+            .select('*')
+            .eq('id', 'current')
+            .single();
 
-        if (error) {
-            throw error;
+        let result;
+        if (existingRecord && !selectError) {
+            // Mettre à jour l'enregistrement existant
+            const updateResult = await supabaseClient
+                .from('planning_data')
+                .update(data)
+                .eq('id', 'current');
+            result = updateResult.data;
+            if (updateResult.error) {
+                throw updateResult.error;
+            }
+        } else {
+            // Insérer un nouvel enregistrement
+            const insertResult = await supabaseClient
+                .from('planning_data')
+                .insert([{
+                    id: 'current',
+                    ...data
+                }]);
+            result = insertResult.data;
+            if (insertResult.error) {
+                throw insertResult.error;
+            }
         }
 
         console.log('Données sauvegardées dans Supabase avec succès');
@@ -72,7 +91,15 @@ async function loadFromSupabase() {
             intervenantsDB = JSON.parse(record.intervenantsdb);  // Colonne en minuscules
 
             // Mettre à jour les interfaces
-            updateInterventionsList();
+            if(typeof updateInterventionsList === 'function') {
+                updateInterventionsList();
+            } else {
+                // Si on est sur la page de rapport, rafraîchir l'affichage
+                if(typeof updateFilterOptions === 'function' && typeof displayInterventions === 'function') {
+                    updateFilterOptions();
+                    displayInterventions(interventions);
+                }
+            }
 
             console.log('Données chargées depuis Supabase avec succès');
             return true;
