@@ -46,6 +46,14 @@ td {
     --pastel-accent1: #a8dadc;
     --pastel-accent2: #d3d3e4;
     --pastel-accent3: #c2e9d8;
+    /* Variables pour la personnalisation du thème */
+    --custom-primary: var(--primary-color);
+    --custom-secondary: var(--secondary-color);
+    --custom-accent: var(--accent-color);
+    --custom-bg: var(--light-bg);
+    --custom-text: #000000;
+    --custom-border-radius: 12px;
+    --custom-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 /* Thèmes */
@@ -87,10 +95,88 @@ body.theme-pastel {
     color: var(--pastel-text);
 }
 
+body.theme-custom {
+    background: linear-gradient(135deg, var(--custom-bg) 0%, var(--custom-bg) 100%);
+    color: var(--custom-text);
+}
+
 .navbar {
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
+}
+
+body.theme-custom .navbar {
+    background: linear-gradient(90deg, var(--custom-primary), var(--custom-secondary));
+}
+
+.card-header {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    color: white;
+    font-weight: 700;
+    padding: 20px;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+body.theme-custom .card-header {
+    background: linear-gradient(90deg, var(--custom-primary), var(--custom-secondary), var(--custom-accent));
+    color: var(--custom-text);
+}
+
+.main-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    margin-bottom: 30px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.theme-custom .main-card {
+    border-radius: var(--custom-border-radius);
+    box-shadow: var(--custom-shadow);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.btn-primary-custom {
+    background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+    border: none;
+    border-radius: 12px;
+    padding: 12px 25px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    color: white;
+    box-shadow: 0 6px 15px rgba(27, 38, 59, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+body.theme-custom .btn-primary-custom {
+    background: linear-gradient(90deg, var(--custom-secondary), var(--custom-accent));
+    border-radius: var(--custom-border-radius);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.cult-type-badge {
+    background: linear-gradient(90deg, var(--accent-color), var(--light-blue));
+    color: white;
+    padding: 5px 12px;
+    border-radius: 25px;
+    font-size: 0.85em;
+    margin-right: 10px;
+    display: inline-block;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-custom .cult-type-badge {
+    background: linear-gradient(90deg, var(--custom-accent), var(--light-blue));
 }
 
 .navbar-brand {
@@ -880,6 +966,112 @@ a:focus {
     line-height: 1.8 !important;
 }
 
+/* Amélioration des animations et transitions */
+:root {
+    --transition-duration: 0.3s;
+    --transition-easing: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Animation de fondu améliorée */
+.fade-in {
+    animation: fadeIn 0.5s var(--transition-easing) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-out {
+    animation: fadeOut 0.3s var(--transition-easing) forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(20px); }
+}
+
+/* Animation de type slide */
+.slide-in-left {
+    animation: slideInLeft 0.4s var(--transition-easing) forwards;
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.4s var(--transition-easing) forwards;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Animation de type scale */
+.scale-in {
+    animation: scaleIn 0.3s var(--transition-easing) forwards;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.scale-out {
+    animation: scaleOut 0.3s var(--transition-easing) forwards;
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.8); opacity: 0; }
+}
+
+/* Animation de type bounce */
+.bounce {
+    animation: bounce 0.6s var(--transition-easing) infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+}
+
+/* Animation de type pulse */
+.pulse {
+    animation: pulse 2s var(--transition-easing) infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Amélioration des transitions existantes */
+.main-card {
+    transition: transform var(--transition-duration) var(--transition-easing),
+                box-shadow var(--transition-duration) var(--transition-easing),
+                background var(--transition-duration) var(--transition-easing),
+                border-radius var(--transition-duration) var(--transition-easing),
+                border-color var(--transition-duration) var(--transition-easing);
+}
+
+.card-header {
+    transition: all var(--transition-duration) var(--transition-easing);
+}
+
+.btn {
+    transition: all var(--transition-duration) var(--transition-easing);
+}
+
+.theme-btn {
+    transition: transform var(--transition-duration) var(--transition-easing),
+                background var(--transition-duration) var(--transition-easing);
+}
+
 /* Réduction des animations pour les utilisateurs sensibles */
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -888,6 +1080,17 @@ a:focus {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+
+    .fade-in,
+    .fade-out,
+    .slide-in-left,
+    .slide-in-right,
+    .scale-in,
+    .scale-out,
+    .bounce,
+    .pulse {
+        animation: none !important;
     }
 }
 
@@ -902,4 +1105,329 @@ a:focus {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* Media Queries pour l'interface responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .logo-container {
+        padding: 5px 8px;
+        margin-right: 10px;
+    }
+
+    .logo-ad {
+        font-size: 1.8rem;
+    }
+
+    .logo-subtitle {
+        font-size: 0.6rem;
+    }
+
+    .theme-selector {
+        gap: 6px;
+        margin-left: 10px;
+    }
+
+    .theme-btn {
+        width: 24px;
+        height: 24px;
+    }
+
+    .main-card {
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+
+    .card-header {
+        padding: 15px;
+    }
+
+    .card-header h4 {
+        font-size: 1.1rem;
+    }
+
+    .section-title {
+        padding: 12px 18px;
+        margin: 20px 0;
+        font-size: 0.95rem;
+    }
+
+    .intervention-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .btn-primary-custom, .btn-success-custom {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    .checkbox-group {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .date-display {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    .step {
+        margin: 0 10px;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+        margin-right: 10px;
+    }
+
+    .step-line {
+        width: 50px;
+    }
+
+    .ad-header {
+        padding: 20px 15px;
+    }
+
+    .ad-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .ad-header p {
+        font-size: 1rem;
+    }
+
+    .btn-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .btn-group {
+        justify-content: center;
+    }
+
+    .share-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .share-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .alert-custom {
+        min-width: auto;
+        width: calc(100% - 30px);
+        right: 15px;
+        left: 15px;
+        top: 15px;
+    }
+
+    .whatsapp-share {
+        width: 50px;
+        height: 50px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .floating-btn {
+        bottom: 80px;
+        right: 20px;
+    }
+
+    .intervenant-form {
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 45px;
+    }
+
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+
+    .modal-dialog {
+        margin: 10px;
+        width: calc(100% - 20px);
+    }
+
+    .modal-content {
+        border-radius: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand span {
+        font-size: 0.9rem;
+    }
+
+    .theme-selector {
+        gap: 5px;
+        margin-left: 5px;
+    }
+
+    .theme-btn {
+        width: 20px;
+        height: 20px;
+    }
+
+    .card-header {
+        padding: 12px;
+    }
+
+    .card-header h4 {
+        font-size: 1rem;
+    }
+
+    .step {
+        margin: 0 5px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .step-number {
+        width: 25px;
+        height: 25px;
+        font-size: 0.9rem;
+    }
+
+    .step-line {
+        width: 30px;
+    }
+
+    .btn-primary-custom, .btn-success-custom {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .form-control, .form-select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .ad-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .ad-header p {
+        font-size: 0.9rem;
+    }
+
+    .share-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+
+    .table-responsive {
+        font-size: 0.75rem;
+    }
+
+    .table th, .table td {
+        padding: 0.3rem;
+    }
+}
+
+/* Indicateur de synchronisation */
+.sync-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 15px;
+    transition: all 0.3s ease;
+    min-width: 140px;
+}
+
+.sync-indicator.sync-loading {
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    color: #ffc107;
+}
+
+.sync-indicator.sync-synced {
+    background: rgba(40, 167, 69, 0.2);
+    border: 1px solid rgba(40, 167, 69, 0.5);
+    color: #28a745;
+}
+
+.sync-indicator.sync-error {
+    background: rgba(220, 53, 69, 0.2);
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    color: #dc3545;
+}
+
+.sync-indicator.sync-no-data {
+    background: rgba(108, 117, 125, 0.2);
+    border: 1px solid rgba(108, 117, 125, 0.5);
+    color: #6c757d;
+}
+
+.sync-icon {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.sync-icon.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Amélioration de l'expérience tactile */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        padding: 12px 20px;
+        min-height: 48px;
+    }
+
+    .form-control, .form-select {
+        min-height: 48px;
+    }
+
+    .card {
+        transition: none;
+    }
+
+    .card:hover {
+        transform: none;
+    }
+
+    .step:hover {
+        transform: none;
+    }
+
+    .theme-btn:hover {
+        transform: none;
+    }
 }

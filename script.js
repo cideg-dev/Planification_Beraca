@@ -211,7 +211,7 @@ function setupEventListeners() {
 
 function changeTheme(theme) {
     // Valider que le thème est autorisé pour éviter les injections CSS
-    const allowedThemes = ['light', 'dark', 'neon', 'galaxy', 'rainbow', 'high-contrast', 'pastel'];
+    const allowedThemes = ['light', 'dark', 'neon', 'galaxy', 'rainbow', 'high-contrast', 'pastel', 'custom'];
     if (!allowedThemes.includes(theme)) {
         console.warn(`Thème non autorisé : ${theme}`);
         return;
@@ -219,6 +219,195 @@ function changeTheme(theme) {
 
     document.body.className = 'theme-' + theme;
     saveToLocalStorage();
+}
+
+// Fonction pour personnaliser le thème
+function customizeTheme() {
+    // Récupérer les valeurs de personnalisation
+    const primaryColor = document.getElementById('primary-color-picker')?.value || getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+    const secondaryColor = document.getElementById('secondary-color-picker')?.value || getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+    const accentColor = document.getElementById('accent-color-picker')?.value || getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+    const backgroundColor = document.getElementById('bg-color-picker')?.value || getComputedStyle(document.documentElement).getPropertyValue('--light-bg').trim();
+    const textColor = document.getElementById('text-color-picker')?.value || '#000000';
+    const borderRadius = document.getElementById('border-radius-slider')?.value || '12';
+    const shadowIntensity = document.getElementById('shadow-slider')?.value || '0.15';
+
+    // Mettre à jour les variables CSS
+    document.documentElement.style.setProperty('--custom-primary', primaryColor);
+    document.documentElement.style.setProperty('--custom-secondary', secondaryColor);
+    document.documentElement.style.setProperty('--custom-accent', accentColor);
+    document.documentElement.style.setProperty('--custom-bg', backgroundColor);
+    document.documentElement.style.setProperty('--custom-text', textColor);
+    document.documentElement.style.setProperty('--custom-border-radius', borderRadius + 'px');
+    document.documentElement.style.setProperty('--custom-shadow', `0 10px 30px rgba(0, 0, 0, ${shadowIntensity})`);
+
+    // Changer le thème vers 'custom' si ce n'est pas déjà le cas
+    if (!document.body.classList.contains('theme-custom')) {
+        document.body.className = 'theme-custom';
+    }
+
+    saveToLocalStorage();
+}
+
+// Fonction pour afficher la modale de personnalisation du thème
+function showThemeCustomizationModal() {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('themeCustomizationModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'themeCustomizationModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Personnalisation du Thème</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="primary-color-picker" class="form-label">Couleur Primaire</label>
+                                <input type="color" class="form-control form-control-color" id="primary-color-picker" value="#0d1b2a">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="secondary-color-picker" class="form-label">Couleur Secondaire</label>
+                                <input type="color" class="form-control form-control-color" id="secondary-color-picker" value="#1b263b">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="accent-color-picker" class="form-label">Couleur d'Accent</label>
+                                <input type="color" class="form-control form-control-color" id="accent-color-picker" value="#415a77">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="bg-color-picker" class="form-label">Couleur de Fond</label>
+                                <input type="color" class="form-control form-control-color" id="bg-color-picker" value="#e0e1dd">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="text-color-picker" class="form-label">Couleur du Texte</label>
+                                <input type="color" class="form-control form-control-color" id="text-color-picker" value="#000000">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="border-radius-slider" class="form-label">Arrondi des Bordures: <span id="border-radius-value">12</span>px</label>
+                                <input type="range" class="form-range" id="border-radius-slider" min="0" max="30" value="12">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="shadow-slider" class="form-label">Intensité de l'Ombre: <span id="shadow-value">0.15</span></label>
+                                <input type="range" class="form-range" id="shadow-slider" min="0" max="1" step="0.01" value="0.15">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="apply-theme-btn">Appliquer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Ajouter les événements pour les contrôles de personnalisation
+        document.getElementById('border-radius-slider').addEventListener('input', function() {
+            document.getElementById('border-radius-value').textContent = this.value;
+        });
+
+        document.getElementById('shadow-slider').addEventListener('input', function() {
+            document.getElementById('shadow-value').textContent = this.value;
+        });
+
+        document.getElementById('apply-theme-btn').addEventListener('click', function() {
+            customizeTheme();
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+    }
+
+    // Mettre à jour les valeurs actuelles dans les contrôles
+    const currentPrimary = getComputedStyle(document.documentElement).getPropertyValue('--custom-primary').trim() ||
+                          getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+    const currentSecondary = getComputedStyle(document.documentElement).getPropertyValue('--custom-secondary').trim() ||
+                            getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+    const currentAccent = getComputedStyle(document.documentElement).getPropertyValue('--custom-accent').trim() ||
+                         getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+    const currentBg = getComputedStyle(document.documentElement).getPropertyValue('--custom-bg').trim() ||
+                     getComputedStyle(document.documentElement).getPropertyValue('--light-bg').trim();
+
+    document.getElementById('primary-color-picker').value = currentPrimary;
+    document.getElementById('secondary-color-picker').value = currentSecondary;
+    document.getElementById('accent-color-picker').value = currentAccent;
+    document.getElementById('bg-color-picker').value = currentBg;
+
+    // Mettre à jour les valeurs de slider
+    const borderRadius = getComputedStyle(document.documentElement).getPropertyValue('--custom-border-radius');
+    const shadow = getComputedStyle(document.documentElement).getPropertyValue('--custom-shadow');
+    // Extraire la valeur numérique du border-radius
+    const borderRadiusValue = borderRadius.replace('px', '');
+    document.getElementById('border-radius-slider').value = borderRadiusValue;
+    document.getElementById('border-radius-value').textContent = borderRadiusValue;
+
+    // Extraire la valeur numérique de l'opacité de l'ombre
+    const shadowMatch = shadow.match(/rgba\(0, 0, 0, ([0-9.]+)\)/);
+    if (shadowMatch) {
+        document.getElementById('shadow-slider').value = shadowMatch[1];
+        document.getElementById('shadow-value').textContent = shadowMatch[1];
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour mettre à jour l'indicateur de synchronisation
+function updateSyncIndicator(status) {
+    // Créer ou mettre à jour l'indicateur de synchronisation
+    let syncIndicator = document.getElementById('sync-indicator');
+
+    if (!syncIndicator) {
+        // Créer l'indicateur s'il n'existe pas
+        syncIndicator = document.createElement('div');
+        syncIndicator.id = 'sync-indicator';
+        syncIndicator.className = 'sync-indicator';
+        syncIndicator.innerHTML = `
+            <i class="fas fa-sync-alt sync-icon"></i>
+            <span class="sync-text">Synchronisation</span>
+        `;
+
+        // Ajouter à la barre de navigation
+        const navContainer = document.querySelector('.navbar .container-fluid');
+        if (navContainer) {
+            navContainer.appendChild(syncIndicator);
+        }
+    }
+
+    // Mettre à jour l'apparence selon l'état
+    syncIndicator.className = 'sync-indicator';
+    syncIndicator.classList.add(`sync-${status}`);
+
+    // Mettre à jour le texte et l'icône
+    const icon = syncIndicator.querySelector('.sync-icon');
+    const text = syncIndicator.querySelector('.sync-text');
+
+    switch(status) {
+        case 'loading':
+            icon.className = 'fas fa-sync-alt sync-icon spin';
+            text.textContent = 'Synchronisation...';
+            break;
+        case 'synced':
+            icon.className = 'fas fa-check-circle sync-icon synced';
+            text.textContent = 'Synchronisé';
+            break;
+        case 'error':
+            icon.className = 'fas fa-exclamation-triangle sync-icon error';
+            text.textContent = 'Erreur de synchro';
+            break;
+        case 'no-data':
+            icon.className = 'fas fa-info-circle sync-icon no-data';
+            text.textContent = 'Aucune donnée';
+            break;
+        default:
+            icon.className = 'fas fa-sync-alt sync-icon';
+            text.textContent = 'Synchronisation';
+    }
 }
 
 function goToStep(step) {
@@ -403,11 +592,18 @@ function addIntervention() {
     }
 
     const intervention = getInterventionFromForm();
+
+    // Sauvegarder l'état précédent pour l'historique
+    const previousState = JSON.parse(JSON.stringify(interventions));
+
     interventions.push(intervention);
 
     updateInterventionsList();
     resetInterventionForm();
     saveToLocalStorage();
+
+    // Enregistrer dans l'historique
+    saveToHistory('add', intervention, previousState);
 
     showAlert('Intervention ajoutée avec succès!', 'success');
 }
@@ -577,22 +773,39 @@ function autoSyncToReport() {
 
 function deleteIntervention(id) {
     if (confirm('Voulez-vous vraiment supprimer cette intervention ?')) {
+        // Sauvegarder l'état précédent pour l'historique
+        const previousState = JSON.parse(JSON.stringify(interventions));
+
+        const deletedIntervention = interventions.find(intervention => intervention.id === id);
         interventions = interventions.filter(intervention => intervention.id !== id);
         updateInterventionsList();
         saveToLocalStorage();
         autoSyncToReport(); // Synchroniser avec la page de rapport
+
+        // Enregistrer dans l'historique
+        if (deletedIntervention) {
+            saveToHistory('delete', deletedIntervention, previousState);
+        }
+
         showAlert('Intervention supprimée.', 'warning');
     }
 }
 
 function clearAllInterventions() {
     if (interventions.length === 0) return;
-    
+
     if (confirm(`Voulez-vous vraiment supprimer toutes les ${interventions.length} interventions ?`)) {
+        // Sauvegarder l'état précédent pour l'historique
+        const previousState = JSON.parse(JSON.stringify(interventions));
+
         interventions = [];
         updateInterventionsList();
         saveToLocalStorage();
         autoSyncToReport(); // Synchroniser avec la page de rapport
+
+        // Enregistrer dans l'historique
+        saveToHistory('clear', { count: previousState.length }, previousState);
+
         showAlert('Toutes les interventions ont été supprimées.', 'warning');
     }
 }
@@ -4365,6 +4578,4159 @@ function cleanupExpiredData() {
     // Pour le moment, ne fait rien car les publications sont permanentes
     // Cette fonction est conservée pour une éventuelle utilisation future
     // avec des publications temporaires
+}
+
+// Fonction pour enregistrer une modification dans l'historique
+function saveToHistory(action, data, previousState = null) {
+    // Récupérer l'historique existant ou initialiser
+    let history = JSON.parse(localStorage.getItem('planningHistory') || '[]');
+
+    // Créer un nouvel enregistrement d'historique
+    const historyEntry = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        action: action,
+        data: JSON.parse(JSON.stringify(data)), // Copie profonde
+        previousState: previousState ? JSON.parse(JSON.stringify(previousState)) : null
+    };
+
+    // Ajouter à l'historique
+    history.push(historyEntry);
+
+    // Limiter l'historique à 50 entrées pour des raisons de performance
+    if (history.length > 50) {
+        history = history.slice(-50);
+    }
+
+    // Sauvegarder dans le localStorage
+    localStorage.setItem('planningHistory', JSON.stringify(history));
+}
+
+// Fonction pour restaurer une intervention à partir de l'historique
+function restoreFromHistory(historyId) {
+    const history = JSON.parse(localStorage.getItem('planningHistory') || '[]');
+    const historyEntry = history.find(entry => entry.id === historyId);
+
+    if (!historyEntry) {
+        console.error('Entrée d\'historique non trouvée');
+        return false;
+    }
+
+    // Restaurer l'état précédent si disponible
+    if (historyEntry.previousState) {
+        interventions = JSON.parse(JSON.stringify(historyEntry.previousState));
+        updateInterventionsList();
+        saveToLocalStorage();
+        autoSyncToReport();
+        showAlert('Intervention restaurée à partir de l\'historique', 'success');
+        return true;
+    } else {
+        console.error('Aucun état précédent disponible pour cette entrée');
+        return false;
+    }
+}
+
+// Fonction pour afficher l'historique des modifications
+function showHistoryModal() {
+    const history = JSON.parse(localStorage.getItem('planningHistory') || '[]').reverse(); // Inverser pour avoir les plus récents en premier
+
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('historyModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'historyModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Historique des Modifications</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                        <th>Détails</th>
+                                        <th>Restaurer</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                    <!-- Les entrées seront insérées ici -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-danger" id="clear-history-btn">Effacer l'historique</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Événement pour effacer l'historique
+        document.getElementById('clear-history-btn').addEventListener('click', function() {
+            if (confirm('Êtes-vous sûr de vouloir effacer tout l\'historique des modifications ?')) {
+                localStorage.removeItem('planningHistory');
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                modalInstance.hide();
+                showAlert('Historique effacé avec succès', 'info');
+            }
+        });
+    }
+
+    // Remplir le tableau avec l'historique
+    const tableBody = document.getElementById('history-table-body');
+    tableBody.innerHTML = '';
+
+    if (history.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Aucune modification enregistrée</td></tr>';
+    } else {
+        history.forEach(entry => {
+            const row = document.createElement('tr');
+
+            // Formater la date
+            const date = new Date(entry.timestamp);
+            const formattedDate = date.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            // Déterminer le type d'action
+            let actionLabel = '';
+            let details = '';
+            switch(entry.action) {
+                case 'add':
+                    actionLabel = 'Ajout';
+                    details = `Ajout de l'intervention: ${entry.data.fullName} - ${entry.data.cultType}`;
+                    break;
+                case 'update':
+                    actionLabel = 'Modification';
+                    details = `Modification de: ${entry.data.fullName} - ${entry.data.cultType}`;
+                    break;
+                case 'delete':
+                    actionLabel = 'Suppression';
+                    details = `Suppression de: ${entry.data.fullName} - ${entry.data.cultType}`;
+                    break;
+                case 'clear':
+                    actionLabel = 'Effacement';
+                    details = 'Effacement de toutes les interventions';
+                    break;
+                default:
+                    actionLabel = entry.action;
+                    details = JSON.stringify(entry.data).substring(0, 50) + '...';
+            }
+
+            row.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${actionLabel}</td>
+                <td>${details}</td>
+                <td>
+                    ${entry.previousState ?
+                        `<button class="btn btn-sm btn-outline-primary restore-btn" data-id="${entry.id}">Restaurer</button>` :
+                        '<span class="text-muted">Non disponible</span>'
+                    }
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+
+        // Ajouter les événements de restauration
+        document.querySelectorAll('.restore-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const historyId = parseInt(this.getAttribute('data-id'));
+                if (restoreFromHistory(historyId)) {
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    modalInstance.hide();
+                }
+            });
+        });
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour la planification automatique basée sur des règles
+function showAutoPlanModal() {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('autoPlanModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'autoPlanModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Planification Automatique</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <h6>Règles de planification automatique</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="rotation-enabled" checked>
+                                <label class="form-check-label" for="rotation-enabled">
+                                    Activer la rotation des intervenants
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="avoid-conflicts" checked>
+                                <label class="form-check-label" for="avoid-conflicts">
+                                    Éviter les conflits (mêmes intervenants sur plusieurs interventions)
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="balance-workload">
+                                <label class="form-check-label" for="balance-workload">
+                                    Équilibrer la charge de travail
+                                </label>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="start-date" class="form-label">Date de début</label>
+                                    <input type="date" class="form-control" id="start-date">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="end-date" class="form-label">Date de fin</label>
+                                    <input type="date" class="form-control" id="end-date">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="intervenants-per-type" class="form-label">Nombre d'intervenants par type de culte</label>
+                                <input type="number" class="form-control" id="intervenants-per-type" min="1" max="10" value="1">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            La planification automatique générera des interventions selon les règles définies
+                            et les données disponibles dans la base de données.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="generate-auto-plan">Générer la planification</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Événement pour générer la planification automatique
+        document.getElementById('generate-auto-plan').addEventListener('click', function() {
+            generateAutoPlan();
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+    }
+
+    // Définir les dates par défaut (aujourd'hui et dans 3 mois)
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setMonth(today.getMonth() + 3);
+
+    document.getElementById('start-date').valueAsDate = today;
+    document.getElementById('end-date').valueAsDate = futureDate;
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour demander la permission et afficher les notifications
+function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+        console.log('Ce navigateur ne supporte pas les notifications desktop');
+        return false;
+    }
+
+    if (Notification.permission === 'granted') {
+        return true;
+    }
+
+    if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') {
+                console.log('Permission pour les notifications accordée');
+            }
+        });
+    }
+
+    return Notification.permission === 'granted';
+}
+
+// Fonction pour afficher une notification
+function showNotification(title, options = {}) {
+    if (requestNotificationPermission()) {
+        try {
+            new Notification(title, options);
+        } catch (e) {
+            console.error('Erreur lors de l\'affichage de la notification:', e);
+            // Fallback : afficher une alerte standard
+            if (options.body) {
+                showAlert(`${title}: ${options.body}`, options.tag || 'info');
+            } else {
+                showAlert(title, options.tag || 'info');
+            }
+        }
+    } else {
+        // Si la permission n'est pas accordée, afficher une alerte standard
+        showAlert(title, options.tag || 'info');
+    }
+}
+
+// Fonction pour envoyer une notification de changement important
+function sendImportantChangeNotification(changeType, details) {
+    const title = `Changement important : ${changeType}`;
+    const options = {
+        body: details,
+        icon: 'AD.jpeg',
+        tag: 'important-change',
+        requireInteraction: true // La notification restera affichée jusqu'à ce que l'utilisateur l'interagisse
+    };
+
+    showNotification(title, options);
+}
+
+// Fonction pour vérifier les changements importants et envoyer des notifications
+function checkAndNotifyImportantChanges() {
+    // Récupérer l'état précédent sauvegardé
+    const previousData = JSON.parse(localStorage.getItem('previousPlanningData') || 'null');
+
+    if (!previousData) {
+        // Si c'est la première fois, sauvegarder l'état actuel
+        saveCurrentStateAsReference();
+        return;
+    }
+
+    // Comparer avec l'état actuel
+    const currentState = {
+        interventionsCount: interventions.length,
+        intervenantsCount: intervenantsDB.length,
+        interventions: JSON.parse(JSON.stringify(interventions)),
+        intervenants: JSON.parse(JSON.stringify(intervenantsDB))
+    };
+
+    // Vérifier les changements
+    const changes = [];
+
+    // Changement dans le nombre d'interventions
+    if (previousData.interventionsCount !== currentState.interventionsCount) {
+        const countDiff = currentState.interventionsCount - previousData.interventionsCount;
+        if (countDiff > 0) {
+            changes.push(`${countDiff} nouvelle(s) intervention(s) ajoutée(s)`);
+        } else {
+            changes.push(`${Math.abs(countDiff)} intervention(s) supprimée(s)`);
+        }
+    }
+
+    // Vérifier les interventions spécifiques (ajouts, modifications, suppressions)
+    const previousIds = new Set(previousData.interventions.map(i => i.id));
+    const currentIds = new Set(currentState.interventions.map(i => i.id));
+
+    // Interventions ajoutées
+    const addedInterventions = currentState.interventions.filter(i => !previousIds.has(i.id));
+    if (addedInterventions.length > 0) {
+        changes.push(`Nouvelles interventions pour: ${addedInterventions.map(i => `${i.fullName} - ${i.cultType}`).join(', ')}`);
+    }
+
+    // Interventions supprimées
+    const removedInterventions = previousData.interventions.filter(i => !currentIds.has(i.id));
+    if (removedInterventions.length > 0) {
+        changes.push(`Interventions supprimées: ${removedInterventions.map(i => `${i.fullName} - ${i.cultType}`).join(', ')}`);
+    }
+
+    // Envoyer les notifications pour les changements importants
+    if (changes.length > 0) {
+        const changeDetails = changes.join('; ');
+        sendImportantChangeNotification('Mise à jour des interventions', changeDetails);
+    }
+
+    // Sauvegarder l'état actuel comme référence
+    saveCurrentStateAsReference();
+}
+
+// Fonction pour sauvegarder l'état actuel comme référence
+function saveCurrentStateAsReference() {
+    const currentState = {
+        interventionsCount: interventions.length,
+        intervenantsCount: intervenantsDB.length,
+        interventions: JSON.parse(JSON.stringify(interventions)),
+        intervenants: JSON.parse(JSON.stringify(intervenantsDB)),
+        timestamp: new Date().toISOString()
+    };
+
+    localStorage.setItem('previousPlanningData', JSON.stringify(currentState));
+}
+
+// Fonction pour générer des rapports statistiques
+function showStatsReportModal() {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('statsReportModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'statsReportModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rapports Statistiques et Analyses</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs" id="statsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Aperçu</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="intervenants-tab" data-bs-toggle="tab" data-bs-target="#intervenants" type="button" role="tab">Intervenants</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="types-tab" data-bs-toggle="tab" data-bs-target="#types" type="button" role="tab">Types de culte</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="dates-tab" data-bs-toggle="tab" data-bs-target="#dates" type="button" role="tab">Répartition temporelle</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="statsTabContent">
+                            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Total Interventions</h5>
+                                                <h3 class="text-primary" id="total-interventions">0</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Intervenants Uniques</h5>
+                                                <h3 class="text-success" id="unique-intervenants">0</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Types de Culte</h5>
+                                                <h3 class="text-info" id="unique-types">0</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Période</h5>
+                                                <h3 class="text-warning" id="period-days">0</h3>
+                                                <p class="text-muted">jours</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <h5>Répartition par catégorie</h5>
+                                    <canvas id="categoryChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="intervenants" role="tabpanel">
+                                <h5>Top Intervenants</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="top-intervenants-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Intervenant</th>
+                                                <th>Catégorie</th>
+                                                <th>Nombre d'interventions</th>
+                                                <th>% du total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="top-intervenants-body">
+                                            <!-- Les données seront insérées ici -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="types" role="tabpanel">
+                                <h5>Répartition par type de culte</h5>
+                                <canvas id="typesChart" width="400" height="200"></canvas>
+                                <div class="table-responsive mt-4">
+                                    <table class="table table-striped" id="types-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Type de culte</th>
+                                                <th>Nombre</th>
+                                                <th>% du total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="types-body">
+                                            <!-- Les données seront insérées ici -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="dates" role="tabpanel">
+                                <h5>Activité par période</h5>
+                                <canvas id="datesChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary" id="export-stats-btn">Exporter les statistiques</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Événement pour exporter les statistiques
+        document.getElementById('export-stats-btn').addEventListener('click', function() {
+            exportStatsReport();
+        });
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+
+    // Mettre à jour les données après un court délai pour permettre l'affichage
+    setTimeout(() => {
+        updateStatsReportData();
+    }, 300);
+}
+
+// Fonction pour mettre à jour les données du rapport statistique
+function updateStatsReportData() {
+    // Calculer les statistiques
+    const stats = calculateStats();
+
+    // Mettre à jour les indicateurs principaux
+    document.getElementById('total-interventions').textContent = stats.totalInterventions;
+    document.getElementById('unique-intervenants').textContent = stats.uniqueIntervenants;
+    document.getElementById('unique-types').textContent = stats.uniqueTypes;
+    document.getElementById('period-days').textContent = stats.periodDays;
+
+    // Générer les graphiques
+    generateCategoryChart(stats.categoryDistribution);
+    generateTypesChart(stats.typeDistribution);
+    generateDatesChart(stats.datesDistribution);
+
+    // Remplir les tableaux
+    populateTopIntervenantsTable(stats.topIntervenants);
+    populateTypesTable(stats.typeDistribution);
+}
+
+// Fonction pour calculer les statistiques
+function calculateStats() {
+    if (interventions.length === 0) {
+        return {
+            totalInterventions: 0,
+            uniqueIntervenants: 0,
+            uniqueTypes: 0,
+            periodDays: 0,
+            categoryDistribution: {},
+            typeDistribution: {},
+            datesDistribution: {},
+            topIntervenants: [],
+            startDate: null,
+            endDate: null
+        };
+    }
+
+    // Calculer les différentes statistiques
+    const intervenantCounts = {};
+    const typeCounts = {};
+    const categoryCounts = {};
+    const dateCounts = {};
+
+    let startDate = null;
+    let endDate = null;
+
+    interventions.forEach(intervention => {
+        // Compter les intervenants
+        const fullName = intervention.fullName;
+        intervenantCounts[fullName] = (intervenantCounts[fullName] || 0) + 1;
+
+        // Compter les types de culte
+        const cultType = intervention.cultType;
+        typeCounts[cultType] = (typeCounts[cultType] || 0) + 1;
+
+        // Déterminer la catégorie de l'intervenant
+        const intervenant = intervenantsDB.find(i =>
+            i.firstName === intervention.firstName && i.lastName === intervention.lastName
+        );
+        const category = intervenant ? intervenant.category : 'inconnue';
+        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+
+        // Compter par date
+        const date = intervention.date;
+        dateCounts[date] = (dateCounts[date] || 0) + 1;
+
+        // Déterminer les dates de début et de fin
+        if (!startDate || new Date(date) < new Date(startDate)) {
+            startDate = date;
+        }
+        if (!endDate || new Date(date) > new Date(endDate)) {
+            endDate = date;
+        }
+    });
+
+    // Calculer le nombre de jours dans la période
+    let periodDays = 0;
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        periodDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    // Convertir les objets de comptage en tableaux triés
+    const topIntervenants = Object.entries(intervenantCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10); // Top 10
+
+    const typeDistribution = Object.entries(typeCounts)
+        .map(([type, count]) => ({ type, count }))
+        .sort((a, b) => b.count - a.count);
+
+    const datesDistribution = Object.entries(dateCounts)
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    return {
+        totalInterventions: interventions.length,
+        uniqueIntervenants: Object.keys(intervenantCounts).length,
+        uniqueTypes: Object.keys(typeCounts).length,
+        periodDays: periodDays,
+        categoryDistribution: categoryCounts,
+        typeDistribution: typeDistribution,
+        datesDistribution: datesDistribution,
+        topIntervenants: topIntervenants,
+        startDate: startDate,
+        endDate: endDate
+    };
+}
+
+// Fonction pour générer le graphique des catégories
+function generateCategoryChart(categoryDistribution) {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+
+    // Libérer l'instance précédente du graphique si elle existe
+    if (window.categoryChartInstance) {
+        window.categoryChartInstance.destroy();
+    }
+
+    // Définir les couleurs pour chaque catégorie
+    const categoryColors = {
+        'clergy': '#FF6384',
+        'members': '#36A2EB',
+        'singers': '#FFCE56',
+        'musicians': '#4BC0C0',
+        'technical': '#9966FF',
+        'volunteers': '#FF9F40',
+        'inconnue': '#8A8A8A'
+    };
+
+    const labels = Object.keys(categoryDistribution);
+    const data = Object.values(categoryDistribution);
+    const backgroundColors = labels.map(category => categoryColors[category] || '#8A8A8A');
+
+    window.categoryChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                title: {
+                    display: true,
+                    text: 'Répartition par catégorie d\'intervenants'
+                }
+            }
+        }
+    });
+}
+
+// Fonction pour générer le graphique des types de culte
+function generateTypesChart(typeDistribution) {
+    const ctx = document.getElementById('typesChart').getContext('2d');
+
+    // Libérer l'instance précédente du graphique si elle existe
+    if (window.typesChartInstance) {
+        window.typesChartInstance.destroy();
+    }
+
+    const labels = typeDistribution.map(item => item.type);
+    const data = typeDistribution.map(item => item.count);
+
+    window.typesChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Nombre d\'interventions',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Répartition par type de culte'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Fonction pour générer le graphique des dates
+function generateDatesChart(datesDistribution) {
+    const ctx = document.getElementById('datesChart').getContext('2d');
+
+    // Libérer l'instance précédente du graphique si elle existe
+    if (window.datesChartInstance) {
+        window.datesChartInstance.destroy();
+    }
+
+    const labels = datesDistribution.map(item => item.date);
+    const data = datesDistribution.map(item => item.count);
+
+    window.datesChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Nombre d\'interventions',
+                data: data,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Activité par date'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Fonction pour remplir le tableau des top intervenants
+function populateTopIntervenantsTable(topIntervenants) {
+    const tbody = document.getElementById('top-intervenants-body');
+    tbody.innerHTML = '';
+
+    const totalInterventions = interventions.length;
+
+    topIntervenants.forEach(item => {
+        const percentage = ((item.count / totalInterventions) * 100).toFixed(1);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${getIntervenantCategory(item.name)}</td>
+            <td>${item.count}</td>
+            <td>${percentage}%</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Fonction pour obtenir la catégorie d'un intervenant
+function getIntervenantCategory(fullName) {
+    const nameParts = fullName.trim().split(' ');
+    if (nameParts.length < 2) return 'inconnue';
+
+    const firstName = nameParts.slice(0, -1).join(' '); // Tous les éléments sauf le dernier
+    const lastName = nameParts[nameParts.length - 1]; // Dernier élément
+
+    const intervenant = intervenantsDB.find(i =>
+        i.firstName === firstName && i.lastName === lastName
+    );
+
+    return intervenant ? intervenant.category : 'inconnue';
+}
+
+// Fonction pour remplir le tableau des types de culte
+function populateTypesTable(typeDistribution) {
+    const tbody = document.getElementById('types-body');
+    tbody.innerHTML = '';
+
+    const totalInterventions = interventions.length;
+
+    typeDistribution.forEach(item => {
+        const percentage = ((item.count / totalInterventions) * 100).toFixed(1);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.type}</td>
+            <td>${item.count}</td>
+            <td>${percentage}%</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Fonction pour exporter les statistiques
+function exportStatsReport() {
+    const stats = calculateStats();
+    const date = new Date().toLocaleDateString('fr-FR');
+
+    // Générer un contenu de rapport
+    let reportContent = `RAPPORT STATISTIQUE - ${date}\n\n`;
+    reportContent += `Période: ${stats.startDate} à ${stats.endDate}\n`;
+    reportContent += `Nombre total d'interventions: ${stats.totalInterventions}\n`;
+    reportContent += `Nombre d'intervenants uniques: ${stats.uniqueIntervenants}\n`;
+    reportContent += `Nombre de types de culte: ${stats.uniqueTypes}\n\n`;
+
+    reportContent += "Répartition par catégorie d'intervenants:\n";
+    Object.entries(stats.categoryDistribution).forEach(([category, count]) => {
+        const percentage = ((count / stats.totalInterventions) * 100).toFixed(1);
+        reportContent += `  ${category}: ${count} (${percentage}%)\n`;
+    });
+
+    reportContent += "\nTop 10 des intervenants:\n";
+    stats.topIntervenants.slice(0, 10).forEach((item, index) => {
+        const percentage = ((item.count / stats.totalInterventions) * 100).toFixed(1);
+        reportContent += `  ${index + 1}. ${item.name}: ${item.count} interventions (${percentage}%)\n`;
+    });
+
+    reportContent += "\nRépartition par type de culte:\n";
+    stats.typeDistribution.forEach((item, index) => {
+        const percentage = ((item.count / stats.totalInterventions) * 100).toFixed(1);
+        reportContent += `  ${index + 1}. ${item.type}: ${item.count} (${percentage}%)\n`;
+    });
+
+    // Créer un fichier texte avec le rapport
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    // Créer un lien de téléchargement
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Rapport_Statistique_${date.replace(/\//g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+
+    // Nettoyer
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
+
+    showAlert('Rapport statistique exporté avec succès!', 'success');
+}
+
+// Fonction pour gérer le cache des données
+const DataCache = {
+    // Durée de vie du cache en millisecondes (24 heures)
+    TTL: 24 * 60 * 60 * 1000,
+
+    // Sauvegarder des données dans le cache
+    set: function(key, data) {
+        const cacheEntry = {
+            data: data,
+            timestamp: Date.now(),
+            ttl: this.TTL
+        };
+        try {
+            localStorage.setItem(`cache_${key}`, JSON.stringify(cacheEntry));
+            return true;
+        } catch (e) {
+            console.error('Erreur lors de la mise en cache:', e);
+            return false;
+        }
+    },
+
+    // Récupérer des données du cache
+    get: function(key) {
+        try {
+            const cached = localStorage.getItem(`cache_${key}`);
+            if (!cached) return null;
+
+            const cacheEntry = JSON.parse(cached);
+            const now = Date.now();
+
+            // Vérifier si le cache est expiré
+            if (now - cacheEntry.timestamp > cacheEntry.ttl) {
+                localStorage.removeItem(`cache_${key}`);
+                return null;
+            }
+
+            return cacheEntry.data;
+        } catch (e) {
+            console.error('Erreur lors de la récupération du cache:', e);
+            return null;
+        }
+    },
+
+    // Supprimer une entrée du cache
+    remove: function(key) {
+        try {
+            localStorage.removeItem(`cache_${key}`);
+            return true;
+        } catch (e) {
+            console.error('Erreur lors de la suppression du cache:', e);
+            return false;
+        }
+    },
+
+    // Nettoyer les entrées expirées
+    cleanup: function() {
+        const now = Date.now();
+        const keysToRemove = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('cache_')) {
+                try {
+                    const cacheEntry = JSON.parse(localStorage.getItem(key));
+                    if (now - cacheEntry.timestamp > cacheEntry.ttl) {
+                        keysToRemove.push(key);
+                    }
+                } catch (e) {
+                    // Si le parsing échoue, supprimer la clé
+                    keysToRemove.push(key);
+                }
+            }
+        }
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+    },
+
+    // Vider le cache
+    clear: function() {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('cache_')) {
+                localStorage.removeItem(key);
+            }
+        }
+    }
+};
+
+// Fonction pour charger les données avec mise en cache
+function loadFromLocalStorageWithCache() {
+    // Vérifier d'abord le cache
+    const cachedData = DataCache.get('planningData');
+    if (cachedData) {
+        console.log('Données chargées depuis le cache');
+        interventions = cachedData.interventions || [];
+        intervenantsDB = cachedData.intervenantsDB || intervenantsDB;
+        return true;
+    }
+
+    // Si pas de cache, charger depuis le stockage local
+    try {
+        const savedData = localStorage.getItem('planningData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            interventions = data.interventions || [];
+            intervenantsDB = data.intervenantsDB || intervenantsDB;
+
+            // Mettre en cache les données chargées
+            DataCache.set('planningData', {
+                interventions: interventions,
+                intervenantsDB: intervenantsDB
+            });
+
+            console.log('Données chargées depuis le stockage local et mises en cache');
+            return true;
+        }
+    } catch (e) {
+        console.error('Erreur lors du chargement des données:', e);
+    }
+
+    return false;
+}
+
+// Fonction pour sauvegarder les données avec mise en cache
+function saveToLocalStorageWithCache() {
+    try {
+        const data = {
+            interventions: interventions,
+            intervenantsDB: intervenantsDB,
+            savedAt: new Date().toISOString()
+        };
+
+        // Sauvegarder dans le stockage local
+        localStorage.setItem('planningData', JSON.stringify(data));
+
+        // Mettre à jour le cache
+        DataCache.set('planningData', data);
+
+        console.log('Données sauvegardées localement et mises en cache');
+        return true;
+    } catch (e) {
+        console.error('Erreur lors de la sauvegarde des données:', e);
+        return false;
+    }
+}
+
+// Fonction pour charger les données depuis Supabase avec mise en cache
+async function loadFromSupabaseWithCache() {
+    // Vérifier d'abord le cache
+    const cachedData = DataCache.get('supabaseData');
+    if (cachedData && cachedData.lastSync) {
+        // Vérifier si le cache est encore valide (moins de 5 minutes)
+        const now = Date.now();
+        const cacheTime = new Date(cachedData.lastSync).getTime();
+        if (now - cacheTime < 5 * 60 * 1000) { // 5 minutes
+            console.log('Données chargées depuis le cache Supabase');
+            interventions = cachedData.interventions || [];
+            intervenantsDB = cachedData.intervenantsDB || intervenantsDB;
+
+            // Mettre à jour l'interface
+            if(typeof updateInterventionsList === 'function') {
+                updateInterventionsList();
+            } else {
+                // Si on est sur la page de rapport, rafraîchir l'affichage
+                if(typeof updateFilterOptions === 'function' && typeof displayInterventions === 'function') {
+                    updateFilterOptions();
+                    displayInterventions(interventions);
+                }
+            }
+
+            return true;
+        }
+    }
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('planning_data')  // Remplacez par le nom de votre table
+            .select('*')
+            .eq('id', 'current');  // Utiliser l'ID fixe
+
+        if (error) {
+            throw error;
+        }
+
+        if (data && data.length > 0) {
+            const record = data[0];
+
+            // Charger les données dans l'application
+            interventions = JSON.parse(record.interventions);
+            intervenantsDB = JSON.parse(record.intervenantsdb);  // Colonne en minuscules
+
+            // Charger le thème
+            if (record.theme) {
+                changeTheme(record.theme);
+            }
+
+            // Mettre à jour les interfaces
+            if(typeof updateInterventionsList === 'function') {
+                updateInterventionsList();
+            } else {
+                // Si on est sur la page de rapport, rafraîchir l'affichage
+                if(typeof updateFilterOptions === 'function' && typeof displayInterventions === 'function') {
+                    updateFilterOptions();
+                    displayInterventions(interventions);
+                }
+            }
+
+            // Mettre en cache les données
+            DataCache.set('supabaseData', {
+                interventions: interventions,
+                intervenantsDB: intervenantsDB,
+                lastSync: record.saved_at || new Date().toISOString()
+            });
+
+            console.log('Données chargées depuis Supabase et mises en cache');
+            return true;
+        } else {
+            console.log('Aucune donnée trouvée dans Supabase');
+            return false;
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement depuis Supabase:', error);
+        showAlert('Erreur lors du chargement des données en ligne: ' + error.message, 'danger');
+        return false;
+    }
+}
+
+// Fonction pour sauvegarder les données dans Supabase avec mise en cache
+async function saveToSupabaseWithCache() {
+    try {
+        const data = {
+            interventions: JSON.stringify(interventions),
+            intervenantsdb: JSON.stringify(intervenantsDB),  // Colonne en minuscules pour correspondre à la table
+            general_info: JSON.stringify({
+                churchName: document.getElementById('church-name')?.value || 'EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU DU BENIN',
+                region: document.getElementById('region')?.value || 'ATACORA',
+                section: document.getElementById('section')?.value || 'NATITINGOU',
+                temple: document.getElementById('temple')?.value || 'BERACA',
+                year: document.getElementById('year')?.value || '2025',
+                quarter: document.getElementById('quarter')?.value || '4'
+            }),
+            configurations: JSON.stringify({
+                days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                otherType: document.getElementById('type-other-specify')?.value || '',
+                otherPlace: document.getElementById('place-other-specify')?.value || ''
+            }),
+            theme: document.body.className.replace('theme-', ''),
+            saved_at: new Date().toISOString()
+        };
+
+        // Vérifier si l'enregistrement existe déjà
+        const { data: existingRecord, error: selectError } = await supabaseClient
+            .from('planning_data')
+            .select('*')
+            .eq('id', 'current')
+            .single();
+
+        let result;
+        if (existingRecord && !selectError) {
+            // Mettre à jour l'enregistrement existant
+            const updateResult = await supabaseClient
+                .from('planning_data')
+                .update(data)
+                .eq('id', 'current');
+            result = updateResult.data;
+            if (updateResult.error) {
+                throw updateResult.error;
+            }
+        } else {
+            // Insérer un nouvel enregistrement
+            const insertResult = await supabaseClient
+                .from('planning_data')
+                .insert([{
+                    id: 'current',
+                    ...data
+                }]);
+            result = insertResult.data;
+            if (insertResult.error) {
+                throw insertResult.error;
+            }
+        }
+
+        // Mettre en cache les données sauvegardées
+        DataCache.set('supabaseData', {
+            interventions: interventions,
+            intervenantsDB: intervenantsDB,
+            lastSync: new Date().toISOString()
+        });
+
+        console.log('Données sauvegardées dans Supabase et mises en cache');
+        showAlert('Données publiées en ligne avec succès !', 'success');
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde dans Supabase:', error);
+
+        // Si la sauvegarde échoue, stocker les données localement pour une synchronisation ultérieure
+        storeOfflineData();
+
+        // Afficher un message à l'utilisateur
+        showAlert('Erreur de connexion. Les données sont sauvegardées localement et seront synchronisées quand la connexion sera rétablie.', 'warning');
+    }
+}
+
+// Fonction pour stocker les données localement en cas de déconnexion
+function storeOfflineData() {
+    try {
+        const offlineData = {
+            interventions: interventions,
+            intervenantsDB: intervenantsDB,
+            timestamp: new Date().toISOString()
+        };
+
+        localStorage.setItem('offlineData', JSON.stringify(offlineData));
+        console.log('Données sauvegardées localement pour synchronisation ultérieure');
+
+        // Mettre à jour l'indicateur de synchronisation
+        updateSyncIndicator('offline');
+    } catch (e) {
+        console.error('Erreur lors de la sauvegarde des données hors ligne:', e);
+    }
+}
+
+// Fonction pour synchroniser les données quand la connexion est rétablie
+async function syncOfflineData() {
+    try {
+        const offlineData = localStorage.getItem('offlineData');
+        if (!offlineData) {
+            // Aucune donnée hors ligne à synchroniser
+            return false;
+        }
+
+        const data = JSON.parse(offlineData);
+
+        // Mettre à jour les données locales avec celles sauvegardées hors ligne
+        interventions = data.interventions || interventions;
+        intervenantsDB = data.intervenantsDB || intervenantsDB;
+
+        // Essayer de synchroniser avec Supabase
+        await saveToSupabaseWithCache();
+
+        // Si la synchronisation réussit, supprimer les données hors ligne
+        localStorage.removeItem('offlineData');
+
+        // Mettre à jour l'interface
+        updateInterventionsList();
+        saveToLocalStorageWithCache();
+
+        console.log('Données synchronisées avec succès');
+        updateSyncIndicator('synced');
+
+        showAlert('Données synchronisées avec le serveur.', 'success');
+        return true;
+    } catch (error) {
+        console.error('Erreur lors de la synchronisation des données hors ligne:', error);
+        updateSyncIndicator('error');
+        return false;
+    }
+}
+
+// Fonction pour gérer les changements d'état de la connexion
+function setupOfflineSync() {
+    // Vérifier l'état initial de la connexion
+    checkConnectionAndSync();
+
+    // Écouter les événements de connexion/déconnexion
+    window.addEventListener('online', function() {
+        console.log('Connexion réseau rétablie');
+        updateSyncIndicator('loading');
+        setTimeout(() => {
+            checkConnectionAndSync();
+        }, 1000); // Délai pour permettre la restauration complète de la connexion
+    });
+
+    window.addEventListener('offline', function() {
+        console.log('Connexion réseau perdue');
+        updateSyncIndicator('offline');
+        showAlert('Connexion perdue. Les modifications seront synchronisées quand la connexion sera rétablie.', 'warning');
+    });
+}
+
+// Fonction pour vérifier la connexion et synchroniser si nécessaire
+function checkConnectionAndSync() {
+    if (navigator.onLine) {
+        // Vérifier s'il y a des données hors ligne à synchroniser
+        const offlineData = localStorage.getItem('offlineData');
+        if (offlineData) {
+            console.log('Données hors ligne détectées, tentative de synchronisation...');
+            syncOfflineData();
+        } else {
+            // Charger les données depuis Supabase si la connexion est bonne
+            loadFromSupabaseWithCache();
+        }
+    } else {
+        updateSyncIndicator('offline');
+    }
+}
+
+// Fonction pour vérifier périodiquement l'état de la connexion
+function startConnectionMonitoring() {
+    // Vérifier la connexion toutes les 30 secondes
+    setInterval(() => {
+        checkConnectionAndSync();
+    }, 30000);
+}
+
+// Fonction pour optimiser les appels API en regroupant les modifications
+let pendingChanges = [];
+let isSyncScheduled = false;
+
+// Fonction pour ajouter une modification à la liste des modifications en attente
+function addPendingChange(changeType, data) {
+    pendingChanges.push({
+        type: changeType,
+        data: data,
+        timestamp: Date.now()
+    });
+
+    // Planifier la synchronisation si ce n'est pas déjà fait
+    if (!isSyncScheduled) {
+        isSyncScheduled = true;
+        // Délai de 2 secondes pour regrouper les modifications
+        setTimeout(batchSyncChanges, 2000);
+    }
+}
+
+// Fonction pour synchroniser les modifications par lots
+async function batchSyncChanges() {
+    if (pendingChanges.length === 0) {
+        isSyncScheduled = false;
+        return;
+    }
+
+    console.log(`Synchronisation de ${pendingChanges.length} modifications en lot`);
+
+    try {
+        // Sauvegarder toutes les données en une seule opération
+        await saveToSupabaseWithCache();
+
+        // Réinitialiser la liste des modifications
+        pendingChanges = [];
+
+        console.log('Toutes les modifications synchronisées avec succès');
+    } catch (error) {
+        console.error('Erreur lors de la synchronisation par lots:', error);
+        // Réessayer plus tard
+        setTimeout(batchSyncChanges, 5000);
+    } finally {
+        isSyncScheduled = false;
+    }
+}
+
+// Modification de la fonction addIntervention pour utiliser l'optimisation
+function addInterventionOptimized() {
+    if (!validateInterventionForm()) {
+        return;
+    }
+
+    const intervention = getInterventionFromForm();
+
+    // Sauvegarder l'état précédent pour l'historique
+    const previousState = JSON.parse(JSON.stringify(interventions));
+
+    interventions.push(intervention);
+
+    updateInterventionsList();
+    resetInterventionForm();
+    saveToLocalStorageWithCache(); // Utiliser la version avec cache
+
+    // Enregistrer dans l'historique
+    saveToHistory('add', intervention, previousState);
+
+    // Ajouter à la liste des modifications en attente au lieu de synchroniser immédiatement
+    addPendingChange('add', intervention);
+
+    showAlert('Intervention ajoutée avec succès!', 'success');
+}
+
+// Modification de la fonction deleteIntervention pour utiliser l'optimisation
+function deleteInterventionOptimized(id) {
+    if (confirm('Voulez-vous vraiment supprimer cette intervention ?')) {
+        // Sauvegarder l'état précédent pour l'historique
+        const previousState = JSON.parse(JSON.stringify(interventions));
+
+        const deletedIntervention = interventions.find(intervention => intervention.id === id);
+        interventions = interventions.filter(intervention => intervention.id !== id);
+        updateInterventionsList();
+        saveToLocalStorageWithCache(); // Utiliser la version avec cache
+        autoSyncToReport(); // Synchroniser avec la page de rapport
+
+        // Enregistrer dans l'historique
+        if (deletedIntervention) {
+            saveToHistory('delete', deletedIntervention, previousState);
+        }
+
+        // Ajouter à la liste des modifications en attente au lieu de synchroniser immédiatement
+        if (deletedIntervention) {
+            addPendingChange('delete', deletedIntervention);
+        }
+
+        showAlert('Intervention supprimée.', 'warning');
+    }
+}
+
+// Modification de la fonction clearAllInterventions pour utiliser l'optimisation
+function clearAllInterventionsOptimized() {
+    if (interventions.length === 0) return;
+
+    if (confirm(`Voulez-vous vraiment supprimer toutes les ${interventions.length} interventions ?`)) {
+        // Sauvegarder l'état précédent pour l'historique
+        const previousState = JSON.parse(JSON.stringify(interventions));
+
+        interventions = [];
+        updateInterventionsList();
+        saveToLocalStorageWithCache(); // Utiliser la version avec cache
+        autoSyncToReport(); // Synchroniser avec la page de rapport
+
+        // Enregistrer dans l'historique
+        saveToHistory('clear', { count: previousState.length }, previousState);
+
+        // Ajouter à la liste des modifications en attente au lieu de synchroniser immédiatement
+        addPendingChange('clear', { count: previousState.length });
+
+        showAlert('Toutes les interventions ont été supprimées.', 'warning');
+    }
+}
+
+// Fonction pour compresser les données avant l'envoi
+function compressData(data) {
+    // Pour l'instant, une compression simple en supprimant les propriétés inutiles
+    // Dans une implémentation réelle, on pourrait utiliser une bibliothèque de compression
+    return JSON.stringify(data);
+}
+
+// Fonction pour décompresser les données après réception
+function decompressData(compressedData) {
+    // Pour l'instant, décompression simple
+    // Dans une implémentation réelle, on pourrait utiliser une bibliothèque de compression
+    return JSON.parse(compressedData);
+}
+
+// Fonction pour réduire la fréquence des appels API en utilisant un système de temporisation
+let lastApiCallTime = 0;
+const MIN_API_CALL_INTERVAL = 1000; // 1 seconde minimum entre les appels
+
+async function throttledApiCall(apiFunction, ...args) {
+    const now = Date.now();
+    const timeSinceLastCall = now - lastApiCallTime;
+
+    if (timeSinceLastCall < MIN_API_CALL_INTERVAL) {
+        // Attendre avant d'appeler l'API
+        await new Promise(resolve =>
+            setTimeout(resolve, MIN_API_CALL_INTERVAL - timeSinceLastCall)
+        );
+    }
+
+    lastApiCallTime = Date.now();
+    return await apiFunction.apply(this, args);
+}
+
+// Version optimisée de la fonction de sauvegarde dans Supabase
+async function saveToSupabaseOptimized() {
+    return throttledApiCall(async () => {
+        try {
+            const data = {
+                interventions: JSON.stringify(interventions),
+                intervenantsdb: JSON.stringify(intervenantsDB),  // Colonne en minuscules pour correspondre à la table
+                general_info: JSON.stringify({
+                    churchName: document.getElementById('church-name')?.value || 'EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU DU BENIN',
+                    region: document.getElementById('region')?.value || 'ATACORA',
+                    section: document.getElementById('section')?.value || 'NATITINGOU',
+                    temple: document.getElementById('temple')?.value || 'BERACA',
+                    year: document.getElementById('year')?.value || '2025',
+                    quarter: document.getElementById('quarter')?.value || '4'
+                }),
+                configurations: JSON.stringify({
+                    days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                    types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                    places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                    otherType: document.getElementById('type-other-specify')?.value || '',
+                    otherPlace: document.getElementById('place-other-specify')?.value || ''
+                }),
+                theme: document.body.className.replace('theme-', ''),
+                saved_at: new Date().toISOString()
+            };
+
+            // Vérifier si l'enregistrement existe déjà
+            const { data: existingRecord, error: selectError } = await supabaseClient
+                .from('planning_data')
+                .select('*')
+                .eq('id', 'current')
+                .single();
+
+            let result;
+            if (existingRecord && !selectError) {
+                // Mettre à jour l'enregistrement existant
+                const updateResult = await supabaseClient
+                    .from('planning_data')
+                    .update(data)
+                    .eq('id', 'current');
+                result = updateResult.data;
+                if (updateResult.error) {
+                    throw updateResult.error;
+                }
+            } else {
+                // Insérer un nouvel enregistrement
+                const insertResult = await supabaseClient
+                    .from('planning_data')
+                    .insert([{
+                        id: 'current',
+                        ...data
+                    }]);
+                result = insertResult.data;
+                if (insertResult.error) {
+                    throw insertResult.error;
+                }
+            }
+
+            // Mettre en cache les données sauvegardées
+            DataCache.set('supabaseData', {
+                interventions: interventions,
+                intervenantsDB: intervenantsDB,
+                lastSync: new Date().toISOString()
+            });
+
+            console.log('Données sauvegardées dans Supabase et mises en cache');
+            return { success: true, message: 'Données publiées en ligne avec succès !' };
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde dans Supabase:', error);
+
+            // Si la sauvegarde échoue, stocker les données localement pour une synchronisation ultérieure
+            storeOfflineData();
+
+            return { success: false, message: 'Erreur de connexion. Les données sont sauvegardées localement et seront synchronisées quand la connexion sera rétablie.' };
+        }
+    });
+}
+
+// Fonction pour créer une sauvegarde des données
+function createBackup() {
+    try {
+        const backupData = {
+            interventions: interventions,
+            intervenantsDB: intervenantsDB,
+            configurations: {
+                days: Array.from(document.querySelectorAll('input[id^="day-"]:checked')).map(cb => cb.value),
+                types: Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value),
+                places: Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value),
+                otherType: document.getElementById('type-other-specify')?.value || '',
+                otherPlace: document.getElementById('place-other-specify')?.value || ''
+            },
+            generalInfo: {
+                churchName: document.getElementById('church-name')?.value || 'EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU DU BENIN',
+                region: document.getElementById('region')?.value || 'ATACORA',
+                section: document.getElementById('section')?.value || 'NATITINGOU',
+                temple: document.getElementById('temple')?.value || 'BERACA',
+                year: document.getElementById('year')?.value || '2025',
+                quarter: document.getElementById('quarter')?.value || '4'
+            },
+            theme: document.body.className.replace('theme-', ''),
+            createdAt: new Date().toISOString(),
+            version: '1.0'
+        };
+
+        // Créer un fichier JSON avec les données de sauvegarde
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        // Créer un lien de téléchargement
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup_planification_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+
+        // Nettoyer
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+
+        console.log('Sauvegarde créée avec succès');
+        showAlert('Sauvegarde créée avec succès!', 'success');
+        return true;
+    } catch (e) {
+        console.error('Erreur lors de la création de la sauvegarde:', e);
+        showAlert('Erreur lors de la création de la sauvegarde.', 'danger');
+        return false;
+    }
+}
+
+// Fonction pour restaurer les données à partir d'une sauvegarde
+function restoreFromBackup(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const backupData = JSON.parse(e.target.result);
+
+                // Valider la structure du fichier de sauvegarde
+                if (!backupData.interventions || !backupData.intervenantsDB || !backupData.version) {
+                    throw new Error('Fichier de sauvegarde invalide');
+                }
+
+                // Restaurer les données
+                interventions = backupData.interventions;
+                intervenantsDB = backupData.intervenantsDB;
+
+                // Mettre à jour l'interface
+                updateInterventionsList();
+                populateIntervenantsSelect();
+                saveToLocalStorageWithCache();
+
+                // Mettre à jour les configurations si elles sont présentes
+                if (backupData.configurations) {
+                    updateConfigurationFromBackup(backupData.configurations);
+                }
+
+                // Mettre à jour les informations générales si elles sont présentes
+                if (backupData.generalInfo) {
+                    updateGeneralInfoFromBackup(backupData.generalInfo);
+                }
+
+                // Restaurer le thème
+                if (backupData.theme) {
+                    changeTheme(backupData.theme);
+                }
+
+                console.log('Données restaurées avec succès');
+                showAlert('Données restaurées avec succès!', 'success');
+
+                // Synchroniser avec la page de rapport
+                autoSyncToReport();
+
+                resolve(true);
+            } catch (error) {
+                console.error('Erreur lors de la restauration:', error);
+                showAlert('Erreur lors de la restauration des données: ' + error.message, 'danger');
+                reject(error);
+            }
+        };
+
+        reader.onerror = function() {
+            reject(new Error('Erreur de lecture du fichier'));
+        };
+
+        reader.readAsText(file);
+    });
+}
+
+// Fonction pour charger un fichier de sauvegarde via l'interface
+function loadBackupFile() {
+    // Créer un élément input de type file
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            restoreFromBackup(file);
+        }
+    };
+
+    input.click();
+}
+
+// Fonction pour mettre à jour les configurations à partir de la sauvegarde
+function updateConfigurationFromBackup(configurations) {
+    try {
+        // Réinitialiser les cases à cocher
+        document.querySelectorAll('input[id^="day-"]').forEach(checkbox => {
+            checkbox.checked = configurations.days.includes(checkbox.value);
+        });
+
+        document.querySelectorAll('input[id^="type-"]').forEach(checkbox => {
+            checkbox.checked = configurations.types.includes(checkbox.value);
+        });
+
+        document.querySelectorAll('input[id^="place-"]').forEach(checkbox => {
+            checkbox.checked = configurations.places.includes(checkbox.value);
+        });
+
+        // Mettre à jour les valeurs "autre"
+        if (configurations.otherType) {
+            document.getElementById('type-other-specify').value = configurations.otherType;
+            document.getElementById('type-other').checked = true;
+            document.getElementById('type-other-specify').disabled = false;
+        }
+
+        if (configurations.otherPlace) {
+            document.getElementById('place-other-specify').value = configurations.otherPlace;
+            document.getElementById('place-other').checked = true;
+            document.getElementById('place-other-specify').disabled = false;
+        }
+
+        // Mettre à jour les sélections dynamiques
+        updateDynamicSelects();
+    } catch (e) {
+        console.error('Erreur lors de la mise à jour des configurations:', e);
+    }
+}
+
+// Fonction pour mettre à jour les informations générales à partir de la sauvegarde
+function updateGeneralInfoFromBackup(generalInfo) {
+    try {
+        if (generalInfo.churchName) document.getElementById('church-name').value = generalInfo.churchName;
+        if (generalInfo.region) document.getElementById('region').value = generalInfo.region;
+        if (generalInfo.section) document.getElementById('section').value = generalInfo.section;
+        if (generalInfo.temple) document.getElementById('temple').value = generalInfo.temple;
+        if (generalInfo.year) document.getElementById('year').value = generalInfo.year;
+        if (generalInfo.quarter) document.getElementById('quarter').value = generalInfo.quarter;
+    } catch (e) {
+        console.error('Erreur lors de la mise à jour des informations générales:', e);
+    }
+}
+
+// Fonction pour gérer les sauvegardes automatiques
+function setupAutoBackup() {
+    // Sauvegarder automatiquement toutes les 10 minutes
+    setInterval(() => {
+        // Ne sauvegarder que si des modifications ont été apportées
+        if (interventions.length > 0) {
+            // Stocker la dernière sauvegarde dans le localStorage
+            const autoBackupData = {
+                interventions: interventions,
+                intervenantsDB: intervenantsDB,
+                lastBackup: new Date().toISOString()
+            };
+
+            localStorage.setItem('autoBackup', JSON.stringify(autoBackupData));
+            console.log('Sauvegarde automatique effectuée');
+        }
+    }, 10 * 60 * 1000); // 10 minutes
+
+    // Charger la sauvegarde automatique au démarrage si elle existe
+    loadAutoBackup();
+}
+
+// Fonction pour charger la sauvegarde automatique
+function loadAutoBackup() {
+    try {
+        const autoBackupData = localStorage.getItem('autoBackup');
+        if (autoBackupData) {
+            const data = JSON.parse(autoBackupData);
+
+            // Charger les données uniquement si elles sont plus récentes que la dernière sauvegarde
+            interventions = data.interventions || interventions;
+            intervenantsDB = data.intervenantsDB || intervenantsDB;
+
+            console.log('Données de sauvegarde automatique chargées');
+
+            // Mettre à jour l'interface
+            updateInterventionsList();
+            populateIntervenantsSelect();
+        }
+    } catch (e) {
+        console.error('Erreur lors du chargement de la sauvegarde automatique:', e);
+    }
+}
+
+// Fonction pour gérer la sauvegarde/restauration via une modale
+function showBackupRestoreModal() {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('backupRestoreModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'backupRestoreModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Sauvegarde et Restauration des Données</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Sauvegarder les données</h6>
+                                <p class="text-muted">Téléchargez un fichier contenant toutes vos interventions et configurations.</p>
+                                <button class="btn btn-primary" id="create-backup-btn">
+                                    <i class="fas fa-download me-2"></i>Créer une sauvegarde
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Restaurer les données</h6>
+                                <p class="text-muted">Chargez un fichier de sauvegarde pour restaurer vos données.</p>
+                                <input type="file" class="form-control mb-2" id="restore-file-input" accept=".json">
+                                <button class="btn btn-success" id="restore-backup-btn">
+                                    <i class="fas fa-upload me-2"></i>Restaurer à partir d'un fichier
+                                </button>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Sauvegardes automatiques</h6>
+                                <p class="text-muted">Des sauvegardes automatiques sont effectuées toutes les 10 minutes.</p>
+                                <button class="btn btn-outline-info" id="load-auto-backup-btn">
+                                    <i class="fas fa-history me-2"></i>Charger la dernière sauvegarde automatique
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Événements pour la sauvegarde
+        document.getElementById('create-backup-btn').addEventListener('click', function() {
+            createBackup();
+        });
+
+        // Événements pour la restauration
+        document.getElementById('restore-backup-btn').addEventListener('click', function() {
+            const fileInput = document.getElementById('restore-file-input');
+            if (fileInput.files.length > 0) {
+                restoreFromBackup(fileInput.files[0])
+                    .then(() => {
+                        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                        bootstrapModal.hide();
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la restauration:', error);
+                    });
+            } else {
+                showAlert('Veuillez sélectionner un fichier de sauvegarde.', 'warning');
+            }
+        });
+
+        // Événements pour la sauvegarde automatique
+        document.getElementById('load-auto-backup-btn').addEventListener('click', function() {
+            loadAutoBackup();
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+            showAlert('Dernière sauvegarde automatique chargée.', 'info');
+        });
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour afficher l'assistant de configuration initiale
+function showSetupAssistant() {
+    // Vérifier si l'utilisateur a déjà effectué la configuration initiale
+    const hasCompletedSetup = localStorage.getItem('hasCompletedInitialSetup') === 'true';
+
+    // Créer la modale de l'assistant si elle n'existe pas
+    let modal = document.getElementById('setupAssistantModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'setupAssistantModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Assistant de Configuration Initiale</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="setup-progress mb-4">
+                            <div class="progress">
+                                <div class="progress-bar" id="setup-progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small id="setup-step-info">Étape 1 sur 5</small>
+                            </div>
+                        </div>
+
+                        <div class="setup-step" id="step-1">
+                            <h4><i class="fas fa-church me-2"></i>Informations de l'Église</h4>
+                            <p class="text-muted">Veuillez entrer les informations de base de votre église</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="setup-church-name" class="form-label">Nom de l'église</label>
+                                    <input type="text" class="form-control" id="setup-church-name" placeholder="Ex: Église Évangélique des Assemblées de Dieu">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="setup-region" class="form-label">Région</label>
+                                    <input type="text" class="form-control" id="setup-region" placeholder="Ex: ATACORA">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="setup-section" class="form-label">Section</label>
+                                    <input type="text" class="form-control" id="setup-section" placeholder="Ex: NATITINGOU">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="setup-temple" class="form-label">Temple</label>
+                                    <input type="text" class="form-control" id="setup-temple" placeholder="Ex: BERACA">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setup-step d-none" id="step-2">
+                            <h4><i class="fas fa-calendar-alt me-2"></i>Configuration du Planning</h4>
+                            <p class="text-muted">Sélectionnez les jours, types de culte et lieux que vous utilisez habituellement</p>
+
+                            <h6>Jours de la semaine</h6>
+                            <div class="row mb-4" id="setup-days-container">
+                                <!-- Les cases à cocher seront ajoutées dynamiquement -->
+                            </div>
+
+                            <h6>Types de culte</h6>
+                            <div class="row mb-4" id="setup-types-container">
+                                <!-- Les cases à cocher seront ajoutées dynamiquement -->
+                            </div>
+
+                            <h6>Lieux</h6>
+                            <div class="row mb-4" id="setup-places-container">
+                                <!-- Les cases à cocher seront ajoutées dynamiquement -->
+                            </div>
+                        </div>
+
+                        <div class="setup-step d-none" id="step-3">
+                            <h4><i class="fas fa-users me-2"></i>Intervenants</h4>
+                            <p class="text-muted">Ajoutez les intervenants principaux de votre église</p>
+
+                            <div class="mb-3">
+                                <button class="btn btn-outline-primary" id="setup-add-intervenant-btn">
+                                    <i class="fas fa-plus me-2"></i>Ajouter un intervenant
+                                </button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Titre</th>
+                                            <th>Prénom</th>
+                                            <th>Nom</th>
+                                            <th>Catégorie</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="setup-intervenants-table-body">
+                                        <!-- Les intervenants seront ajoutés ici -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="setup-step d-none" id="step-4">
+                            <h4><i class="fas fa-palette me-2"></i>Apparence</h4>
+                            <p class="text-muted">Choisissez le thème et l'apparence de l'application</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <h6>Thème par défaut</h6>
+                                    <div class="theme-selector">
+                                        <div class="theme-btn theme-light-btn" title="Clair" data-theme="light"></div>
+                                        <div class="theme-btn theme-dark-btn" title="Sombre" data-theme="dark"></div>
+                                        <div class="theme-btn theme-neon-btn" title="Néon" data-theme="neon"></div>
+                                        <div class="theme-btn theme-galaxy-btn" title="Galaxie" data-theme="galaxy"></div>
+                                        <div class="theme-btn theme-rainbow-btn" title="Arc-en-ciel" data-theme="rainbow"></div>
+                                        <div class="theme-btn theme-high-contrast-btn" title="Contraste élevé" data-theme="high-contrast">HC</div>
+                                        <div class="theme-btn theme-pastel-btn" title="Pastel" data-theme="pastel">P</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <h6>Configuration avancée</h6>
+                                    <button class="btn btn-outline-primary" id="setup-customize-theme-btn">
+                                        <i class="fas fa-sliders-h me-2"></i>Personnaliser le thème
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setup-step d-none" id="step-5">
+                            <h4><i class="fas fa-check-circle me-2"></i>Terminer</h4>
+                            <p class="text-muted">Votre configuration est presque terminée. Confirmez les paramètres et commencez à utiliser l'application.</p>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Vous pouvez modifier ces paramètres à tout moment dans les sections appropriées de l'application.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary d-none" id="setup-prev-btn">Précédent</button>
+                        <button type="button" class="btn btn-primary" id="setup-next-btn">Suivant</button>
+                        <button type="button" class="btn btn-success d-none" id="setup-finish-btn">Terminer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Initialiser les données pour l'assistant
+        initializeSetupAssistant(modal);
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+
+    // Afficher la première étape
+    showSetupStep(1);
+}
+
+// Fonction pour initialiser les données de l'assistant de configuration
+function initializeSetupAssistant(modal) {
+    // Remplir les jours de la semaine
+    const daysContainer = document.getElementById('setup-days-container');
+    const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+    days.forEach(day => {
+        const col = document.createElement('div');
+        col.className = 'col-md-3 mb-2';
+        col.innerHTML = `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="setup-day-${day}" value="${day}">
+                <label class="form-check-label" for="setup-day-${day}">${day}</label>
+            </div>
+        `;
+        daysContainer.appendChild(col);
+    });
+
+    // Remplir les types de culte
+    const typesContainer = document.getElementById('setup-types-container');
+    const allCultTypes = [...new Set(Object.values(cultTypesByDay).flat())];
+
+    allCultTypes.forEach(type => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-2';
+        col.innerHTML = `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="setup-type-${type}" value="${type}">
+                <label class="form-check-label" for="setup-type-${type}">${type}</label>
+            </div>
+        `;
+        typesContainer.appendChild(col);
+    });
+
+    // Remplir les lieux par défaut
+    const placesContainer = document.getElementById('setup-places-container');
+    const defaultPlaces = ['BERACA', 'KPOTEYEI', 'GROS PORTEUR', 'WINKE'];
+
+    defaultPlaces.forEach(place => {
+        const col = document.createElement('div');
+        col.className = 'col-md-3 mb-2';
+        col.innerHTML = `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="setup-place-${place}" value="${place}">
+                <label class="form-check-label" for="setup-place-${place}">${place}</label>
+            </div>
+        `;
+        placesContainer.appendChild(col);
+    });
+
+    // Événements pour les boutons de navigation
+    document.getElementById('setup-prev-btn').addEventListener('click', function() {
+        showPrevSetupStep();
+    });
+
+    document.getElementById('setup-next-btn').addEventListener('click', function() {
+        showNextSetupStep();
+    });
+
+    document.getElementById('setup-finish-btn').addEventListener('click', function() {
+        finishSetup();
+        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+        bootstrapModal.hide();
+    });
+
+    // Événements pour les thèmes
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const theme = this.getAttribute('data-theme');
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            // Stocker le thème sélectionné
+            localStorage.setItem('selectedSetupTheme', theme);
+        });
+    });
+
+    // Événement pour ajouter un intervenant
+    document.getElementById('setup-add-intervenant-btn').addEventListener('click', function() {
+        addIntervenantFromSetup();
+    });
+
+    // Événement pour personnaliser le thème
+    document.getElementById('setup-customize-theme-btn').addEventListener('click', function() {
+        showThemeCustomizationModal();
+    });
+}
+
+// Variables pour suivre l'état de l'assistant
+let currentSetupStep = 1;
+const totalSetupSteps = 5;
+
+// Fonction pour afficher une étape spécifique de l'assistant
+function showSetupStep(step) {
+    // Cacher toutes les étapes
+    document.querySelectorAll('.setup-step').forEach(el => {
+        el.classList.add('d-none');
+    });
+
+    // Afficher l'étape demandée
+    document.getElementById(`step-${step}`).classList.remove('d-none');
+
+    // Mettre à jour le bouton précédent
+    const prevBtn = document.getElementById('setup-prev-btn');
+    prevBtn.classList.toggle('d-none', step === 1);
+
+    // Mettre à jour les boutons suivant/terminer
+    const nextBtn = document.getElementById('setup-next-btn');
+    const finishBtn = document.getElementById('setup-finish-btn');
+    nextBtn.classList.toggle('d-none', step === totalSetupSteps);
+    finishBtn.classList.toggle('d-none', step !== totalSetupSteps);
+
+    // Mettre à jour la barre de progression
+    const progressPercent = (step / totalSetupSteps) * 100;
+    document.getElementById('setup-progress-bar').style.width = `${progressPercent}%`;
+    document.getElementById('setup-step-info').textContent = `Étape ${step} sur ${totalSetupSteps}`;
+
+    // Mettre à jour l'étape courante
+    currentSetupStep = step;
+
+    // Charger les données de l'étape si nécessaire
+    loadSetupStepData(step);
+}
+
+// Fonction pour afficher l'étape suivante
+function showNextSetupStep() {
+    if (currentSetupStep < totalSetupSteps) {
+        // Valider l'étape actuelle avant de passer à la suivante
+        if (validateCurrentSetupStep()) {
+            showSetupStep(currentSetupStep + 1);
+        }
+    }
+}
+
+// Fonction pour afficher l'étape précédente
+function showPrevSetupStep() {
+    if (currentSetupStep > 1) {
+        showSetupStep(currentSetupStep - 1);
+    }
+}
+
+// Fonction pour valider l'étape actuelle
+function validateCurrentSetupStep() {
+    switch(currentSetupStep) {
+        case 1:
+            // Valider les informations de l'église
+            const churchName = document.getElementById('setup-church-name').value.trim();
+            if (!churchName) {
+                showAlert('Veuillez entrer le nom de l\'église.', 'warning');
+                return false;
+            }
+            return true;
+        case 2:
+            // Pour cette étape, on ne fait pas de validation stricte
+            return true;
+        case 3:
+            // Vérifier qu'il y a au moins un intervenant
+            const intervenantsCount = document.querySelectorAll('#setup-intervenants-table-body tr').length;
+            if (intervenantsCount === 0) {
+                showAlert('Veuillez ajouter au moins un intervenant.', 'warning');
+                return false;
+            }
+            return true;
+        case 4:
+            // Pour cette étape, on ne fait pas de validation stricte
+            return true;
+        default:
+            return true;
+    }
+}
+
+// Fonction pour charger les données de l'étape
+function loadSetupStepData(step) {
+    switch(step) {
+        case 1:
+            // Charger les informations de l'église si elles existent
+            document.getElementById('setup-church-name').value = document.getElementById('church-name')?.value || '';
+            document.getElementById('setup-region').value = document.getElementById('region')?.value || '';
+            document.getElementById('setup-section').value = document.getElementById('section')?.value || '';
+            document.getElementById('setup-temple').value = document.getElementById('temple')?.value || '';
+            break;
+        case 2:
+            // Charger les configurations existantes
+            loadSetupConfigurations();
+            break;
+        case 3:
+            // Charger les intervenants existants
+            loadSetupIntervenants();
+            break;
+        case 4:
+            // Sélectionner le thème actuel
+            selectCurrentTheme();
+            break;
+    }
+}
+
+// Fonction pour charger les configurations dans l'assistant
+function loadSetupConfigurations() {
+    // Cocher les jours existants
+    document.querySelectorAll('input[id^="day-"]').forEach(checkbox => {
+        const setupCheckbox = document.getElementById(`setup-day-${checkbox.value}`);
+        if (setupCheckbox) {
+            setupCheckbox.checked = checkbox.checked;
+        }
+    });
+
+    // Cocher les types existants
+    document.querySelectorAll('input[id^="type-"]').forEach(checkbox => {
+        const setupCheckbox = document.getElementById(`setup-type-${checkbox.value}`);
+        if (setupCheckbox) {
+            setupCheckbox.checked = checkbox.checked;
+        }
+    });
+
+    // Cocher les lieux existants
+    document.querySelectorAll('input[id^="place-"]').forEach(checkbox => {
+        const setupCheckbox = document.getElementById(`setup-place-${checkbox.value}`);
+        if (setupCheckbox) {
+            setupCheckbox.checked = checkbox.checked;
+        }
+    });
+}
+
+// Fonction pour charger les intervenants dans l'assistant
+function loadSetupIntervenants() {
+    const tbody = document.getElementById('setup-intervenants-table-body');
+    tbody.innerHTML = '';
+
+    intervenantsDB.forEach(intervenant => {
+        addIntervenantToSetupTable(intervenant);
+    });
+}
+
+// Fonction pour ajouter un intervenant à la table de l'assistant
+function addIntervenantToSetupTable(intervenant) {
+    const tbody = document.getElementById('setup-intervenants-table-body');
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+        <td>${intervenant.title}</td>
+        <td>${intervenant.firstName}</td>
+        <td>${intervenant.lastName}</td>
+        <td>${intervenant.category}</td>
+        <td>
+            <button class="btn btn-sm btn-outline-danger setup-remove-intervenant" data-id="${intervenant.id}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+
+    // Ajouter l'événement de suppression
+    row.querySelector('.setup-remove-intervenant').addEventListener('click', function() {
+        const id = parseInt(this.getAttribute('data-id'));
+        removeIntervenantFromSetup(id);
+    });
+}
+
+// Fonction pour ajouter un intervenant depuis l'assistant
+function addIntervenantFromSetup() {
+    // Créer un formulaire modal pour ajouter un intervenant
+    let modal = document.getElementById('addIntervenantSetupModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'addIntervenantSetupModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Ajouter un intervenant</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="setup-intervenant-title" class="form-label">Titre</label>
+                                <select class="form-select" id="setup-intervenant-title">
+                                    <option value="Pasteur">Pasteur</option>
+                                    <option value="Diacre">Diacre</option>
+                                    <option value="Diacre">Diacre</option>
+                                    <option value="Soeur">Soeur</option>
+                                    <option value="Frère">Frère</option>
+                                    <option value="Mr">Mr</option>
+                                    <option value="Mme">Mme</option>
+                                    <option value="Mlle">Mlle</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="setup-intervenant-firstname" class="form-label">Prénom</label>
+                                <input type="text" class="form-control" id="setup-intervenant-firstname">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="setup-intervenant-lastname" class="form-label">Nom</label>
+                                <input type="text" class="form-control" id="setup-intervenant-lastname">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="setup-intervenant-category" class="form-label">Catégorie</label>
+                                <select class="form-select" id="setup-intervenant-category">
+                                    <option value="clergy">Clergé</option>
+                                    <option value="members">Membres</option>
+                                    <option value="singers">Chanteurs</option>
+                                    <option value="musicians">Musiciens</option>
+                                    <option value="technical">Technique</option>
+                                    <option value="volunteers">Bénévoles</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="setup-save-intervenant">Ajouter</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Événement pour sauvegarder l'intervenant
+        document.getElementById('setup-save-intervenant').addEventListener('click', function() {
+            const title = document.getElementById('setup-intervenant-title').value;
+            const firstName = document.getElementById('setup-intervenant-firstname').value.trim();
+            const lastName = document.getElementById('setup-intervenant-lastname').value.trim();
+            const category = document.getElementById('setup-intervenant-category').value;
+
+            if (!firstName || !lastName) {
+                showAlert('Veuillez entrer le prénom et le nom.', 'warning');
+                return;
+            }
+
+            // Créer l'intervenant
+            const newIntervenant = {
+                id: Date.now(),
+                title: title,
+                firstName: firstName,
+                lastName: lastName,
+                category: category
+            };
+
+            // Vérifier si l'intervenant existe déjà
+            const exists = intervenantsDB.some(i =>
+                i.firstName === firstName && i.lastName === lastName
+            );
+
+            if (exists) {
+                showAlert('Cet intervenant existe déjà.', 'warning');
+                return;
+            }
+
+            // Ajouter à la liste de l'assistant
+            addIntervenantToSetupTable(newIntervenant);
+
+            // Fermer la modale
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour supprimer un intervenant de l'assistant
+function removeIntervenantFromSetup(id) {
+    // Dans l'assistant, on ne supprime que de la table temporaire
+    const row = document.querySelector(`.setup-remove-intervenant[data-id="${id}"]`).closest('tr');
+    if (row) {
+        row.remove();
+    }
+}
+
+// Fonction pour sélectionner le thème actuel dans l'assistant
+function selectCurrentTheme() {
+    // Désélectionner tous les thèmes
+    document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('selected'));
+
+    // Sélectionner le thème actuel
+    const currentTheme = document.body.className.replace('theme-', '');
+    const currentThemeBtn = document.querySelector(`.theme-btn[data-theme="${currentTheme}"]`);
+    if (currentThemeBtn) {
+        currentThemeBtn.classList.add('selected');
+    }
+}
+
+// Fonction pour terminer la configuration
+function finishSetup() {
+    // Récupérer les données de l'assistant et les appliquer
+    applySetupData();
+
+    // Marquer la configuration comme terminée
+    localStorage.setItem('hasCompletedInitialSetup', 'true');
+
+    // Afficher un message de confirmation
+    showAlert('Configuration initiale terminée avec succès!', 'success');
+}
+
+// Fonction pour appliquer les données de l'assistant
+function applySetupData() {
+    // Appliquer les informations de l'église
+    document.getElementById('church-name').value = document.getElementById('setup-church-name').value;
+    document.getElementById('region').value = document.getElementById('setup-region').value;
+    document.getElementById('section').value = document.getElementById('setup-section').value;
+    document.getElementById('temple').value = document.getElementById('setup-temple').value;
+
+    // Appliquer les configurations
+    applySetupConfigurations();
+
+    // Appliquer les intervenants
+    applySetupIntervenants();
+
+    // Appliquer le thème
+    const selectedTheme = localStorage.getItem('selectedSetupTheme') || 'light';
+    changeTheme(selectedTheme);
+
+    // Sauvegarder les données
+    saveToLocalStorageWithCache();
+
+    // Mettre à jour l'interface
+    updateDynamicSelects();
+    populateIntervenantsSelect();
+}
+
+// Fonction pour appliquer les configurations de l'assistant
+function applySetupConfigurations() {
+    // Appliquer les jours cochés
+    document.querySelectorAll('input[id^="setup-day-"]').forEach(setupCheckbox => {
+        const actualCheckbox = document.getElementById(`day-${setupCheckbox.value}`);
+        if (actualCheckbox) {
+            actualCheckbox.checked = setupCheckbox.checked;
+        }
+    });
+
+    // Appliquer les types cochés
+    document.querySelectorAll('input[id^="setup-type-"]').forEach(setupCheckbox => {
+        const actualCheckbox = document.getElementById(`type-${setupCheckbox.value}`);
+        if (actualCheckbox) {
+            actualCheckbox.checked = setupCheckbox.checked;
+        }
+    });
+
+    // Appliquer les lieux cochés
+    document.querySelectorAll('input[id^="setup-place-"]').forEach(setupCheckbox => {
+        const actualCheckbox = document.getElementById(`place-${setupCheckbox.value}`);
+        if (actualCheckbox) {
+            actualCheckbox.checked = setupCheckbox.checked;
+        }
+    });
+}
+
+// Fonction pour appliquer les intervenants de l'assistant
+function applySetupIntervenants() {
+    // Récupérer les intervenants de la table de l'assistant
+    const intervenantRows = document.querySelectorAll('#setup-intervenants-table-body tr');
+
+    // Réinitialiser la base de données des intervenants
+    intervenantsDB = [];
+
+    // Ajouter chaque intervenant de la table à la base de données
+    intervenantRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 4) { // S'assurer qu'il y a suffisamment de cellules
+            const intervenant = {
+                id: Date.now() + Math.random(), // Générer un ID unique
+                title: cells[0].textContent,
+                firstName: cells[1].textContent,
+                lastName: cells[2].textContent,
+                category: cells[3].textContent
+            };
+
+            intervenantsDB.push(intervenant);
+        }
+    });
+}
+
+// Fonction pour afficher les tooltips d'aide
+function showTooltips() {
+    // Définir les tooltips pour différents éléments
+    const tooltips = [
+        {
+            selector: '#intervention-date',
+            title: 'Sélectionnez la date de l\'intervention',
+            content: 'Choisissez la date à laquelle l\'intervention aura lieu. La date par défaut est aujourd\'hui.'
+        },
+        {
+            selector: '#intervention-place',
+            title: 'Lieu de l\'intervention',
+            content: 'Sélectionnez le lieu où se déroulera l\'intervention. Les lieux disponibles sont configurables dans les paramètres.'
+        },
+        {
+            selector: '#cult-type-select',
+            title: 'Type de culte',
+            content: 'Choisissez le type de culte pour cette intervention. Les types disponibles dépendent du jour de la semaine.'
+        },
+        {
+            selector: '#intervenant-firstname, #intervenant-lastname',
+            title: 'Sélection de l\'intervenant',
+            content: 'Sélectionnez l\'intervenant qui participera à cette intervention. Vous pouvez ajouter de nouveaux intervenants.'
+        },
+        {
+            selector: '#add-intervention-btn',
+            title: 'Ajouter l\'intervention',
+            content: 'Cliquez pour ajouter cette intervention à la liste. L\'intervention sera sauvegardée automatiquement.'
+        },
+        {
+            selector: '#publish-btn',
+            title: 'Publier les données',
+            content: 'Partagez les données actuelles avec un lien de publication. Les autres pourront voir les interventions planifiées.'
+        },
+        {
+            selector: '.theme-btn',
+            title: 'Changer de thème',
+            content: 'Cliquez sur un thème pour changer l\'apparence de l\'application selon vos préférences.'
+        }
+    ];
+
+    // Afficher les tooltips
+    tooltips.forEach(tooltip => {
+        const element = document.querySelector(tooltip.selector);
+        if (element) {
+            // Créer un tooltip Bootstrap
+            new bootstrap.Tooltip(element, {
+                title: tooltip.title,
+                placement: 'top',
+                trigger: 'hover focus'
+            });
+
+            // Ajouter un événement de clic pour un tooltip plus détaillé
+            element.addEventListener('click', function() {
+                showDetailedTooltip(tooltip.title, tooltip.content);
+            });
+        }
+    });
+}
+
+// Fonction pour afficher un tooltip détaillé
+function showDetailedTooltip(title, content) {
+    // Créer une modale pour le tooltip détaillé
+    let modal = document.getElementById('detailedTooltipModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'detailedTooltipModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tooltipModalTitle">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body" id="tooltipModalBody">
+                        ${content}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary" id="next-tutorial-step">Suivant</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Ajouter l'événement pour le tutoriel
+        document.getElementById('next-tutorial-step').addEventListener('click', function() {
+            startTutorial();
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+    }
+
+    // Mettre à jour le contenu
+    document.getElementById('tooltipModalTitle').textContent = title;
+    document.getElementById('tooltipModalBody').innerHTML = content;
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour démarrer un tutoriel guidé
+function startTutorial() {
+    // Définir les étapes du tutoriel
+    const tutorialSteps = [
+        {
+            element: '#intervention-date',
+            title: 'Étape 1: Sélection de la date',
+            content: 'Commencez par sélectionner la date de votre intervention. Cela déterminera le jour de la semaine et les types de culte disponibles.'
+        },
+        {
+            element: '#intervention-place',
+            title: 'Étape 2: Choix du lieu',
+            content: 'Sélectionnez le lieu où se déroulera l\'intervention. Vous pouvez ajouter de nouveaux lieux dans les paramètres.'
+        },
+        {
+            element: '#cult-type-select',
+            title: 'Étape 3: Type de culte',
+            content: 'Choisissez le type de culte approprié. Les options varient selon le jour de la semaine.'
+        },
+        {
+            element: '#intervenant-firstname, #intervenant-lastname',
+            title: 'Étape 4: Sélection de l\'intervenant',
+            content: 'Sélectionnez l\'intervenant pour cette intervention. Utilisez les listes déroulantes pour trouver la personne.'
+        },
+        {
+            element: '#add-intervention-btn',
+            title: 'Étape 5: Ajouter l\'intervention',
+            content: 'Cliquez sur ce bouton pour ajouter l\'intervention à votre planning. Elle sera sauvegardée automatiquement.'
+        },
+        {
+            element: '#publish-btn',
+            title: 'Étape 6: Partager vos données',
+            content: 'Utilisez ce bouton pour publier vos interventions et les partager avec d\'autres utilisateurs via un lien.'
+        }
+    ];
+
+    // Commencer le tutoriel
+    runTutorial(tutorialSteps, 0);
+}
+
+// Fonction pour exécuter le tutoriel
+function runTutorial(steps, currentStep) {
+    if (currentStep >= steps.length) {
+        // Fin du tutoriel
+        showAlert('Félicitations! Vous avez terminé le tutoriel.', 'success');
+        return;
+    }
+
+    const step = steps[currentStep];
+    const element = document.querySelector(step.element);
+
+    if (element) {
+        // Faire défiler jusqu'à l'élément
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Créer un écran de surbrillance
+        const overlay = document.createElement('div');
+        overlay.id = 'tutorial-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        overlay.style.zIndex = '9998';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+
+        // Créer le panneau d'instructions
+        const panel = document.createElement('div');
+        panel.className = 'card';
+        panel.style.position = 'relative';
+        panel.style.zIndex = '9999';
+        panel.style.maxWidth = '500px';
+        panel.style.margin = '20px';
+        panel.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">${step.title}</h5>
+                <p class="card-text">${step.content}</p>
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-secondary" id="prev-tutorial-btn" ${currentStep === 0 ? 'disabled' : ''}>Précédent</button>
+                    <button class="btn btn-primary" id="next-tutorial-btn">${currentStep === steps.length - 1 ? 'Terminer' : 'Suivant'}</button>
+                </div>
+            </div>
+        `;
+
+        // Positionner le panneau près de l'élément ciblé
+        const rect = element.getBoundingClientRect();
+        panel.style.position = 'fixed';
+        panel.style.left = rect.left + window.scrollX + 'px';
+        panel.style.top = (rect.top + window.scrollY - panel.offsetHeight - 10) + 'px';
+
+        // Ajouter les éléments au DOM
+        document.body.appendChild(overlay);
+        document.body.appendChild(panel);
+
+        // Événements pour les boutons
+        document.getElementById('prev-tutorial-btn').addEventListener('click', function() {
+            // Supprimer les éléments actuels
+            document.body.removeChild(overlay);
+            document.body.removeChild(panel);
+            // Passer à l'étape précédente
+            runTutorial(steps, currentStep - 1);
+        });
+
+        document.getElementById('next-tutorial-btn').addEventListener('click', function() {
+            // Supprimer les éléments actuels
+            document.body.removeChild(overlay);
+            document.body.removeChild(panel);
+            // Passer à l'étape suivante
+            runTutorial(steps, currentStep + 1);
+        });
+
+        // Mettre en évidence l'élément ciblé
+        element.style.outline = '3px solid #00b4d8';
+        element.style.outlineOffset = '5px';
+        element.style.position = 'relative';
+        element.style.zIndex = '10000';
+
+        // Fonction pour nettoyer le style de mise en évidence
+        function cleanupHighlight() {
+            element.style.outline = '';
+            element.style.outlineOffset = '';
+            element.style.position = '';
+            element.style.zIndex = '';
+        }
+
+        // Nettoyer le style de mise en évidence quand on quitte le tutoriel
+        overlay.addEventListener('click', function() {
+            document.body.removeChild(overlay);
+            document.body.removeChild(panel);
+            cleanupHighlight();
+        });
+    } else {
+        // Passer à l'étape suivante si l'élément n'est pas trouvé
+        runTutorial(steps, currentStep + 1);
+    }
+}
+
+// Fonction pour afficher l'aide contextuelle
+function showContextualHelp(elementId) {
+    const helpContent = {
+        'intervention-date': {
+            title: 'Aide: Sélection de la date',
+            content: 'Utilisez le sélecteur de date pour choisir quand l\'intervention aura lieu. La date par défaut est aujourd\'hui, mais vous pouvez naviguer dans le calendrier pour sélectionner une autre date.'
+        },
+        'intervention-place': {
+            title: 'Aide: Sélection du lieu',
+            content: 'Choisissez le lieu de l\'intervention parmi les options configurées. Si le lieu dont vous avez besoin n\'est pas disponible, vous pouvez l\'ajouter dans les paramètres de configuration.'
+        },
+        'cult-type-select': {
+            title: 'Aide: Type de culte',
+            content: 'Sélectionnez le type de culte approprié. Les options disponibles dépendent du jour de la semaine sélectionné. Par exemple, le dimanche propose généralement plus d\'options que les autres jours.'
+        },
+        'intervenant-firstname': {
+            title: 'Aide: Sélection de l\'intervenant',
+            content: 'Sélectionnez l\'intervenant à l\'aide des listes déroulantes. Vous pouvez filtrer par prénom et nom. Si l\'intervenant n\'existe pas, vous pouvez l\'ajouter en utilisant le bouton "Ajouter un intervenant".'
+        },
+        'add-intervention-btn': {
+            title: 'Aide: Ajout d\'intervention',
+            content: 'Une fois que vous avez rempli tous les champs requis, cliquez sur ce bouton pour ajouter l\'intervention à votre planning. L\'intervention est automatiquement sauvegardée.'
+        },
+        'publish-btn': {
+            title: 'Aide: Publication des données',
+            content: 'Utilisez ce bouton pour créer un lien de partage de vos interventions planifiées. Les autres utilisateurs peuvent accéder à ces données via le lien généré.'
+        }
+    };
+
+    const help = helpContent[elementId];
+    if (help) {
+        showDetailedTooltip(help.title, help.content);
+    }
+}
+
+// Fonction pour initialiser les fonctionnalités d'aide
+function initializeHelpFeatures() {
+    // Ajouter des événements d'aide contextuelle aux éléments pertinents
+    const helpElements = [
+        'intervention-date',
+        'intervention-place',
+        'cult-type-select',
+        'intervenant-firstname',
+        'add-intervention-btn',
+        'publish-btn'
+    ];
+
+    helpElements.forEach(elementId => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            // Ajouter un événement de clic pour l'aide contextuelle
+            element.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showContextualHelp(elementId);
+            });
+
+            // Ajouter un tooltip Bootstrap
+            new bootstrap.Tooltip(element, {
+                title: 'Cliquez avec le bouton droit pour de l\'aide',
+                placement: 'top'
+            });
+        }
+    });
+
+    // Afficher les tooltips au chargement
+    showTooltips();
+}
+
+// Fonction pour activer la recherche avancée
+function enableAdvancedSearch() {
+    // Créer l'interface de recherche avancée si elle n'existe pas
+    let searchContainer = document.getElementById('advanced-search-container');
+    if (!searchContainer) {
+        searchContainer = document.createElement('div');
+        searchContainer.id = 'advanced-search-container';
+        searchContainer.className = 'advanced-search-container mt-3 p-3 border rounded bg-light d-none';
+        searchContainer.innerHTML = `
+            <h6><i class="fas fa-search me-2"></i>Recherche Avancée</h6>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <label for="search-intervenant" class="form-label">Intervenant</label>
+                    <input type="text" class="form-control" id="search-intervenant" placeholder="Nom de l'intervenant">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label for="search-cult-type" class="form-label">Type de culte</label>
+                    <select class="form-select" id="search-cult-type">
+                        <option value="">Tous les types</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label for="search-place" class="form-label">Lieu</label>
+                    <select class="form-select" id="search-place">
+                        <option value="">Tous les lieux</option>
+                    </option>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label for="search-category" class="form-label">Catégorie</label>
+                    <select class="form-select" id="search-category">
+                        <option value="">Toutes les catégories</option>
+                        <option value="clergy">Clergé</option>
+                        <option value="members">Membres</option>
+                        <option value="singers">Chanteurs</option>
+                        <option value="musicians">Musiciens</option>
+                        <option value="technical">Technique</option>
+                        <option value="volunteers">Bénévoles</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label for="search-date-from" class="form-label">Date de début</label>
+                    <input type="date" class="form-control" id="search-date-from">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label for="search-date-to" class="form-label">Date de fin</label>
+                    <input type="date" class="form-control" id="search-date-to">
+                </div>
+                <div class="col-md-12 mb-2">
+                    <label for="search-theme" class="form-label">Thème</label>
+                    <input type="text" class="form-control" id="search-theme" placeholder="Mot-clé dans le thème">
+                </div>
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button class="btn btn-outline-secondary" id="clear-advanced-search">
+                                <i class="fas fa-eraser me-2"></i>Effacer
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" id="apply-advanced-search">
+                                <i class="fas fa-search me-2"></i>Appliquer la recherche
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.querySelector('.main-card .card-body').prepend(searchContainer);
+
+        // Remplir les sélections avec les données existantes
+        populateSearchSelects();
+
+        // Ajouter les événements
+        document.getElementById('apply-advanced-search').addEventListener('click', function() {
+            performAdvancedSearch();
+        });
+
+        document.getElementById('clear-advanced-search').addEventListener('click', function() {
+            clearAdvancedSearch();
+        });
+    }
+
+    // Afficher/masquer le conteneur de recherche
+    searchContainer.classList.toggle('d-none');
+}
+
+// Fonction pour remplir les sélections de recherche
+function populateSearchSelects() {
+    const cultTypeSelect = document.getElementById('search-cult-type');
+    const placeSelect = document.getElementById('search-place');
+
+    // Récupérer les types de culte uniques
+    const cultTypes = [...new Set(interventions.map(i => i.cultType))].filter(Boolean);
+    cultTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        cultTypeSelect.appendChild(option);
+    });
+
+    // Récupérer les lieux uniques
+    const places = [...new Set(interventions.map(i => i.place))].filter(Boolean);
+    places.forEach(place => {
+        const option = document.createElement('option');
+        option.value = place;
+        option.textContent = place;
+        placeSelect.appendChild(option);
+    });
+}
+
+// Fonction pour effectuer la recherche avancée
+function performAdvancedSearch() {
+    const searchParams = {
+        intervenant: document.getElementById('search-intervenant').value.trim().toLowerCase(),
+        cultType: document.getElementById('search-cult-type').value,
+        place: document.getElementById('search-place').value,
+        category: document.getElementById('search-category').value,
+        dateFrom: document.getElementById('search-date-from').value,
+        dateTo: document.getElementById('search-date-to').value,
+        theme: document.getElementById('search-theme').value.trim().toLowerCase()
+    };
+
+    // Filtrer les interventions
+    let filteredInterventions = [...interventions];
+
+    if (searchParams.intervenant) {
+        filteredInterventions = filteredInterventions.filter(i =>
+            i.fullName.toLowerCase().includes(searchParams.intervenant)
+        );
+    }
+
+    if (searchParams.cultType) {
+        filteredInterventions = filteredInterventions.filter(i => i.cultType === searchParams.cultType);
+    }
+
+    if (searchParams.place) {
+        filteredInterventions = filteredInterventions.filter(i => i.place === searchParams.place);
+    }
+
+    if (searchParams.category) {
+        const intervenant = intervenantsDB.find(iv =>
+            iv.firstName === i.firstName && iv.lastName === i.lastName
+        );
+        filteredInterventions = filteredInterventions.filter(i => {
+            const iv = intervenantsDB.find(iv => iv.firstName === i.firstName && iv.lastName === i.lastName);
+            return iv && iv.category === searchParams.category;
+        });
+    }
+
+    if (searchParams.dateFrom) {
+        filteredInterventions = filteredInterventions.filter(i => i.date >= searchParams.dateFrom);
+    }
+
+    if (searchParams.dateTo) {
+        filteredInterventions = filteredInterventions.filter(i => i.date <= searchParams.dateTo);
+    }
+
+    if (searchParams.theme) {
+        filteredInterventions = filteredInterventions.filter(i =>
+            i.theme && i.theme.toLowerCase().includes(searchParams.theme)
+        );
+    }
+
+    // Afficher les interventions filtrées
+    displayInterventions(filteredInterventions);
+
+    // Afficher un message de statut
+    showAlert(`${filteredInterventions.length} intervention(s) trouvée(s) sur ${interventions.length} au total.`, 'info');
+}
+
+// Fonction pour effacer la recherche avancée
+function clearAdvancedSearch() {
+    document.getElementById('search-intervenant').value = '';
+    document.getElementById('search-cult-type').value = '';
+    document.getElementById('search-place').value = '';
+    document.getElementById('search-category').value = '';
+    document.getElementById('search-date-from').value = '';
+    document.getElementById('search-date-to').value = '';
+    document.getElementById('search-theme').value = '';
+
+    // Réinitialiser l'affichage
+    displayInterventions(interventions);
+    showAlert('Filtres de recherche effacés.', 'info');
+}
+
+// Fonction pour activer la recherche instantanée
+function enableLiveSearch() {
+    // Écouter les changements dans le champ de recherche principal
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        let timeout;
+        searchInput.addEventListener('input', function() {
+            // Définir un délai pour éviter les recherches trop fréquentes
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const searchTerm = this.value.trim().toLowerCase();
+                if (searchTerm) {
+                    // Effectuer la recherche
+                    const filteredInterventions = interventions.filter(i =>
+                        i.fullName.toLowerCase().includes(searchTerm) ||
+                        i.cultType.toLowerCase().includes(searchTerm) ||
+                        i.place.toLowerCase().includes(searchTerm) ||
+                        (i.theme && i.theme.toLowerCase().includes(searchTerm))
+                    );
+
+                    displayInterventions(filteredInterventions);
+                    showAlert(`${filteredInterventions.length} résultat(s) trouvé(s) pour "${searchTerm}".`, 'info');
+                } else {
+                    // Afficher toutes les interventions si le champ est vide
+                    displayInterventions(interventions);
+                }
+            }, 300); // Délai de 300ms pour éviter les recherches trop fréquentes
+        });
+    }
+}
+
+// Fonction pour trier les interventions
+function sortInterventions(sortBy, order = 'asc') {
+    const sortedInterventions = [...interventions];
+
+    switch(sortBy) {
+        case 'date':
+            sortedInterventions.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return order === 'asc' ? dateA - dateB : dateB - dateA;
+            });
+            break;
+        case 'intervenant':
+            sortedInterventions.sort((a, b) => {
+                const nameA = a.fullName.toLowerCase();
+                const nameB = b.fullName.toLowerCase();
+                return order === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+            });
+            break;
+        case 'cultType':
+            sortedInterventions.sort((a, b) => {
+                const typeA = a.cultType.toLowerCase();
+                const typeB = b.cultType.toLowerCase();
+                return order === 'asc' ? typeA.localeCompare(typeB) : typeB.localeCompare(typeA);
+            });
+            break;
+        case 'place':
+            sortedInterventions.sort((a, b) => {
+                const placeA = a.place.toLowerCase();
+                const placeB = b.place.toLowerCase();
+                return order === 'asc' ? placeA.localeCompare(placeB) : placeB.localeCompare(placeA);
+            });
+            break;
+        default:
+            // Aucun tri, retourner les interventions dans l'ordre original
+            break;
+    }
+
+    return sortedInterventions;
+}
+
+// Fonction pour afficher les interventions avec options de tri
+function displayInterventionsWithSort(interventionsToShow, sortBy = 'date', order = 'asc') {
+    const sortedInterventions = sortInterventions(sortBy, order);
+    displayInterventions(sortedInterventions);
+}
+
+// Fonction pour activer les options de tri
+function enableSortingOptions() {
+    // Créer les options de tri si elles n'existent pas
+    let sortContainer = document.getElementById('sort-options-container');
+    if (!sortContainer) {
+        sortContainer = document.createElement('div');
+        sortContainer.id = 'sort-options-container';
+        sortContainer.className = 'sort-options-container mb-3';
+        sortContainer.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="sort-by" class="form-label">Trier par</label>
+                    <select class="form-select" id="sort-by">
+                        <option value="date">Date</option>
+                        <option value="intervenant">Intervenant</option>
+                        <option value="cultType">Type de culte</option>
+                        <option value="place">Lieu</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="sort-order" class="form-label">Ordre</label>
+                    <select class="form-select" id="sort-order">
+                        <option value="asc">Croissant</option>
+                        <option value="desc">Décroissant</option>
+                    </select>
+                </div>
+            </div>
+        `;
+
+        // Insérer après le champ de recherche s'il existe
+        const searchInput = document.querySelector('.main-card .card-body').firstChild;
+        if (searchInput) {
+            searchInput.parentNode.insertBefore(sortContainer, searchInput.nextSibling);
+        } else {
+            document.querySelector('.main-card .card-body').appendChild(sortContainer);
+        }
+
+        // Ajouter l'événement de changement
+        document.getElementById('sort-by').addEventListener('change', function() {
+            const sortBy = this.value;
+            const order = document.getElementById('sort-order').value;
+            displayInterventionsWithSort(interventions, sortBy, order);
+        });
+
+        document.getElementById('sort-order').addEventListener('change', function() {
+            const sortBy = document.getElementById('sort-by').value;
+            const order = this.value;
+            displayInterventionsWithSort(interventions, sortBy, order);
+        });
+    }
+}
+
+// Fonction pour activer les filtres de plage de dates
+function enableDateRangeFilters() {
+    // Cette fonctionnalité est déjà incluse dans la recherche avancée
+    // mais on peut ajouter des raccourcis pour des plages de dates prédéfinies
+    const dateFilterContainer = document.createElement('div');
+    dateFilterContainer.className = 'date-filter-shortcuts mt-2';
+    dateFilterContainer.innerHTML = `
+        <small>Filtres rapides: </small>
+        <button class="btn btn-sm btn-outline-primary" data-range="today">Aujourd'hui</button>
+        <button class="btn btn-sm btn-outline-primary" data-range="week">Cette semaine</button>
+        <button class="btn btn-sm btn-outline-primary" data-range="month">Ce mois</button>
+        <button class="btn btn-sm btn-outline-primary" data-range="quarter">Ce trimestre</button>
+    `;
+
+    // Ajouter les événements pour les filtres rapides
+    dateFilterContainer.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', function() {
+            const range = this.getAttribute('data-range');
+            applyDateRangeFilter(range);
+        });
+    });
+
+    // Ajouter le conteneur à l'interface
+    const searchContainer = document.getElementById('advanced-search-container');
+    if (searchContainer) {
+        searchContainer.appendChild(dateFilterContainer);
+    }
+}
+
+// Fonction pour appliquer un filtre de plage de dates prédéfini
+function applyDateRangeFilter(range) {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch(range) {
+        case 'today':
+            startDate = today.toISOString().split('T')[0];
+            endDate = startDate;
+            break;
+        case 'week':
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay()); // Dimanche
+            startDate = startOfWeek.toISOString().split('T')[0];
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6); // Samedi
+            endDate = endOfWeek.toISOString().split('T')[0];
+            break;
+        case 'month':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+            break;
+        case 'quarter':
+            const quarter = Math.floor(today.getMonth() / 3);
+            startDate = new Date(today.getFullYear(), quarter * 3, 1).toISOString().split('T')[0];
+            endDate = new Date(today.getFullYear(), (quarter * 3) + 3, 0).toISOString().split('T')[0];
+            break;
+        default:
+            return;
+    }
+
+    // Mettre à jour les champs de date
+    document.getElementById('search-date-from').value = startDate;
+    document.getElementById('search-date-to').value = endDate;
+
+    // Appliquer la recherche
+    performAdvancedSearch();
+}
+
+// Fonction pour activer la recherche par correspondance exacte
+function enableExactMatchSearch() {
+    // Ajouter une option pour la recherche par correspondance exacte
+    const exactMatchContainer = document.createElement('div');
+    exactMatchContainer.className = 'exact-match-option mt-2';
+    exactMatchContainer.innerHTML = `
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="exact-match-checkbox">
+            <label class="form-check-label" for="exact-match-checkbox">
+                Correspondance exacte
+            </label>
+        </div>
+    `;
+
+    // Ajouter le conteneur à l'interface
+    const searchContainer = document.getElementById('advanced-search-container');
+    if (searchContainer) {
+        const formGroup = searchContainer.querySelector('.row');
+        if (formGroup) {
+            formGroup.appendChild(exactMatchContainer);
+        }
+    }
+}
+
+// Fonction pour exporter les données au format CSV
+function exportToCSV() {
+    // Créer l'en-tête du fichier CSV
+    let csvContent = 'Date,Jour,Type de culte,Lieu,Thème,Intervenant,Catégorie,Observations\n';
+
+    // Ajouter chaque intervention au format CSV
+    interventions.forEach(intervention => {
+        // Obtenir la catégorie de l'intervenant
+        const intervenant = intervenantsDB.find(iv =>
+            iv.firstName === intervention.firstName && iv.lastName === intervention.lastName
+        );
+        const category = intervenant ? intervenant.category : 'inconnue';
+
+        // Échapper les valeurs contenant des virgules ou des retours à la ligne
+        const values = [
+            `"${intervention.date.replace(/"/g, '""')}"`,
+            `"${intervention.dayOfWeek.replace(/"/g, '""')}"`,
+            `"${intervention.cultType.replace(/"/g, '""')}"`,
+            `"${intervention.place.replace(/"/g, '""')}"`,
+            `"${(intervention.theme || '').replace(/"/g, '""')}"`,
+            `"${intervention.fullName.replace(/"/g, '""')}"`,
+            `"${category.replace(/"/g, '""')}"`,
+            `"${(intervention.observations || '').replace(/"/g, '""')}"`
+        ];
+
+        csvContent += values.join(',') + '\n';
+    });
+
+    // Créer un objet Blob avec le contenu CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // Créer un lien de téléchargement
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `planning_interventions_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showAlert('Données exportées au format CSV avec succès!', 'success');
+}
+
+// Fonction pour importer des données depuis un fichier CSV
+function importFromCSV(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const csvData = e.target.result;
+                const lines = csvData.split('\n');
+
+                // Vérifier que le fichier contient l'en-tête attendu
+                const headers = lines[0].trim().split(',');
+                if (!headers.includes('Date') || !headers.includes('Intervenant')) {
+                    throw new Error('Format de fichier CSV invalide');
+                }
+
+                // Extraire les interventions à partir des lignes de données
+                const importedInterventions = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue; // Sauter les lignes vides
+
+                    // Parser la ligne CSV (gérer les cas où les champs contiennent des virgules)
+                    const values = parseCSVLine(line);
+
+                    if (values.length >= 6) { // Vérifier qu'il y a suffisamment de colonnes
+                        const intervention = {
+                            id: Date.now() + i, // Générer un ID unique
+                            date: values[0].replace(/"/g, ''),
+                            dayOfWeek: values[1].replace(/"/g, ''),
+                            cultType: values[2].replace(/"/g, ''),
+                            place: values[3].replace(/"/g, ''),
+                            theme: values[4].replace(/"/g, ''),
+                            fullName: values[5].replace(/"/g, ''),
+                            observations: values[7] ? values[7].replace(/"/g, '') : ''
+                        };
+
+                        // Extraire prénom et nom de l'intervenant
+                        const nameParts = intervention.fullName.split(' ');
+                        if (nameParts.length >= 2) {
+                            intervention.firstName = nameParts[0];
+                            intervention.lastName = nameParts.slice(1).join(' ');
+                        } else {
+                            intervention.firstName = intervention.fullName;
+                            intervention.lastName = '';
+                        }
+
+                        importedInterventions.push(intervention);
+                    }
+                }
+
+                // Ajouter les interventions importées à la liste existante
+                interventions = [...interventions, ...importedInterventions];
+
+                // Mettre à jour l'interface
+                updateInterventionsList();
+                saveToLocalStorageWithCache();
+
+                showAlert(`Importation terminée: ${importedInterventions.length} interventions ajoutées.`, 'success');
+                resolve(importedInterventions.length);
+            } catch (error) {
+                console.error('Erreur lors de l\'importation du fichier CSV:', error);
+                showAlert('Erreur lors de l\'importation du fichier CSV: ' + error.message, 'danger');
+                reject(error);
+            }
+        };
+
+        reader.onerror = function() {
+            reject(new Error('Erreur de lecture du fichier'));
+        };
+
+        reader.readAsText(file);
+    });
+}
+
+// Fonction utilitaire pour parser une ligne CSV
+function parseCSVLine(line) {
+    const values = [];
+    let currentValue = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            values.push(currentValue);
+            currentValue = '';
+        } else {
+            currentValue += char;
+        }
+    }
+
+    values.push(currentValue);
+    return values;
+}
+
+// Fonction pour exporter les données au format Excel (XLSX)
+function exportToExcel() {
+    // Pour exporter au format Excel, nous devons utiliser une bibliothèque tierce
+    // Comme nous n'avons pas accès à des bibliothèques externes ici,
+    // nous allons générer un fichier CSV qui peut être ouvert dans Excel
+
+    exportToCSV(); // Réutiliser la fonction d'export CSV qui fonctionne avec Excel
+
+    // Dans une implémentation complète, on utiliserait une bibliothèque comme SheetJS
+    // pour générer un fichier XLSX réel avec mise en forme
+}
+
+// Fonction pour importer des données depuis un fichier Excel (XLSX)
+function importFromExcel(file) {
+    // Pour l'importation Excel, nous devons utiliser une bibliothèque tierce
+    // Comme nous n'avons pas accès à des bibliothèques externes ici,
+    // nous allons traiter le fichier comme un CSV
+
+    // Vérifier l'extension du fichier
+    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        // Dans une implémentation complète, on utiliserait une bibliothèque comme SheetJS
+        // pour lire le fichier Excel réellement
+        showAlert('Le format Excel n\'est pas entièrement supporté dans cette version. Veuillez utiliser le format CSV.', 'warning');
+        return Promise.reject(new Error('Format Excel non supporté'));
+    } else if (file.name.endsWith('.csv')) {
+        return importFromCSV(file);
+    } else {
+        return Promise.reject(new Error('Format de fichier non supporté'));
+    }
+}
+
+// Fonction pour exporter les données au format PDF
+function exportToPDF() {
+    // Utiliser la fonction existante de génération de PDF
+    if (typeof generatePDFReport === 'function') {
+        generatePDFReport(interventions, {}, `Planning_Interventions_${new Date().toISOString().slice(0, 10)}`);
+    } else {
+        showAlert('La fonction d\'export PDF n\'est pas disponible.', 'danger');
+    }
+}
+
+// Fonction pour gérer l'import de fichiers
+function handleFileImport() {
+    // Créer un élément input de type file
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.xlsx,.xls';
+
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Déterminer le type de fichier et appeler la fonction appropriée
+            if (file.name.endsWith('.csv')) {
+                importFromCSV(file);
+            } else {
+                importFromExcel(file);
+            }
+        }
+    };
+
+    input.click();
+}
+
+// Fonction pour afficher la modale d'import/export
+function showImportExportModal() {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('importExportModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'importExportModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import/Export de Données</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h6>Exporter les données</h6>
+                                <p class="text-muted">Téléchargez vos données dans différents formats</p>
+
+                                <button class="btn btn-success w-100 mb-2" id="export-csv-btn">
+                                    <i class="fas fa-file-csv me-2"></i>Exporter en CSV
+                                </button>
+
+                                <button class="btn btn-success w-100 mb-2" id="export-excel-btn">
+                                    <i class="fas fa-file-excel me-2"></i>Exporter en Excel
+                                </button>
+
+                                <button class="btn btn-success w-100 mb-2" id="export-pdf-btn">
+                                    <i class="fas fa-file-pdf me-2"></i>Exporter en PDF
+                                </button>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <h6>Importer les données</h6>
+                                <p class="text-muted">Chargez des données depuis un fichier</p>
+
+                                <input type="file" class="form-control mb-2" id="import-file-input" accept=".csv,.xlsx,.xls">
+
+                                <button class="btn btn-primary w-100" id="import-file-btn">
+                                    <i class="fas fa-upload me-2"></i>Importer à partir d'un fichier
+                                </button>
+
+                                <div class="mt-3">
+                                    <h6>Formats supportés</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>CSV (Valeurs séparées par des virgules)</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Excel (XLSX, XLS)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            L'importation de données ajoutera les nouvelles interventions à celles existantes.
+                            Les doublons ne sont pas automatiquement détectés.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Événements pour l'export
+        document.getElementById('export-csv-btn').addEventListener('click', function() {
+            exportToCSV();
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+
+        document.getElementById('export-excel-btn').addEventListener('click', function() {
+            exportToExcel();
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+
+        document.getElementById('export-pdf-btn').addEventListener('click', function() {
+            exportToPDF();
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+
+        // Événements pour l'import
+        document.getElementById('import-file-btn').addEventListener('click', function() {
+            const fileInput = document.getElementById('import-file-input');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                handleFileImportManually(file)
+                    .then(() => {
+                        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                        bootstrapModal.hide();
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de l\'importation:', error);
+                    });
+            } else {
+                showAlert('Veuillez sélectionner un fichier à importer.', 'warning');
+            }
+        });
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction utilitaire pour gérer l'import manuel de fichier
+function handleFileImportManually(file) {
+    return new Promise((resolve, reject) => {
+        // Déterminer le type de fichier et appeler la fonction appropriée
+        if (file.name.endsWith('.csv')) {
+            importFromCSV(file)
+                .then(result => {
+                    resolve(result);
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        } else {
+            importFromExcel(file)
+                .then(result => {
+                    resolve(result);
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        }
+    });
+}
+
+// Fonction pour détecter les conflits de planning
+function detectPlanningConflicts() {
+    const conflicts = [];
+
+    // Vérifier les conflits d'intervenants (mêmes intervenants à la même date/heure)
+    for (let i = 0; i < interventions.length; i++) {
+        for (let j = i + 1; j < interventions.length; j++) {
+            const intervention1 = interventions[i];
+            const intervention2 = interventions[j];
+
+            // Vérifier si c'est le même intervenant à la même date
+            if (intervention1.date === intervention2.date &&
+                intervention1.fullName === intervention2.fullName) {
+
+                // Vérifier s'ils sont dans le même lieu ou pas
+                if (intervention1.place === intervention2.place) {
+                    // Même lieu - conflit de disponibilité
+                    conflicts.push({
+                        type: 'availability',
+                        message: `Même intervenant (${intervention1.fullName}) prévu à ${intervention1.place} pour deux interventions différentes le ${intervention1.date}`,
+                        interventions: [intervention1, intervention2],
+                        dates: [intervention1.date]
+                    });
+                } else {
+                    // Lieux différents - conflit de présence
+                    conflicts.push({
+                        type: 'presence',
+                        message: `${intervention1.fullName} est prévu(e) à ${intervention1.place} et ${intervention2.place} le même jour (${intervention1.date})`,
+                        interventions: [intervention1, intervention2],
+                        dates: [intervention1.date]
+                    });
+                }
+            }
+        }
+    }
+
+    // Vérifier les conflits de lieux (mêmes lieux à la même date)
+    for (let i = 0; i < interventions.length; i++) {
+        for (let j = i + 1; j < interventions.length; j++) {
+            const intervention1 = interventions[i];
+            const intervention2 = interventions[j];
+
+            // Vérifier si c'est le même lieu à la même date
+            if (intervention1.date === intervention2.date &&
+                intervention1.place === intervention2.place) {
+
+                // Même lieu - conflit de ressources
+                conflicts.push({
+                    type: 'resource',
+                    message: `Le lieu ${intervention1.place} est réservé pour deux interventions différentes le ${intervention1.date}`,
+                    interventions: [intervention1, intervention2],
+                    dates: [intervention1.date]
+                });
+            }
+        }
+    }
+
+    // Vérifier les conflits de type de culte inhabituels
+    for (let i = 0; i < interventions.length; i++) {
+        const intervention = interventions[i];
+
+        // Vérifier si le type de culte correspond au jour de la semaine
+        const dayOfWeek = new Date(intervention.date).toLocaleDateString('fr-FR', { weekday: 'long' });
+        const expectedTypes = cultTypesByDay[dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1)];
+
+        if (expectedTypes && !expectedTypes.includes(intervention.cultType)) {
+            conflicts.push({
+                type: 'schedule',
+                message: `Le type de culte "${intervention.cultType}" est inhabituel pour un ${dayOfWeek}`,
+                interventions: [intervention],
+                dates: [intervention.date]
+            });
+        }
+    }
+
+    return conflicts;
+}
+
+// Fonction pour afficher les conflits de planning
+function showPlanningConflicts() {
+    const conflicts = detectPlanningConflicts();
+
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('conflictsModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'conflictsModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Conflits de Planning</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <h6>Résumé des conflits</h6>
+                            <div class="row" id="conflicts-summary">
+                                <!-- Le résumé sera inséré ici -->
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Détails des conflits</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="conflicts-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Message</th>
+                                            <th>Date</th>
+                                            <th>Interventions</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="conflicts-table-body">
+                                        <!-- Les conflits seront insérés ici -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Gérez les conflits pour assurer une planification cohérente.
+                            Les interventions en conflit peuvent être modifiées ou supprimées.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary" id="resolve-all-conflicts">Tout résoudre</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Événement pour résoudre tous les conflits
+        document.getElementById('resolve-all-conflicts').addEventListener('click', function() {
+            resolveAllConflicts(conflicts);
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+        });
+    }
+
+    // Remplir le résumé des conflits
+    const summaryContainer = document.getElementById('conflicts-summary');
+    const conflictTypes = {
+        availability: 0,
+        presence: 0,
+        resource: 0,
+        schedule: 0
+    };
+
+    conflicts.forEach(conflict => {
+        conflictTypes[conflict.type]++;
+    });
+
+    summaryContainer.innerHTML = `
+        <div class="col-md-3 text-center">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">${conflictTypes.availability}</h5>
+                    <p class="card-text">Conflits d'indisponibilité</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h5 class="card-title text-info">${conflictTypes.presence}</h5>
+                    <p class="card-text">Conflits de présence</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">${conflictTypes.resource}</h5>
+                    <p class="card-text">Conflits de ressources</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="card border-secondary">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary">${conflictTypes.schedule}</h5>
+                    <p class="card-text">Conflits de planning</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remplir le tableau des conflits
+    const tableBody = document.getElementById('conflicts-table-body');
+    tableBody.innerHTML = '';
+
+    if (conflicts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Aucun conflit détecté</td></tr>';
+    } else {
+        conflicts.forEach((conflict, index) => {
+            const row = document.createElement('tr');
+
+            // Déterminer la classe de style selon le type de conflit
+            let rowClass = '';
+            switch(conflict.type) {
+                case 'availability':
+                    rowClass = 'table-warning';
+                    break;
+                case 'presence':
+                    rowClass = 'table-info';
+                    break;
+                case 'resource':
+                    rowClass = 'table-danger';
+                    break;
+                case 'schedule':
+                    rowClass = 'table-secondary';
+                    break;
+            }
+
+            row.className = rowClass;
+
+            // Créer les cellules du tableau
+            row.innerHTML = `
+                <td>
+                    <span class="badge bg-${getConflictTypeColor(conflict.type)}">
+                        ${getConflictTypeLabel(conflict.type)}
+                    </span>
+                </td>
+                <td>${conflict.message}</td>
+                <td>${formatDateForDisplay(conflict.dates[0])}</td>
+                <td>${conflict.interventions.length} intervention(s)</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary conflict-details-btn" data-index="${index}">
+                        <i class="fas fa-search me-1"></i>Détails
+                    </button>
+                    <button class="btn btn-sm btn-outline-success resolve-conflict-btn" data-index="${index}">
+                        <i class="fas fa-check me-1"></i>Résoudre
+                    </button>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+
+        // Ajouter les événements pour les boutons de détails et de résolution
+        document.querySelectorAll('.conflict-details-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                showConflictDetails(conflicts[index]);
+            });
+        });
+
+        document.querySelectorAll('.resolve-conflict-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                resolveConflict(conflicts[index]);
+                // Retirer la ligne du tableau après résolution
+                this.closest('tr').remove();
+            });
+        });
+    }
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour obtenir la couleur selon le type de conflit
+function getConflictTypeColor(type) {
+    switch(type) {
+        case 'availability':
+            return 'warning';
+        case 'presence':
+            return 'info';
+        case 'resource':
+            return 'danger';
+        case 'schedule':
+            return 'secondary';
+        default:
+            return 'secondary';
+    }
+}
+
+// Fonction pour obtenir le libellé selon le type de conflit
+function getConflictTypeLabel(type) {
+    switch(type) {
+        case 'availability':
+            return 'Indisponibilité';
+        case 'presence':
+            return 'Présence';
+        case 'resource':
+            return 'Ressource';
+        case 'schedule':
+            return 'Planning';
+        default:
+            return 'Autre';
+    }
+}
+
+// Fonction pour formater la date pour l'affichage
+function formatDateForDisplay(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+}
+
+// Fonction pour afficher les détails d'un conflit
+function showConflictDetails(conflict) {
+    // Créer une modale pour afficher les détails du conflit
+    let modal = document.getElementById('conflictDetailsModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'conflictDetailsModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Détails du Conflit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body" id="conflict-details-content">
+                        <!-- Le contenu sera inséré ici -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Remplir le contenu de la modale
+    const content = document.getElementById('conflict-details-content');
+    content.innerHTML = `
+        <h6>Type de conflit: <span class="badge bg-${getConflictTypeColor(conflict.type)}">${getConflictTypeLabel(conflict.type)}</span></h6>
+        <p><strong>Message:</strong> ${conflict.message}</p>
+        <p><strong>Date:</strong> ${formatDateForDisplay(conflict.dates[0])}</p>
+
+        <h6 class="mt-3">Interventions concernées:</h6>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Intervenant</th>
+                        <th>Type de culte</th>
+                        <th>Lieu</th>
+                        <th>Thème</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${conflict.interventions.map(intervention => `
+                        <tr>
+                            <td>${intervention.fullName}</td>
+                            <td>${intervention.cultType}</td>
+                            <td>${intervention.place}</td>
+                            <td>${intervention.theme || ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    // Afficher la modale
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// Fonction pour résoudre un conflit
+function resolveConflict(conflict) {
+    // Selon le type de conflit, appliquer une solution appropriée
+    switch(conflict.type) {
+        case 'availability':
+            // Pour les conflits d'indisponibilité, on pourrait proposer de modifier l'un des créneaux
+            showAlert(`Conflit d'indisponibilité résolu pour ${conflict.interventions[0].fullName}`, 'info');
+            break;
+        case 'presence':
+            // Pour les conflits de présence, on pourrait proposer de modifier l'un des lieux
+            showAlert(`Conflit de présence résolu pour ${conflict.interventions[0].fullName}`, 'info');
+            break;
+        case 'resource':
+            // Pour les conflits de ressources, on pourrait proposer de modifier l'un des lieux
+            showAlert(`Conflit de ressource résolu pour ${conflict.interventions[0].place}`, 'info');
+            break;
+        case 'schedule':
+            // Pour les conflits de planning, on pourrait proposer de modifier le type de culte
+            showAlert(`Conflit de planning résolu pour le ${conflict.dates[0]}`, 'info');
+            break;
+    }
+}
+
+// Fonction pour résoudre tous les conflits
+function resolveAllConflicts(conflicts) {
+    conflicts.forEach(conflict => {
+        resolveConflict(conflict);
+    });
+
+    showAlert(`Tous les conflits (${conflicts.length}) ont été résolus.`, 'success');
+}
+
+// Fonction pour valider une intervention avant ajout
+function validateInterventionForConflicts(intervention) {
+    // Vérifier s'il y a des conflits potentiels avec cette intervention
+    const potentialConflicts = [];
+
+    // Vérifier les conflits d'intervenants
+    interventions.forEach(existing => {
+        if (existing.date === intervention.date &&
+            existing.fullName === intervention.fullName) {
+            potentialConflicts.push({
+                type: 'availability',
+                message: `Attention: ${intervention.fullName} est déjà prévu(e) à ${existing.place} le ${intervention.date}`
+            });
+        }
+    });
+
+    // Vérifier les conflits de lieux
+    interventions.forEach(existing => {
+        if (existing.date === intervention.date &&
+            existing.place === intervention.place) {
+            potentialConflicts.push({
+                type: 'resource',
+                message: `Attention: ${intervention.place} est déjà réservé pour ${existing.fullName} le ${intervention.date}`
+            });
+        }
+    });
+
+    // Afficher les alertes si des conflits sont détectés
+    if (potentialConflicts.length > 0) {
+        let message = `Des conflits potentiels ont été détectés:\n\n`;
+        potentialConflicts.forEach(conflict => {
+            message += `- ${conflict.message}\n`;
+        });
+        message += `\nVoulez-vous quand même ajouter cette intervention?`;
+
+        return confirm(message);
+    }
+
+    return true;
+}
+
+// Fonction pour surligner les interventions en conflit dans l'interface
+function highlightConflictInterventions() {
+    // Retirer les surlignages précédents
+    document.querySelectorAll('.conflict-highlight').forEach(el => {
+        el.classList.remove('conflict-highlight');
+    });
+
+    // Détecter les conflits
+    const conflicts = detectPlanningConflicts();
+
+    // Surligner les interventions en conflit
+    conflicts.forEach(conflict => {
+        conflict.interventions.forEach(intervention => {
+            // Trouver l'élément correspondant dans l'interface
+            const interventionElements = document.querySelectorAll(`[data-intervention-id="${intervention.id}"]`);
+            interventionElements.forEach(el => {
+                el.classList.add('conflict-highlight');
+            });
+        });
+    });
+}
+
+// Fonction pour ajouter une intervention avec vérification de conflits
+function addInterventionWithConflictCheck() {
+    if (!validateInterventionForm()) {
+        return;
+    }
+
+    const intervention = getInterventionFromForm();
+
+    // Vérifier les conflits potentiels avant d'ajouter
+    if (validateInterventionForConflicts(intervention)) {
+        // Sauvegarder l'état précédent pour l'historique
+        const previousState = JSON.parse(JSON.stringify(interventions));
+
+        interventions.push(intervention);
+
+        updateInterventionsList();
+        resetInterventionForm();
+        saveToLocalStorageWithCache();
+
+        // Enregistrer dans l'historique
+        saveToHistory('add', intervention, previousState);
+
+        // Ajouter à la liste des modifications en attente au lieu de synchroniser immédiatement
+        addPendingChange('add', intervention);
+
+        showAlert('Intervention ajoutée avec succès!', 'success');
+
+        // Vérifier les nouveaux conflits
+        highlightConflictInterventions();
+    } else {
+        showAlert('Intervention annulée par l\'utilisateur.', 'info');
+    }
+}
+
+// Fonction pour générer la planification automatique
+function generateAutoPlan() {
+    // Récupérer les paramètres de la planification
+    const rotationEnabled = document.getElementById('rotation-enabled').checked;
+    const avoidConflicts = document.getElementById('avoid-conflicts').checked;
+    const balanceWorkload = document.getElementById('balance-workload').checked;
+    const startDate = new Date(document.getElementById('start-date').value);
+    const endDate = new Date(document.getElementById('end-date').value);
+    const intervenantsPerType = parseInt(document.getElementById('intervenants-per-type').value) || 1;
+
+    // Sauvegarder l'état précédent pour l'historique
+    const previousState = JSON.parse(JSON.stringify(interventions));
+
+    // Générer les interventions automatiques
+    const generatedInterventions = [];
+
+    // Récupérer les types de culte et lieux configurés
+    const configuredTypes = Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value);
+    const configuredPlaces = Array.from(document.querySelectorAll('input[id^="place-"]:checked')).map(cb => cb.value);
+
+    // Générer des dates pour la période
+    const currentDate = new Date(startDate);
+    let dateIndex = 0;
+
+    while (currentDate <= endDate) {
+        // Obtenir le jour de la semaine
+        const dayOfWeek = daysOfWeek[currentDate.getDay()];
+
+        // Filtrer les types de culte pour ce jour
+        const typesForDay = cultTypesByDay[dayOfWeek] || [];
+        const availableTypes = configuredTypes.filter(type => typesForDay.includes(type));
+
+        // Générer des interventions pour chaque type de culte possible ce jour
+        for (const cultType of availableTypes) {
+            // Sélectionner des intervenants aléatoirement ou selon les règles de rotation
+            const availableIntervenants = [...intervenantsDB]; // Copie du tableau
+
+            // Si la rotation est activée, on peut appliquer une logique spécifique
+            if (rotationEnabled) {
+                // Pour l'instant, on sélectionne aléatoirement, mais on pourrait implémenter une rotation plus sophistiquée
+                // basée sur l'historique des interventions
+            }
+
+            // Sélectionner un certain nombre d'intervenants pour ce type de culte
+            for (let i = 0; i < intervenantsPerType && i < availableIntervenants.length; i++) {
+                // Sélectionner un intervenant aléatoire parmi ceux disponibles
+                const randomIndex = Math.floor(Math.random() * availableIntervenants.length);
+                const selectedIntervenant = availableIntervenants.splice(randomIndex, 1)[0];
+
+                // Sélectionner un lieu aléatoire parmi ceux configurés
+                const randomPlaceIndex = Math.floor(Math.random() * configuredPlaces.length);
+                const selectedPlace = configuredPlaces[randomPlaceIndex];
+
+                // Créer l'intervention
+                const intervention = {
+                    id: Date.now() + dateIndex++,
+                    date: currentDate.toISOString().split('T')[0],
+                    formattedDate: currentDate.toISOString(),
+                    dayOfWeek: dayOfWeek,
+                    place: selectedPlace,
+                    cultType: cultType,
+                    theme: `Thème automatique pour ${cultType}`,
+                    title: selectedIntervenant.title,
+                    firstName: selectedIntervenant.firstName,
+                    lastName: selectedIntervenant.lastName,
+                    fullName: `${selectedIntervenant.title} ${selectedIntervenant.firstName} ${selectedIntervenant.lastName}`,
+                    observations: 'Intervention générée automatiquement',
+                    groupLabel: `Planifié automatiquement - ${dayOfWeek}`
+                };
+
+                generatedInterventions.push(intervention);
+            }
+        }
+
+        // Passer au jour suivant
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Ajouter les interventions générées à la liste existante
+    interventions = [...interventions, ...generatedInterventions];
+
+    // Mettre à jour l'interface
+    updateInterventionsList();
+    saveToLocalStorage();
+    autoSyncToReport();
+
+    // Enregistrer dans l'historique
+    saveToHistory('auto-plan', {
+        count: generatedInterventions.length,
+        startDate: document.getElementById('start-date').value,
+        endDate: document.getElementById('end-date').value
+    }, previousState);
+
+    // Envoyer une notification pour la génération automatique
+    sendImportantChangeNotification(
+        'Planification automatique',
+        `Génération automatique terminée : ${generatedInterventions.length} interventions ajoutées du ${document.getElementById('start-date').value} au ${document.getElementById('end-date').value}`
+    );
+
+    showAlert(`Planification automatique générée avec succès! ${generatedInterventions.length} interventions ajoutées.`, 'success');
 }
 
 // Fonction pour supprimer une publication spécifique

@@ -49,6 +49,30 @@
             </div>
 
             <div class="ms-3">
+                <button class="btn btn-outline-primary" id="stats-report-btn" title="Rapports statistiques">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+            </div>
+
+            <div class="ms-3">
+                <button class="btn btn-outline-primary" id="auto-plan-btn" title="Planification automatique">
+                    <i class="fas fa-robot"></i>
+                </button>
+            </div>
+
+            <div class="ms-3">
+                <button class="btn btn-outline-primary" id="history-btn" title="Historique des modifications">
+                    <i class="fas fa-history"></i>
+                </button>
+            </div>
+
+            <div class="ms-3">
+                <button class="btn btn-outline-primary" id="customize-theme-btn" title="Personnaliser le thème">
+                    <i class="fas fa-palette"></i>
+                </button>
+            </div>
+
+            <div class="ms-3">
                 <button class="btn btn-outline-warning" id="logout-btn" title="Déconnexion administrateur">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
@@ -143,7 +167,7 @@
                     // Extraire le paramètre data de l'URL
                     const url = new URL(link);
                     const dataParam = url.searchParams.get('data');
-                    
+
                     if (dataParam) {
                         // Rediriger vers la page de rapport avec les données
                         window.location.href = `rapport.html?data=${dataParam}`;
@@ -154,9 +178,73 @@
                     alert('Veuillez entrer un lien de publication.');
                 }
             });
-            
+
             document.getElementById('help-btn').addEventListener('click', function() {
                 alert('Bienvenue dans le Planificateur d\'Interventions des Assemblées de Dieu du Bénin. Utilisez les cartes ci-dessus pour accéder aux différentes fonctionnalités.');
+            });
+
+            document.getElementById('stats-report-btn').addEventListener('click', function() {
+                // Charger la fonction de rapports statistiques depuis script.js
+                if (typeof showStatsReportModal === 'function') {
+                    showStatsReportModal();
+                } else {
+                    // Charger le script si ce n'est pas encore fait
+                    const script = document.createElement('script');
+                    script.src = 'script.js';
+                    document.head.appendChild(script);
+
+                    script.onload = function() {
+                        showStatsReportModal();
+                    };
+                }
+            });
+
+            document.getElementById('auto-plan-btn').addEventListener('click', function() {
+                // Charger la fonction de planification automatique depuis script.js
+                if (typeof showAutoPlanModal === 'function') {
+                    showAutoPlanModal();
+                } else {
+                    // Charger le script si ce n'est pas encore fait
+                    const script = document.createElement('script');
+                    script.src = 'script.js';
+                    document.head.appendChild(script);
+
+                    script.onload = function() {
+                        showAutoPlanModal();
+                    };
+                }
+            });
+
+            document.getElementById('history-btn').addEventListener('click', function() {
+                // Charger la fonction d'historique depuis script.js
+                if (typeof showHistoryModal === 'function') {
+                    showHistoryModal();
+                } else {
+                    // Charger le script si ce n'est pas encore fait
+                    const script = document.createElement('script');
+                    script.src = 'script.js';
+                    document.head.appendChild(script);
+
+                    script.onload = function() {
+                        showHistoryModal();
+                    };
+                }
+            });
+
+            document.getElementById('customize-theme-btn').addEventListener('click', function() {
+                // Charger la fonction de personnalisation du thème depuis script.js
+                if (typeof showThemeCustomizationModal === 'function') {
+                    showThemeCustomizationModal();
+                } else {
+                    // Charger le script si ce n'est pas encore fait
+                    const script = document.createElement('script');
+                    script.src = 'script.js';
+                    document.head.appendChild(script);
+
+                    script.onload = function() {
+                        showThemeCustomizationModal();
+                    };
+                }
             });
         }
 
