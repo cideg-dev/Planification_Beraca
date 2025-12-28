@@ -160,22 +160,35 @@ async function loadFromSupabaseForReport() {
 async function enableRealTimeSync() {
     try {
         // S'abonner aux changements dans la table planning_data
-        const subscription = supabaseClient
-            .from('planning_data')
-            .on('UPDATE', (payload) => {
-                console.log('Changements détectés dans la base de données:', payload);
-                // Mettre à jour les données localement
-                const record = payload.new;
-                interventions = JSON.parse(record.interventions);
-                intervenantsDB = JSON.parse(record.intervenantsdb);
+        const { data: subscription, error } = await supabaseClient
+            .channel('planning_data_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'planning_data',
+                    filter: 'id=eq.current'
+                },
+                (payload) => {
+                    console.log('Changements détectés dans la base de données:', payload);
+                    // Mettre à jour les données localement
+                    const record = payload.new;
+                    interventions = JSON.parse(record.interventions);
+                    intervenantsDB = JSON.parse(record.intervenantsdb);
 
-                // Mettre à jour l'interface
-                updateFilterOptions();
-                displayInterventions(interventions);
+                    // Mettre à jour l'interface
+                    updateFilterOptions();
+                    displayInterventions(interventions);
 
-                showAlert('Données mises à jour depuis le serveur.', 'info');
-            })
+                    showAlert('Données mises à jour depuis le serveur.', 'info');
+                }
+            )
             .subscribe();
+
+        if (error) {
+            throw error;
+        }
 
         console.log('Synchronisation en temps réel activée');
         return subscription;
