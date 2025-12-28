@@ -51,6 +51,12 @@
 
 
             <div class="ms-3">
+                <button class="btn btn-outline-primary" id="refresh-btn" title="Actualiser les données">
+                    <i class="fas fa-sync-alt"></i> Actualiser
+                </button>
+            </div>
+
+            <div class="ms-3">
                 <button class="btn btn-outline-primary" id="publish-btn" title="Publier les données">
                     <i class="fas fa-share-alt"></i> Publier
                 </button>
@@ -884,6 +890,23 @@
                 exportPdfBtn.addEventListener('click', showPdfCustomizationModal);
             }
 
+            // Bouton de rafraîchissement
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    // Afficher un indicateur de chargement
+                    const originalHTML = refreshBtn.innerHTML;
+                    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+                    refreshBtn.disabled = true;
+
+                    loadFromSupabaseForReport().finally(() => {
+                        // Restaurer le bouton à son état initial
+                        refreshBtn.innerHTML = originalHTML;
+                        refreshBtn.disabled = false;
+                    });
+                });
+            }
+
             // Bouton de publication
             const publishBtn = document.getElementById('publish-btn');
             if (publishBtn) {
@@ -1437,9 +1460,9 @@
 
     <script src="supabase-config.js"></script>
     <script>
-        // Charger les données depuis Supabase au chargement de la page
+        // Charger les données depuis Supabase au chargement de la page et activer la synchronisation
         document.addEventListener('DOMContentLoaded', function() {
-            loadFromSupabaseForReport();
+            initializeAutoSync();
         });
     </script>
 </body>

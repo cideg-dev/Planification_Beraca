@@ -155,3 +155,46 @@ async function loadFromSupabaseForReport() {
         return false;
     }
 }
+
+// Fonction pour activer la synchronisation en temps réel
+async function enableRealTimeSync() {
+    try {
+        // S'abonner aux changements dans la table planning_data
+        const subscription = supabaseClient
+            .from('planning_data')
+            .on('UPDATE', (payload) => {
+                console.log('Changements détectés dans la base de données:', payload);
+                // Mettre à jour les données localement
+                const record = payload.new;
+                interventions = JSON.parse(record.interventions);
+                intervenantsDB = JSON.parse(record.intervenantsdb);
+
+                // Mettre à jour l'interface
+                updateFilterOptions();
+                displayInterventions(interventions);
+
+                showAlert('Données mises à jour depuis le serveur.', 'info');
+            })
+            .subscribe();
+
+        console.log('Synchronisation en temps réel activée');
+        return subscription;
+    } catch (error) {
+        console.error('Erreur lors de l\'activation de la synchronisation en temps réel:', error);
+        return null;
+    }
+}
+
+// Fonction pour charger et activer la synchronisation automatique
+async function initializeAutoSync() {
+    // Charger les données initiales
+    await loadFromSupabaseForReport();
+
+    // Activer la synchronisation en temps réel
+    await enableRealTimeSync();
+
+    // Mettre en place une vérification périodique en fallback
+    setInterval(async () => {
+        await loadFromSupabaseForReport();
+    }, 30000); // Vérifier toutes les 30 secondes
+}
