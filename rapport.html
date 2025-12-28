@@ -624,18 +624,81 @@
             // Cette fonction est conservée pour une éventuelle utilisation future
         }
 
-        // Fonction pour charger les données sauvegardées
+        // Fonction pour déchiffrer les données
+        function decryptData(encryptedData) {
+            try {
+                const jsonString = decodeURIComponent(atob(encryptedData));
+                return JSON.parse(jsonString);
+            } catch (error) {
+                console.error('Erreur lors du déchiffrement des données:', error);
+                return null;
+            }
+        }
+
+        // Fonction pour charger les données sauvegardées avec support du chiffrement
         function loadFromLocalStorage() {
             try {
-                const savedData = localStorage.getItem('planningData');
+                // Essayer de charger les données chiffrées (nouvelle méthode sécurisée)
+                const encryptedData = localStorage.getItem('churchPlanningDataEncrypted');
+                if (encryptedData) {
+                    const data = decryptData(encryptedData);
+                    if (data) {
+                        processLoadedData(data);
+                        return;
+                    }
+                }
+
+                // Essayer de charger les données non chiffrées (ancienne méthode ou fallback)
+                const savedData = localStorage.getItem('churchPlanningData');
                 if (savedData) {
                     const data = JSON.parse(savedData);
-                    interventions = data.interventions || [];
-                    intervenantsDB = data.intervenantsDB || intervenantsDB;
-                    console.log(`Données chargées: ${interventions.length} interventions, ${intervenantsDB.length} intervenants`);
+                    processLoadedData(data);
+                    return;
                 }
+
+                // Essayer l'ancienne clé (compatibilité descendante)
+                const oldSavedData = localStorage.getItem('planningData');
+                if (oldSavedData) {
+                    const data = JSON.parse(oldSavedData);
+                    processLoadedData(data);
+                    return;
+                }
+
+                console.log("Aucune donnée trouvée dans le stockage local.");
             } catch (e) {
                 console.error('Erreur lors du chargement des données:', e);
+                showAlert('Erreur lors du chargement des données locales.', 'danger');
+            }
+        }
+
+        // Fonction pour traiter les données chargées
+        function processLoadedData(data) {
+            if (data.interventions && Array.isArray(data.interventions)) {
+                interventions = data.interventions;
+            }
+            
+            if (data.intervenants && Array.isArray(data.intervenants)) {
+                intervenantsDB = data.intervenants;
+            } else if (data.intervenantsDB && Array.isArray(data.intervenantsDB)) {
+                // Support pour l'ancien format
+                intervenantsDB = data.intervenantsDB;
+            }
+
+            // Charger le thème si disponible
+            if (data.theme) {
+                changeTheme(data.theme);
+            }
+
+            console.log(`Données chargées: ${interventions.length} interventions, ${intervenantsDB.length} intervenants`);
+            
+            // Mettre à jour l'affichage
+            updateFilterOptions();
+            displayInterventions(interventions);
+            
+            if (interventions.length > 0) {
+                 showAlert(`${interventions.length} intervention(s) chargée(s).`, 'success');
+            } else {
+                 showAlert('Aucune intervention trouvée dans les données sauvegardées.', 'info');
             }
         }
 
