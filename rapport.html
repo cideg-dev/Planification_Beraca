@@ -1044,6 +1044,65 @@
             document.body.className = 'theme-' + theme;
         }
 
+        // Fonction pour mettre à jour l'indicateur de synchronisation
+        function updateSyncIndicator(status) {
+            // Créer ou mettre à jour l'indicateur de synchronisation
+            let syncIndicator = document.getElementById('sync-indicator');
+
+            if (!syncIndicator) {
+                // Créer l'indicateur s'il n'existe pas
+                // On cherche d'abord s'il y a une place dans la navbar
+                const navContainer = document.querySelector('.navbar .container-fluid');
+                if (navContainer) {
+                    syncIndicator = document.createElement('div');
+                    syncIndicator.id = 'sync-indicator';
+                    syncIndicator.className = 'sync-indicator ms-3 text-white';
+                    // Insérer avant les boutons de droite si possible, sinon à la fin
+                    const lastGroup = navContainer.querySelector('.ms-3');
+                    if (lastGroup) {
+                        navContainer.insertBefore(syncIndicator, lastGroup);
+                    } else {
+                        navContainer.appendChild(syncIndicator);
+                    }
+                } else {
+                    return; // Impossible de placer l'indicateur
+                }
+            }
+
+            // Mettre à jour le contenu selon l'état
+            let iconClass = '';
+            let text = '';
+            let colorClass = '';
+
+            switch(status) {
+                case 'loading':
+                    iconClass = 'fas fa-sync-alt fa-spin';
+                    text = ' Synchronisation...';
+                    colorClass = 'text-warning';
+                    break;
+                case 'synced':
+                    iconClass = 'fas fa-check-circle';
+                    text = ' Synchronisé';
+                    colorClass = 'text-light'; // Ou success si le fond le permet
+                    break;
+                case 'error':
+                    iconClass = 'fas fa-exclamation-triangle';
+                    text = ' Erreur Synchro';
+                    colorClass = 'text-danger';
+                    break;
+                case 'no-data':
+                    iconClass = 'fas fa-info-circle';
+                    text = ' Aucune donnée';
+                    colorClass = 'text-muted';
+                    break;
+                default:
+                    iconClass = 'fas fa-sync-alt';
+                    text = ' Synchronisation';
+            }
+
+            syncIndicator.innerHTML = `<i class="${iconClass} ${colorClass}"></i><span class="d-none d-md-inline ${colorClass}">${text}</span>`;
+        }
+
         function generatePDFReportWrapper(options, fileName) {
             // Récupérer les interventions filtrées actuelles
             const tableRows = document.querySelectorAll('#interventions-table-body tr');

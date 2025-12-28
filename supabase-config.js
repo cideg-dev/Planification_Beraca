@@ -118,7 +118,9 @@ async function loadFromSupabase() {
 async function loadFromSupabaseForReport() {
     try {
         // Mettre à jour l'indicateur de synchronisation
-        updateSyncIndicator('loading');
+        if (typeof updateSyncIndicator === 'function') {
+            updateSyncIndicator('loading');
+        }
 
         const { data, error } = await supabaseClient
             .from('planning_data')  // Remplacez par le nom de votre table
@@ -149,14 +151,18 @@ async function loadFromSupabaseForReport() {
             showAlert(`${interventions.length} intervention(s) chargée(s) depuis le serveur.`, 'success');
 
             // Mettre à jour l'indicateur de synchronisation
-            updateSyncIndicator('synced');
+            if (typeof updateSyncIndicator === 'function') {
+                updateSyncIndicator('synced');
+            }
 
             return true;
         } else {
             console.log('Aucune donnée trouvée dans Supabase');
 
             // Mettre à jour l'indicateur de synchronisation
-            updateSyncIndicator('no-data');
+            if (typeof updateSyncIndicator === 'function') {
+                updateSyncIndicator('no-data');
+            }
 
             return false;
         }
@@ -165,7 +171,9 @@ async function loadFromSupabaseForReport() {
         showAlert('Erreur lors du chargement des données en ligne: ' + error.message, 'danger');
 
         // Mettre à jour l'indicateur de synchronisation
-        updateSyncIndicator('error');
+        if (typeof updateSyncIndicator === 'function') {
+            updateSyncIndicator('error');
+        }
 
         return false;
     }
