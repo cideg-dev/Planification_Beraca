@@ -8,7 +8,124 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles de base pour la page de rapport */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        .ad-header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .ad-header h1 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .main-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        
+        .table th {
+            background-color: #2c3e50;
+            color: white;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            transform: scale(1.005);
+            transition: all 0.2s ease;
+        }
+        
+        .alert-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 5px;
+            margin-left: 20px;
+        }
+        
+        .theme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: transform 0.2s;
+        }
+        
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .theme-light-btn { background-color: #ffffff; }
+        .theme-dark-btn { background-color: #2c3e50; }
+        .theme-neon-btn { background-color: #00ff00; }
+        .theme-galaxy-btn { background-color: #1a1a2e; }
+        .theme-rainbow-btn { 
+            background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
+        }
+        .theme-high-contrast-btn { 
+            background-color: #000000; 
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .theme-pastel-btn { 
+            background-color: #ffb6c1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body class="theme-light">
     <!-- Navigation -->
@@ -48,7 +165,6 @@
                     <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
                 </ul>
             </div>
-
 
             <div class="ms-3">
                 <button class="btn btn-outline-primary" id="refresh-btn" title="Actualiser les données">
@@ -171,6 +287,12 @@
                         </thead>
                         <tbody id="interventions-table-body">
                             <!-- Les données seront insérées ici dynamiquement -->
+                            <tr id="no-data-row" style="display: none;">
+                                <td colspan="8" class="text-center text-muted py-5">
+                                    <i class="fas fa-database fa-3x mb-3"></i>
+                                    <p>Aucune donnée disponible. Veuillez charger des interventions.</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -225,21 +347,22 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="pdf-margin-right" class="form-label">Marge droite</label>
-                            <input type="number" class="form-control" id="pdf-margin-right" value="10" min="0">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="pdf-margin-bottom" class="form-label">Marge basse</label>
-                            <input type="number" class="form-control" id="pdf-margin-bottom" value="10" min="0">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="pdf-margin-left" class="form-label">Marge gauche</label>
-                            <input type="number" class="form-control" id="pdf-margin-left" value="10" min="0">
+                                <input type="number" class="form-control" id="pdf-margin-right" value="10" min="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="pdf-margin-bottom" class="form-label">Marge basse</label>
+                                <input type="number" class="form-control" id="pdf-margin-bottom" value="10" min="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="pdf-margin-left" class="form-label">Marge gauche</label>
+                                <input type="number" class="form-control" id="pdf-margin-left" value="10" min="0">
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" id="confirm-pdf-export">Exporter</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="confirm-pdf-export">Exporter</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,127 +375,443 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script>
-        // Charger les données des interventions
+        // Variables globales
+        let interventions = [];
+        let intervenantsDB = [];
+
+        // Charger les données dès que le DOM est prêt
         document.addEventListener('DOMContentLoaded', function() {
             initializeRapportPage();
         });
 
-        // Données globales pour la page de rapport
-        let interventions = [];
-        let intervenantsDB = [
-            { id: 1, title: "Pasteur", firstName: "Christophe", lastName: "SATCHI AKOUETE", category: "clergy" },
-            { id: 2, title: "Diacre", firstName: "Dieudonné", lastName: "N'DIMONTE", category: "clergy" },
-            { id: 3, title: "Mr", firstName: "Joël", lastName: "SENOUWA", category: "members" },
-            { id: 4, title: "Mr", firstName: "Michel", lastName: "MOUDA", category: "members" },
-            { id: 5, title: "Mr", firstName: "Jonas", lastName: "KPANATCHE", category: "members" },
-            { id: 6, title: "Mr", firstName: "Ekué", lastName: "DAVI", category: "members" },
-            { id: 7, title: "Mme", firstName: "ODETTE", lastName: "N'TCHA", category: "members" },
-            { id: 8, title: "Mme", firstName: "SYLVIE", lastName: "DOKO", category: "members" },
-            { id: 9, title: "Diacre", firstName: "Robert", lastName: "NOUGBONAGNI", category: "clergy" },
-            { id: 10, title: "Mme", firstName: "Rébecca", lastName: "N'DAH", category: "members" },
-            { id: 11, title: "Mme", firstName: "Pierrette", lastName: "ALOYA", category: "members" },
-            { id: 12, title: "Mr", firstName: "GuY", lastName: "LOKOSSOU", category: "members" },
-            { id: 13, title: "Mme", firstName: "Grace", lastName: "PASTEUR", category: "members" },
-            { id: 14, title: "Mr", firstName: "Ezéchiel", lastName: "AKOMEDI", category: "members" },
-            { id: 15, title: "Diacre", firstName: "Jonas", lastName: "MEMEGNON", category: "clergy" },
-            { id: 16, title: "Mme", firstName: "Reine", lastName: "N'DIMONTE", category: "members" },
-            { id: 17, title: "Mme", firstName: "Rebecca", lastName: "SENOUWA", category: "members" },
-            { id: 18, title: "Mme", firstName: "KOMBETO", lastName: "", category: "members" },
-            { id: 19, title: "Mme", firstName: "N'DAH", lastName: "REBECCA", category: "members" },
-            { id: 20, title: "Mlle", firstName: "Sandra", lastName: "DJIHENTO", category: "members" }
-        ];
-
         function initializeRapportPage() {
-            // Charger les données sauvegardées
-            loadFromLocalStorage();
-
-            // Charger les données publiées si présentes dans l'URL
-            loadPublishedDataForReport();
-
-            // Nettoyer les données expirées
-            cleanupExpiredDataForReport();
-
-            // Mettre à jour les filtres
-            updateFilterOptions();
-
-            // Afficher toutes les interventions initialement
-            displayInterventions(interventions);
-
-            // Afficher un message selon le nombre d'interventions
-            if (interventions.length === 0) {
-                showAlert("Aucune donnée disponible. Si vous avez un lien de publication, assurez-vous qu'il est correct.", "info");
-            } else {
-                showAlert(`${interventions.length} intervention(s) chargée(s) avec succès.`, "success");
-            }
-
+            console.log('Initialisation de la page de rapport...');
+            
+            // Charger les données
+            loadDataForReport();
+            
             // Configurer les événements
             setupRapportEventListeners();
         }
 
-        function setupRapportEventListeners() {
-            // Événements pour les filtres
-            document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
-            document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
-            document.getElementById('export-pdf-btn').addEventListener('click', showPdfCustomizationModal);
+        function loadDataForReport() {
+            console.log('Chargement des données pour le rapport...');
             
-            // Événements pour la personnalisation PDF
-            document.getElementById('confirm-pdf-export').addEventListener('click', function() {
-                const options = {
-                    orientation: document.getElementById('pdf-orientation').value,
-                    format: document.getElementById('pdf-format').value,
-                    margins: {
-                        top: parseInt(document.getElementById('pdf-margin-top').value) || 10,
-                        right: parseInt(document.getElementById('pdf-margin-right').value) || 10,
-                        bottom: parseInt(document.getElementById('pdf-margin-bottom').value) || 10,
-                        left: parseInt(document.getElementById('pdf-margin-left').value) || 10
-                    },
-                    includeLogo: document.getElementById('pdf-include-logo').checked
+            // 1. D'abord vérifier si des données sont passées dans l'URL
+            loadPublishedDataFromURL();
+            
+            // 2. Si aucune donnée dans l'URL, charger depuis localStorage
+            if (interventions.length === 0) {
+                loadDataFromLocalStorage();
+            }
+            
+            // 3. Si toujours aucune donnée, essayer de charger depuis Supabase
+            if (interventions.length === 0) {
+                loadDataFromSupabase();
+            }
+            
+            // Mettre à jour l'affichage
+            updateDisplay();
+        }
+
+        function loadPublishedDataFromURL() {
+            console.log('Vérification des données dans l\'URL...');
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+            
+            if (dataParam) {
+                try {
+                    console.log('Données trouvées dans l\'URL, tentative de décodage...');
+                    
+                    // Décoder les données
+                    let decodedData;
+                    try {
+                        // Première méthode de décodage
+                        decodedData = decodeURIComponent(atob(dataParam));
+                    } catch (e1) {
+                        console.log('Première méthode de décodage échouée, tentative alternative...');
+                        // Méthode alternative
+                        decodedData = atob(dataParam);
+                    }
+                    
+                    console.log('Données décodées:', decodedData);
+                    
+                    const data = JSON.parse(decodedData);
+                    
+                    // Extraire les interventions
+                    if (data.interventions && Array.isArray(data.interventions)) {
+                        interventions = data.interventions;
+                        console.log(`${interventions.length} interventions chargées depuis l'URL`);
+                    }
+                    
+                    // Extraire les intervenants
+                    if (data.intervenantsDB && Array.isArray(data.intervenantsDB)) {
+                        intervenantsDB = data.intervenantsDB;
+                    } else if (data.intervenants && Array.isArray(data.intervenants)) {
+                        intervenantsDB = data.intervenants;
+                    }
+                    
+                    // Charger le thème
+                    if (data.theme) {
+                        changeTheme(data.theme);
+                    }
+                    
+                    showAlert('Données publiées chargées avec succès depuis l\'URL', 'success');
+                    
+                } catch (error) {
+                    console.error('Erreur lors du chargement des données depuis l\'URL:', error);
+                    showAlert('Impossible de charger les données depuis l\'URL. Vérifiez que le lien est correct.', 'warning');
+                }
+            }
+        }
+
+        function loadDataFromLocalStorage() {
+            console.log('Chargement des données depuis localStorage...');
+            
+            // Essayer différentes clés possibles
+            const possibleKeys = [
+                'churchPlanningDataEncrypted',
+                'churchPlanningData',
+                'planningData',
+                'planning_data'
+            ];
+            
+            for (const key of possibleKeys) {
+                try {
+                    const savedData = localStorage.getItem(key);
+                    if (savedData) {
+                        console.log(`Données trouvées avec la clé: ${key}`);
+                        const data = JSON.parse(savedData);
+                        
+                        // Extraire les interventions
+                        if (data.interventions && Array.isArray(data.interventions)) {
+                            interventions = data.interventions;
+                            console.log(`${interventions.length} interventions chargées depuis localStorage`);
+                        }
+                        
+                        // Extraire les intervenants
+                        if (data.intervenantsDB && Array.isArray(data.intervenantsDB)) {
+                            intervenantsDB = data.intervenantsDB;
+                        } else if (data.intervenants && Array.isArray(data.intervenants)) {
+                            intervenantsDB = data.intervenants;
+                        }
+                        
+                        // Charger le thème
+                        if (data.theme) {
+                            changeTheme(data.theme);
+                        }
+                        
+                        if (interventions.length > 0) {
+                            showAlert(`${interventions.length} interventions chargées depuis la sauvegarde locale`, 'success');
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Erreur lors du chargement de ${key}:`, e);
+                }
+            }
+            
+            // Si on a des interventions mais pas d'intervenants, charger les intervenants par défaut
+            if (interventions.length > 0 && intervenantsDB.length === 0) {
+                loadDefaultIntervenants();
+            }
+        }
+
+        function loadDefaultIntervenants() {
+            // Charger les intervenants par défaut
+            intervenantsDB = [
+                { id: 1, title: "Pasteur", firstName: "Christophe", lastName: "SATCHI AKOUETE", category: "clergy" },
+                { id: 2, title: "Diacre", firstName: "Dieudonné", lastName: "N'DIMONTE", category: "clergy" },
+                { id: 3, title: "Mr", firstName: "Joël", lastName: "SENOUWA", category: "members" },
+                { id: 4, title: "Mr", firstName: "Michel", lastName: "MOUDA", category: "members" },
+                { id: 5, title: "Mr", firstName: "Jonas", lastName: "KPANATCHE", category: "members" },
+                { id: 6, title: "Mr", firstName: "Ekué", lastName: "DAVI", category: "members" },
+                { id: 7, title: "Mme", firstName: "ODETTE", lastName: "N'TCHA", category: "members" },
+                { id: 8, title: "Mme", firstName: "SYLVIE", lastName: "DOKO", category: "members" },
+                { id: 9, title: "Diacre", firstName: "Robert", lastName: "NOUGBONAGNI", category: "clergy" },
+                { id: 10, title: "Mme", firstName: "Rébecca", lastName: "N'DAH", category: "members" },
+                { id: 11, title: "Mme", firstName: "Pierrette", lastName: "ALOYA", category: "members" },
+                { id: 12, title: "Mr", firstName: "GuY", lastName: "LOKOSSOU", category: "members" },
+                { id: 13, title: "Mme", firstName: "Grace", lastName: "PASTEUR", category: "members" },
+                { id: 14, title: "Mr", firstName: "Ezéchiel", lastName: "AKOMEDI", category: "members" },
+                { id: 15, title: "Diacre", firstName: "Jonas", lastName: "MEMEGNON", category: "clergy" },
+                { id: 16, title: "Mme", firstName: "Reine", lastName: "N'DIMONTE", category: "members" },
+                { id: 17, title: "Mme", firstName: "Rebecca", lastName: "SENOUWA", category: "members" },
+                { id: 18, title: "Mme", firstName: "KOMBETO", lastName: "", category: "members" },
+                { id: 19, title: "Mme", firstName: "N'DAH", lastName: "REBECCA", category: "members" },
+                { id: 20, title: "Mlle", firstName: "Sandra", lastName: "DJIHENTO", category: "members" }
+            ];
+        }
+
+        async function loadDataFromSupabase() {
+            console.log('Tentative de chargement depuis Supabase...');
+            
+            // Vous devez avoir configuré Supabase dans un fichier séparé
+            // Si vous avez un fichier supabase-config.js, il devrait être inclus avant ce script
+            if (typeof window.supabase === 'undefined') {
+                console.log('Supabase non configuré');
+                return;
+            }
+            
+            try {
+                // Charger les interventions
+                const { data: interventionsData, error: interventionsError } = await window.supabase
+                    .from('interventions')
+                    .select('*');
+                    
+                if (!interventionsError && interventionsData) {
+                    interventions = interventionsData;
+                    console.log(`${interventions.length} interventions chargées depuis Supabase`);
+                }
+                
+                // Charger les intervenants
+                const { data: intervenantsData, error: intervenantsError } = await window.supabase
+                    .from('intervenants')
+                    .select('*');
+                    
+                if (!intervenantsError && intervenantsData) {
+                    intervenantsDB = intervenantsData;
+                }
+                
+                if (interventions.length > 0) {
+                    showAlert(`${interventions.length} interventions chargées depuis le cloud`, 'success');
+                }
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement depuis Supabase:', error);
+            }
+        }
+
+        function updateDisplay() {
+            console.log('Mise à jour de l\'affichage...');
+            
+            // Afficher/masquer le message "aucune donnée"
+            const noDataRow = document.getElementById('no-data-row');
+            if (noDataRow) {
+                if (interventions.length === 0) {
+                    noDataRow.style.display = '';
+                } else {
+                    noDataRow.style.display = 'none';
+                }
+            }
+            
+            // Mettre à jour le tableau
+            displayInterventions(interventions);
+            
+            // Mettre à jour les filtres
+            updateFilterOptions();
+        }
+
+        function displayInterventions(interventionsToShow) {
+            const tableBody = document.getElementById('interventions-table-body');
+            if (!tableBody) return;
+            
+            // Garder la ligne "aucune donnée"
+            const noDataRow = document.getElementById('no-data-row');
+            
+            // Supprimer toutes les lignes sauf "aucune donnée"
+            const rowsToRemove = tableBody.querySelectorAll('tr:not(#no-data-row)');
+            rowsToRemove.forEach(row => row.remove());
+            
+            // Si aucune intervention à afficher
+            if (!interventionsToShow || interventionsToShow.length === 0) {
+                if (noDataRow) {
+                    noDataRow.style.display = '';
+                }
+                document.getElementById('results-count').textContent = '0 intervention(s)';
+                return;
+            }
+            
+            // Masquer la ligne "aucune donnée"
+            if (noDataRow) {
+                noDataRow.style.display = 'none';
+            }
+            
+            // Ajouter les interventions
+            interventionsToShow.forEach(intervention => {
+                // Trouver l'intervenant correspondant
+                let category = 'inconnue';
+                if (intervention.firstName && intervention.lastName) {
+                    const intervenant = intervenantsDB.find(iv => 
+                        iv.firstName === intervention.firstName && iv.lastName === intervention.lastName
+                    );
+                    
+                    if (intervenant && intervenant.category) {
+                        category = intervenant.category;
+                    }
+                }
+                
+                // Définir les labels des catégories
+                const categoryLabels = {
+                    'clergy': 'Clergé',
+                    'members': 'Membres',
+                    'singers': 'Chanteurs',
+                    'musicians': 'Musiciens',
+                    'technical': 'Technique',
+                    'volunteers': 'Bénévoles',
+                    'inconnue': 'Inconnue'
                 };
-
-                const fileName = document.getElementById('pdf-filename').value || 'Rapport_Interventions';
-
-                // Fermer la modale
-                const modal = bootstrap.Modal.getInstance(document.getElementById('pdfCustomizationModal'));
-                modal.hide();
-
-                // Générer le PDF
-                generatePDFReportWrapper(options, fileName);
+                
+                // Créer la ligne
+                const row = document.createElement('tr');
+                
+                // S'assurer que tous les champs existent
+                const date = intervention.date || '';
+                const dayOfWeek = intervention.dayOfWeek || getDayOfWeekFromDate(date);
+                const cultType = intervention.cultType || '';
+                const place = intervention.place || '';
+                const theme = intervention.theme || '';
+                const fullName = intervention.fullName || 
+                                ((intervention.title || '') + ' ' + (intervention.firstName || '') + ' ' + (intervention.lastName || '')).trim();
+                const observations = intervention.observations || '';
+                
+                row.innerHTML = `
+                    <td>${formatDate(date)}</td>
+                    <td>${dayOfWeek}</td>
+                    <td>${cultType}</td>
+                    <td>${place}</td>
+                    <td>${theme}</td>
+                    <td>${fullName}</td>
+                    <td>${categoryLabels[category] || category}</td>
+                    <td>${observations}</td>
+                `;
+                tableBody.appendChild(row);
             });
+            
+            // Mettre à jour le compteur
+            document.getElementById('results-count').textContent = `${interventionsToShow.length} intervention(s)`;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return dateString; // Retourner tel quel si ce n'est pas une date valide
+                }
+                return date.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        function getDayOfWeekFromDate(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '';
+                
+                const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+                return days[date.getDay()];
+            } catch (error) {
+                return '';
+            }
         }
 
         function updateFilterOptions() {
-            // Remplir les filtres avec les données existantes
-            const cultTypes = [...new Set(interventions.map(i => i.cultType))].filter(Boolean);
-            const places = [...new Set(interventions.map(i => i.place))].filter(Boolean);
-            const intervenants = [...new Set(interventions.map(i => i.fullName))].filter(Boolean);
-            const days = [...new Set(interventions.map(i => i.dayOfWeek))].filter(Boolean);
+            // Récupérer toutes les valeurs uniques
+            const cultTypes = [...new Set(interventions.map(i => i.cultType).filter(Boolean))];
+            const places = [...new Set(interventions.map(i => i.place).filter(Boolean))];
+            const intervenants = [...new Set(interventions.map(i => {
+                if (i.fullName) return i.fullName;
+                return ((i.title || '') + ' ' + (i.firstName || '') + ' ' + (i.lastName || '')).trim();
+            }).filter(Boolean))];
+            const days = [...new Set(interventions.map(i => {
+                if (i.dayOfWeek) return i.dayOfWeek;
+                return getDayOfWeekFromDate(i.date);
+            }).filter(Boolean))];
             
-            // Remplir le filtre des types de culte
+            // Mettre à jour le filtre des types de culte
             const cultTypeSelect = document.getElementById('filter-cult-type');
-            cultTypeSelect.innerHTML = '<option value="">Tous les types</option>';
-            cultTypes.forEach(type => {
-                cultTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
-            });
+            if (cultTypeSelect) {
+                let options = '<option value="">Tous les types</option>';
+                cultTypes.forEach(type => {
+                    options += `<option value="${type}">${type}</option>`;
+                });
+                cultTypeSelect.innerHTML = options;
+            }
             
-            // Remplir le filtre des lieux
+            // Mettre à jour le filtre des lieux
             const placeSelect = document.getElementById('filter-place');
-            placeSelect.innerHTML = '<option value="">Tous les lieux</option>';
-            places.forEach(place => {
-                placeSelect.innerHTML += `<option value="${place}">${place}</option>`;
-            });
+            if (placeSelect) {
+                let options = '<option value="">Tous les lieux</option>';
+                places.forEach(place => {
+                    options += `<option value="${place}">${place}</option>`;
+                });
+                placeSelect.innerHTML = options;
+            }
             
-            // Remplir le filtre des intervenants
+            // Mettre à jour le filtre des intervenants
             const intervenantSelect = document.getElementById('filter-intervenant');
-            intervenantSelect.innerHTML = '<option value="">Tous les intervenants</option>';
-            intervenants.forEach(name => {
-                intervenantSelect.innerHTML += `<option value="${name}">${name}</option>`;
-            });
+            if (intervenantSelect) {
+                let options = '<option value="">Tous les intervenants</option>';
+                intervenants.forEach(name => {
+                    options += `<option value="${name}">${name}</option>`;
+                });
+                intervenantSelect.innerHTML = options;
+            }
             
-            // Remplir le filtre des jours
+            // Mettre à jour le filtre des jours
             const daySelect = document.getElementById('filter-day');
-            daySelect.innerHTML = '<option value="">Tous les jours</option>';
-            days.forEach(day => {
-                daySelect.innerHTML += `<option value="${day}">${day}</option>`;
+            if (daySelect) {
+                let options = '<option value="">Tous les jours</option>';
+                days.forEach(day => {
+                    options += `<option value="${day}">${day}</option>`;
+                });
+                daySelect.innerHTML = options;
+            }
+        }
+
+        function setupRapportEventListeners() {
+            console.log('Configuration des événements...');
+            
+            // Filtres
+            const applyFiltersBtn = document.getElementById('apply-filters-btn');
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', applyFilters);
+            }
+            
+            const clearFiltersBtn = document.getElementById('clear-filters-btn');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', clearFilters);
+            }
+            
+            const exportPdfBtn = document.getElementById('export-pdf-btn');
+            if (exportPdfBtn) {
+                exportPdfBtn.addEventListener('click', showPdfCustomizationModal);
+            }
+            
+            const confirmPdfExport = document.getElementById('confirm-pdf-export');
+            if (confirmPdfExport) {
+                confirmPdfExport.addEventListener('click', generatePDF);
+            }
+            
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    showAlert('Rechargement des données...', 'info');
+                    loadDataForReport();
+                });
+            }
+            
+            const publishBtn = document.getElementById('publish-btn');
+            if (publishBtn) {
+                publishBtn.addEventListener('click', publishData);
+            }
+            
+            // Thèmes
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            themeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const theme = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    changeTheme(theme);
+                });
             });
         }
 
@@ -384,34 +823,43 @@
             const intervenant = document.getElementById('filter-intervenant').value;
             const category = document.getElementById('filter-category').value;
             const day = document.getElementById('filter-day').value;
-
+            
             let filteredInterventions = [...interventions];
-
-            // Filtre par date de début
+            
+            // Filtre par date
             if (startDate) {
-                filteredInterventions = filteredInterventions.filter(i => i.date >= startDate);
+                filteredInterventions = filteredInterventions.filter(i => {
+                    if (!i.date) return false;
+                    return i.date >= startDate;
+                });
             }
-
-            // Filtre par date de fin
+            
             if (endDate) {
-                filteredInterventions = filteredInterventions.filter(i => i.date <= endDate);
+                filteredInterventions = filteredInterventions.filter(i => {
+                    if (!i.date) return false;
+                    return i.date <= endDate;
+                });
             }
-
+            
             // Filtre par type de culte
             if (cultType) {
                 filteredInterventions = filteredInterventions.filter(i => i.cultType === cultType);
             }
-
+            
             // Filtre par lieu
             if (place) {
                 filteredInterventions = filteredInterventions.filter(i => i.place === place);
             }
-
+            
             // Filtre par intervenant
             if (intervenant) {
-                filteredInterventions = filteredInterventions.filter(i => i.fullName === intervenant);
+                filteredInterventions = filteredInterventions.filter(i => {
+                    const fullName = i.fullName || 
+                                   ((i.title || '') + ' ' + (i.firstName || '') + ' ' + (i.lastName || '')).trim();
+                    return fullName === intervenant;
+                });
             }
-
+            
             // Filtre par catégorie
             if (category) {
                 filteredInterventions = filteredInterventions.filter(i => {
@@ -421,585 +869,19 @@
                     return intervenant && intervenant.category === category;
                 });
             }
-
+            
             // Filtre par jour
             if (day) {
-                filteredInterventions = filteredInterventions.filter(i => i.dayOfWeek === day);
-            }
-
-            // Afficher les interventions filtrées
-            displayInterventions(filteredInterventions);
-        }
-
-        function clearFilters() {
-            document.getElementById('filter-date-start').value = '';
-            document.getElementById('filter-date-end').value = '';
-            document.getElementById('filter-cult-type').value = '';
-            document.getElementById('filter-place').value = '';
-            document.getElementById('filter-intervenant').value = '';
-            document.getElementById('filter-category').value = '';
-            document.getElementById('filter-day').value = '';
-
-            displayInterventions(interventions);
-        }
-
-        function displayInterventions(interventionsToShow) {
-            const tableBody = document.getElementById('interventions-table-body');
-            tableBody.innerHTML = '';
-
-            interventionsToShow.forEach(intervention => {
-                const intervenant = intervenantsDB.find(iv => 
-                    iv.firstName === intervention.firstName && iv.lastName === intervention.lastName
-                );
-                
-                const category = intervenant ? intervenant.category : 'inconnue';
-                
-                const categoryLabels = {
-                    'clergy': 'Clergé',
-                    'members': 'Membres',
-                    'singers': 'Chanteurs',
-                    'musicians': 'Musiciens',
-                    'technical': 'Technique',
-                    'volunteers': 'Bénévoles'
-                };
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${formatDate(intervention.date)}</td>
-                    <td>${intervention.dayOfWeek}</td>
-                    <td>${intervention.cultType}</td>
-                    <td>${intervention.place}</td>
-                    <td>${intervention.theme || ''}</td>
-                    <td>${intervention.fullName}</td>
-                    <td>${categoryLabels[category] || 'Inconnue'}</td>
-                    <td>${intervention.observations || ''}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            // Mettre à jour le compteur de résultats
-            document.getElementById('results-count').textContent = `${interventionsToShow.length} intervention(s)`;
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        }
-
-        function generatePDFReportWrapper(options, fileName) {
-            // Récupérer les interventions filtrées actuelles
-            const tableRows = document.querySelectorAll('#interventions-table-body tr');
-            if (tableRows.length === 0) {
-                showAlert('Aucune intervention à exporter.', 'warning');
-                return;
-            }
-
-            // Générer un tableau des interventions à partir des lignes du tableau affiché
-            const interventionsToShow = [];
-            tableRows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 8) { // S'assurer qu'il y a suffisamment de cellules
-                    const intervention = {
-                        date: reverseDateFormat(cells[0].textContent.trim()),
-                        dayOfWeek: cells[1].textContent.trim(),
-                        cultType: cells[2].textContent.trim(),
-                        place: cells[3].textContent.trim(),
-                        theme: cells[4].textContent.trim(),
-                        fullName: cells[5].textContent.trim(),
-                        firstName: '', // Ces champs seront extraits de fullName si possible
-                        lastName: '',
-                        observations: cells[7].textContent.trim()
-                    };
-
-                    // Extraire prénom et nom de la chaîne complète
-                    const nameParts = intervention.fullName.split(' ');
-                    if (nameParts.length >= 2) {
-                        intervention.firstName = nameParts[0];
-                        intervention.lastName = nameParts.slice(1).join(' ');
-                    } else {
-                        intervention.firstName = intervention.fullName;
-                    }
-
-                    interventionsToShow.push(intervention);
-                }
-            });
-
-            // Appeler la fonction centrale dans script.js
-            window.generatePDFReport(interventionsToShow, options, fileName);
-        }
-
-        // Fonction utilitaire pour inverser le format de date (de dd/mm/yyyy à yyyy-mm-dd)
-        function reverseDateFormat(dateStr) {
-            if (!dateStr || dateStr.length !== 10) return dateStr; // Si le format n'est pas dd/mm/yyyy, retourner tel quel
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return dateStr;
-            return `${parts[2]}-${parts[1]}-${parts[0]}`;
-        }
-
-        // Fonction pour charger les données sauvegardées (copiée de script.js)
-        function loadFromLocalStorage() {
-            try {
-                const savedData = localStorage.getItem('planningData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    interventions = data.interventions || [];
-                    intervenantsDB = data.intervenantsDB || intervenantsDB;
-                    console.log(`Données chargées: ${interventions.length} interventions, ${intervenantsDB.length} intervenants`);
-                }
-            } catch (e) {
-                console.error('Erreur lors du chargement des données:', e);
-            }
-        }
-
-        // Fonction pour afficher les alertes (copiée de script.js)
-        function showAlert(message, type = 'info') {
-            // Supprimer les alertes existantes
-            const existingAlert = document.querySelector('.alert-custom');
-            if (existingAlert) existingAlert.remove();
-
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-custom`;
-            alertDiv.textContent = message;
-
-            document.body.appendChild(alertDiv);
-
-            // Supprimer l'alerte après 5 secondes
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 5000);
-        }
-
-        // Fonction pour changer de thème (copiée de script.js)
-        function changeTheme(theme) {
-            // Valider que le thème est autorisé pour éviter les injections CSS
-            const allowedThemes = ['light', 'dark', 'neon', 'galaxy', 'rainbow', 'high-contrast', 'pastel'];
-            if (!allowedThemes.includes(theme)) {
-                console.warn(`Thème non autorisé : ${theme}`);
-                return;
-            }
-
-            document.body.className = 'theme-' + theme;
-        }
-
-        // Fonction pour charger les données publiées à partir de l'URL (spécifique à la page de rapport)
-        function loadPublishedDataForReport() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedData = urlParams.get('data');
-
-            if (encodedData) {
-                try {
-                    // Décoder les données
-                    const decodedData = decodeURIComponent(atob(encodedData).split('').map(function(c) {
-                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                    }).join(''));
-
-                    const data = JSON.parse(decodedData);
-
-                    // Charger les données dans l'application
-                    interventions = data.interventions || [];
-                    intervenantsDB = data.intervenantsDB || intervenantsDB;
-
-                    // Charger le thème
-                    if (data.theme) {
-                        changeTheme(data.theme);
-                    }
-
-                    // Mettre à jour les interfaces
-                    updateFilterOptions();
-                    displayInterventions(interventions);
-
-                    showAlert('Données publiées chargées avec succès !', 'success');
-                } catch (error) {
-                    console.error('Erreur lors du chargement des données publiées:', error);
-                    showAlert('Erreur lors du chargement des données publiées: ' + error.message, 'danger');
-                }
-            }
-        }
-
-        // Fonction pour nettoyer les données expirées (spécifique à la page de rapport)
-        function cleanupExpiredDataForReport() {
-            // Cette fonction est incluse pour assurer la compatibilité avec les fonctions de la page principale
-            // Pour le moment, ne fait rien car les publications sont permanentes
-            // Cette fonction est conservée pour une éventuelle utilisation future
-        }
-
-        // Fonction pour déchiffrer les données
-        function decryptData(encryptedData) {
-            try {
-                const jsonString = decodeURIComponent(atob(encryptedData));
-                return JSON.parse(jsonString);
-            } catch (error) {
-                console.error('Erreur lors du déchiffrement des données:', error);
-                return null;
-            }
-        }
-
-        // Fonction pour charger les données sauvegardées avec support du chiffrement
-        function loadFromLocalStorage() {
-            try {
-                // Essayer de charger les données chiffrées (nouvelle méthode sécurisée)
-                const encryptedData = localStorage.getItem('churchPlanningDataEncrypted');
-                if (encryptedData) {
-                    const data = decryptData(encryptedData);
-                    if (data) {
-                        processLoadedData(data);
-                        return;
-                    }
-                }
-
-                // Essayer de charger les données non chiffrées (ancienne méthode ou fallback)
-                const savedData = localStorage.getItem('churchPlanningData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    processLoadedData(data);
-                    return;
-                }
-
-                // Essayer l'ancienne clé (compatibilité descendante)
-                const oldSavedData = localStorage.getItem('planningData');
-                if (oldSavedData) {
-                    const data = JSON.parse(oldSavedData);
-                    processLoadedData(data);
-                    return;
-                }
-
-                console.log("Aucune donnée trouvée dans le stockage local.");
-            } catch (e) {
-                console.error('Erreur lors du chargement des données:', e);
-                showAlert('Erreur lors du chargement des données locales.', 'danger');
-            }
-        }
-
-        // Fonction pour traiter les données chargées
-        function processLoadedData(data) {
-            if (data.interventions && Array.isArray(data.interventions)) {
-                interventions = data.interventions;
-            }
-            
-            if (data.intervenants && Array.isArray(data.intervenants)) {
-                intervenantsDB = data.intervenants;
-            } else if (data.intervenantsDB && Array.isArray(data.intervenantsDB)) {
-                // Support pour l'ancien format
-                intervenantsDB = data.intervenantsDB;
-            }
-
-            // Charger le thème si disponible
-            if (data.theme) {
-                changeTheme(data.theme);
-            }
-
-            console.log(`Données chargées: ${interventions.length} interventions, ${intervenantsDB.length} intervenants`);
-            
-            // Mettre à jour l'affichage
-            updateFilterOptions();
-            displayInterventions(interventions);
-            
-            if (interventions.length > 0) {
-                 showAlert(`${interventions.length} intervention(s) chargée(s).`, 'success');
-            } else {
-                 showAlert('Aucune intervention trouvée dans les données sauvegardées.', 'info');
-            }
-        }
-
-        // Fonction pour charger les données publiées à partir de l'URL (spécifique à la page de rapport)
-        function loadPublishedDataForReport() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedData = urlParams.get('data');
-
-            if (encodedData) {
-                try {
-                    // Décoder les données
-                    const decodedData = decodeURIComponent(atob(encodedData).split('').map(function(c) {
-                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                    }).join(''));
-
-                    const data = JSON.parse(decodedData);
-
-                    // Charger les données dans l'application
-                    interventions = data.interventions || [];
-                    intervenantsDB = data.intervenantsDB || intervenantsDB;
-
-                    // Charger le thème
-                    if (data.theme) {
-                        changeTheme(data.theme);
-                    }
-
-                    // Mettre à jour les interfaces
-                    updateFilterOptions();
-                    displayInterventions(interventions);
-
-                    showAlert('Données publiées chargées avec succès !', 'success');
-                } catch (error) {
-                    console.error('Erreur lors du chargement des données publiées:', error);
-                    showAlert('Erreur lors du chargement des données publiées: ' + error.message, 'danger');
-                }
-            } else {
-                // Charger les données sauvegardées localement si aucune donnée n'est fournie via l'URL
-                loadFromLocalStorage();
-
-                // Charger les données synchronisées automatiquement si aucune donnée n'est encore présente
-                if (interventions.length === 0) {
-                    loadAutoSyncData();
-                }
-            }
-        }
-
-        // Fonction pour charger les données synchronisées automatiquement
-        function loadAutoSyncData() {
-            try {
-                const syncData = localStorage.getItem('autoSyncData');
-                if (syncData) {
-                    const data = JSON.parse(syncData);
-                    interventions = data.interventions || [];
-                    intervenantsDB = data.intervenantsDB || intervenantsDB;
-
-                    // Mettre à jour les interfaces
-                    updateFilterOptions();
-                    displayInterventions(interventions);
-
-                    console.log(`Données synchronisées automatiquement chargées: ${interventions.length} interventions`);
-                }
-            } catch (e) {
-                console.error('Erreur lors du chargement des données synchronisées:', e);
-            }
-        }
-
-
-        // Fonction pour mettre à jour les options de filtre
-        function updateFilterOptions() {
-            // Remplir les filtres avec les données existantes
-            const cultTypes = [...new Set(interventions.map(i => i.cultType))].filter(Boolean);
-            const places = [...new Set(interventions.map(i => i.place))].filter(Boolean);
-            const intervenants = [...new Set(interventions.map(i => i.fullName))].filter(Boolean);
-            const days = [...new Set(interventions.map(i => i.dayOfWeek))].filter(Boolean);
-
-            // Remplir le filtre des types de culte
-            const cultTypeSelect = document.getElementById('filter-cult-type');
-            if (cultTypeSelect) {
-                cultTypeSelect.innerHTML = '<option value="">Tous les types</option>';
-                cultTypes.forEach(type => {
-                    cultTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
-                });
-            }
-
-            // Remplir le filtre des lieux
-            const placeSelect = document.getElementById('filter-place');
-            if (placeSelect) {
-                placeSelect.innerHTML = '<option value="">Tous les lieux</option>';
-                places.forEach(place => {
-                    placeSelect.innerHTML += `<option value="${place}">${place}</option>`;
-                });
-            }
-
-            // Remplir le filtre des intervenants
-            const intervenantSelect = document.getElementById('filter-intervenant');
-            if (intervenantSelect) {
-                intervenantSelect.innerHTML = '<option value="">Tous les intervenants</option>';
-                intervenants.forEach(name => {
-                    intervenantSelect.innerHTML += `<option value="${name}">${name}</option>`;
-                });
-            }
-
-            // Remplir le filtre des jours
-            const daySelect = document.getElementById('filter-day');
-            if (daySelect) {
-                daySelect.innerHTML = '<option value="">Tous les jours</option>';
-                days.forEach(day => {
-                    daySelect.innerHTML += `<option value="${day}">${day}</option>`;
-                });
-            }
-        }
-
-        // Fonction pour afficher les interventions
-        function displayInterventions(interventionsToShow) {
-            const tableBody = document.getElementById('interventions-table-body');
-            if (!tableBody) return;
-
-            tableBody.innerHTML = '';
-
-            interventionsToShow.forEach(intervention => {
-                const intervenant = intervenantsDB.find(iv =>
-                    iv.firstName === intervention.firstName && iv.lastName === intervention.lastName
-                );
-
-                const category = intervenant ? intervenant.category : 'inconnue';
-
-                const categoryLabels = {
-                    'clergy': 'Clergé',
-                    'members': 'Membres',
-                    'singers': 'Chanteurs',
-                    'musicians': 'Musiciens',
-                    'technical': 'Technique',
-                    'volunteers': 'Bénévoles'
-                };
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${formatDate(intervention.date)}</td>
-                    <td>${intervention.dayOfWeek}</td>
-                    <td>${intervention.cultType}</td>
-                    <td>${intervention.place}</td>
-                    <td>${intervention.theme || ''}</td>
-                    <td>${intervention.fullName}</td>
-                    <td>${categoryLabels[category] || 'Inconnue'}</td>
-                    <td>${intervention.observations || ''}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            // Mettre à jour le compteur de résultats
-            const resultsCount = document.getElementById('results-count');
-            if (resultsCount) {
-                resultsCount.textContent = `${interventionsToShow.length} intervention(s)`;
-            }
-        }
-
-        // Fonction pour formater la date
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        }
-
-        // Fonction pour configurer les événements
-        function setupRapportEventListeners() {
-            // Événements pour les filtres
-            const applyFiltersBtn = document.getElementById('apply-filters-btn');
-            if (applyFiltersBtn) {
-                applyFiltersBtn.addEventListener('click', applyFilters);
-            }
-
-            const clearFiltersBtn = document.getElementById('clear-filters-btn');
-            if (clearFiltersBtn) {
-                clearFiltersBtn.addEventListener('click', clearFilters);
-            }
-
-            const exportPdfBtn = document.getElementById('export-pdf-btn');
-            if (exportPdfBtn) {
-                exportPdfBtn.addEventListener('click', showPdfCustomizationModal);
-            }
-
-            // Bouton de rafraîchissement
-            const refreshBtn = document.getElementById('refresh-btn');
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', function() {
-                    // Afficher un indicateur de chargement
-                    const originalHTML = refreshBtn.innerHTML;
-                    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
-                    refreshBtn.disabled = true;
-
-                    loadFromSupabaseForReport().finally(() => {
-                        // Restaurer le bouton à son état initial
-                        refreshBtn.innerHTML = originalHTML;
-                        refreshBtn.disabled = false;
-                    });
-                });
-            }
-
-            // Bouton de publication
-            const publishBtn = document.getElementById('publish-btn');
-            if (publishBtn) {
-                publishBtn.addEventListener('click', publishData);
-            }
-
-            // Événements pour la personnalisation PDF
-            const confirmPdfExport = document.getElementById('confirm-pdf-export');
-            if (confirmPdfExport) {
-                confirmPdfExport.addEventListener('click', function() {
-                    const options = {
-                        orientation: document.getElementById('pdf-orientation').value,
-                        format: document.getElementById('pdf-format').value,
-                        margins: {
-                            top: parseInt(document.getElementById('pdf-margin-top').value) || 10,
-                            right: parseInt(document.getElementById('pdf-margin-right').value) || 10,
-                            bottom: parseInt(document.getElementById('pdf-margin-bottom').value) || 10,
-                            left: parseInt(document.getElementById('pdf-margin-left').value) || 10
-                        },
-                        includeLogo: document.getElementById('pdf-include-logo').checked
-                    };
-
-                    const fileName = document.getElementById('pdf-filename').value || 'Rapport_Interventions';
-
-                    // Fermer la modale
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('pdfCustomizationModal'));
-                    if (modal) {
-                        modal.hide();
-                    }
-
-                    // Générer le PDF
-                    generatePDFReportWrapper(options, fileName);
-                });
-            }
-        }
-
-        // Fonction pour appliquer les filtres
-        function applyFilters() {
-            const startDate = document.getElementById('filter-date-start').value;
-            const endDate = document.getElementById('filter-date-end').value;
-            const cultType = document.getElementById('filter-cult-type').value;
-            const place = document.getElementById('filter-place').value;
-            const intervenant = document.getElementById('filter-intervenant').value;
-            const category = document.getElementById('filter-category').value;
-            const day = document.getElementById('filter-day').value;
-
-            let filteredInterventions = [...interventions];
-
-            // Filtre par date de début
-            if (startDate) {
-                filteredInterventions = filteredInterventions.filter(i => i.date >= startDate);
-            }
-
-            // Filtre par date de fin
-            if (endDate) {
-                filteredInterventions = filteredInterventions.filter(i => i.date <= endDate);
-            }
-
-            // Filtre par type de culte
-            if (cultType) {
-                filteredInterventions = filteredInterventions.filter(i => i.cultType === cultType);
-            }
-
-            // Filtre par lieu
-            if (place) {
-                filteredInterventions = filteredInterventions.filter(i => i.place === place);
-            }
-
-            // Filtre par intervenant
-            if (intervenant) {
-                filteredInterventions = filteredInterventions.filter(i => i.fullName === intervenant);
-            }
-
-            // Filtre par catégorie
-            if (category) {
                 filteredInterventions = filteredInterventions.filter(i => {
-                    const intervenant = intervenantsDB.find(iv =>
-                        iv.firstName === i.firstName && iv.lastName === i.lastName
-                    );
-                    return intervenant && intervenant.category === category;
+                    const dayOfWeek = i.dayOfWeek || getDayOfWeekFromDate(i.date);
+                    return dayOfWeek === day;
                 });
             }
-
-            // Filtre par jour
-            if (day) {
-                filteredInterventions = filteredInterventions.filter(i => i.dayOfWeek === day);
-            }
-
-            // Afficher les interventions filtrées
+            
+            // Afficher les résultats
             displayInterventions(filteredInterventions);
         }
 
-        // Fonction pour effacer les filtres
         function clearFilters() {
             document.getElementById('filter-date-start').value = '';
             document.getElementById('filter-date-end').value = '';
@@ -1008,521 +890,311 @@
             document.getElementById('filter-intervenant').value = '';
             document.getElementById('filter-category').value = '';
             document.getElementById('filter-day').value = '';
-
+            
             displayInterventions(interventions);
         }
 
-        // Fonction pour afficher les alertes
-        function showAlert(message, type = 'info') {
-            // Supprimer les alertes existantes
-            const existingAlert = document.querySelector('.alert-custom');
-            if (existingAlert) existingAlert.remove();
-
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-custom`;
-            alertDiv.textContent = message;
-
-            document.body.appendChild(alertDiv);
-
-            // Supprimer l'alerte après 5 secondes
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 5000);
-        }
-
-        // Fonction pour changer de thème
-        function changeTheme(theme) {
-            // Valider que le thème est autorisé pour éviter les injections CSS
-            const allowedThemes = ['light', 'dark', 'neon', 'galaxy', 'rainbow', 'high-contrast', 'pastel'];
-            if (!allowedThemes.includes(theme)) {
-                console.warn(`Thème non autorisé : ${theme}`);
-                return;
-            }
-
-            document.body.className = 'theme-' + theme;
-        }
-
-        // Fonction pour mettre à jour l'indicateur de synchronisation
-        function updateSyncIndicator(status) {
-            // Créer ou mettre à jour l'indicateur de synchronisation
-            let syncIndicator = document.getElementById('sync-indicator');
-
-            if (!syncIndicator) {
-                // Créer l'indicateur s'il n'existe pas
-                // On cherche d'abord s'il y a une place dans la navbar
-                const navContainer = document.querySelector('.navbar .container-fluid');
-                if (navContainer) {
-                    syncIndicator = document.createElement('div');
-                    syncIndicator.id = 'sync-indicator';
-                    syncIndicator.className = 'sync-indicator ms-3 text-white';
-                    // Insérer avant les boutons de droite si possible, sinon à la fin
-                    const lastGroup = navContainer.querySelector('.ms-3');
-                    if (lastGroup) {
-                        navContainer.insertBefore(syncIndicator, lastGroup);
-                    } else {
-                        navContainer.appendChild(syncIndicator);
-                    }
-                } else {
-                    return; // Impossible de placer l'indicateur
-                }
-            }
-
-            // Mettre à jour le contenu selon l'état
-            let iconClass = '';
-            let text = '';
-            let colorClass = '';
-
-            switch(status) {
-                case 'loading':
-                    iconClass = 'fas fa-sync-alt fa-spin';
-                    text = ' Synchronisation...';
-                    colorClass = 'text-warning';
-                    break;
-                case 'synced':
-                    iconClass = 'fas fa-check-circle';
-                    text = ' Synchronisé';
-                    colorClass = 'text-light'; // Ou success si le fond le permet
-                    break;
-                case 'error':
-                    iconClass = 'fas fa-exclamation-triangle';
-                    text = ' Erreur Synchro';
-                    colorClass = 'text-danger';
-                    break;
-                case 'no-data':
-                    iconClass = 'fas fa-info-circle';
-                    text = ' Aucune donnée';
-                    colorClass = 'text-muted';
-                    break;
-                default:
-                    iconClass = 'fas fa-sync-alt';
-                    text = ' Synchronisation';
-            }
-
-            syncIndicator.innerHTML = `<i class="${iconClass} ${colorClass}"></i><span class="d-none d-md-inline ${colorClass}">${text}</span>`;
-        }
-
-        function generatePDFReportWrapper(options, fileName) {
-            // Récupérer les interventions filtrées actuelles
-            const tableRows = document.querySelectorAll('#interventions-table-body tr');
-            if (tableRows.length === 0) {
-                showAlert('Aucune intervention à exporter.', 'warning');
-                return;
-            }
-
-            // Générer un tableau des interventions à partir des lignes du tableau affiché
-            const interventionsToShow = [];
-            tableRows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 8) { // S'assurer qu'il y a suffisamment de cellules
-                    const intervention = {
-                        date: reverseDateFormat(cells[0].textContent.trim()),
-                        dayOfWeek: cells[1].textContent.trim(),
-                        cultType: cells[2].textContent.trim(),
-                        place: cells[3].textContent.trim(),
-                        theme: cells[4].textContent.trim(),
-                        fullName: cells[5].textContent.trim(),
-                        firstName: '', // Ces champs seront extraits de fullName si possible
-                        lastName: '',
-                        observations: cells[7].textContent.trim()
-                    };
-
-                    // Extraire prénom et nom de la chaîne complète
-                    const nameParts = intervention.fullName.split(' ');
-                    if (nameParts.length >= 2) {
-                        intervention.firstName = nameParts[0];
-                        intervention.lastName = nameParts.slice(1).join(' ');
-                    } else {
-                        intervention.firstName = intervention.fullName;
-                    }
-
-                    interventionsToShow.push(intervention);
-                }
-            });
-
-            // Appeler la fonction de génération PDF
-            generatePDFReport(interventionsToShow, options, fileName);
-        }
-
-        // Fonction utilitaire pour inverser le format de date (de dd/mm/yyyy à yyyy-mm-dd)
-        function reverseDateFormat(dateStr) {
-            if (!dateStr || dateStr.length !== 10) return dateStr; // Si le format n'est pas dd/mm/yyyy, retourner tel quel
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return dateStr;
-            return `${parts[2]}-${parts[1]}-${parts[0]}`;
-        }
-
-        // Fonction pour générer un PDF spécifique pour la page de rapport
-        async function generatePDFReport(interventionsToShow, options = {}, fileName = 'Rapport_Interventions') {
-            if (interventionsToShow.length === 0) {
-                showAlert('Aucune intervention à exporter.', 'warning');
-                return null;
-            }
-
-            try {
-                // Initialisation robuste de jsPDF
-                let jsPDF;
-                if (window.jspdf && window.jspdf.jsPDF) {
-                    jsPDF = window.jspdf.jsPDF;
-                } else if (window.jsPDF) {
-                    jsPDF = window.jsPDF;
-                } else {
-                    throw new Error("La bibliothèque jsPDF n'est pas chargée correctement.");
-                }
-
-                // Utiliser les options de personnalisation ou les valeurs par défaut
-                const orientation = options.orientation || 'portrait';
-                const format = options.format || 'a4';
-                const margins = options.margins || { top: 10, right: 10, bottom: 10, left: 10 };
-                const includeLogo = options.hasOwnProperty('includeLogo') ? options.includeLogo : true;
-
-                // Créer le document PDF
-                const doc = new jsPDF(orientation, 'mm', format);
-
-                // Dimensions de la page
-                const pageWidth = doc.internal.pageSize.width;
-                const pageHeight = doc.internal.pageSize.height;
-
-                // Position de départ
-                let yPosition = margins.top;
-
-                // Ajouter le logo si demandé
-                if (includeLogo) {
-                    try {
-                        const logo = new Image();
-                        logo.src = 'AD.jpeg';
-
-                        // Attendre le chargement de l'image
-                        await new Promise((resolve, reject) => {
-                            logo.onload = resolve;
-                            logo.onerror = reject;
-                        });
-
-                        // Calculer les dimensions du logo (max 30mm de hauteur)
-                        const logoMaxHeight = 30;
-                        const logoMaxWidth = 30;
-                        let logoWidth = logo.width * (logoMaxHeight / logo.height);
-                        let logoHeight = logoMaxHeight;
-
-                        if (logoWidth > logoMaxWidth) {
-                            logoWidth = logoMaxWidth;
-                            logoHeight = logo.height * (logoMaxWidth / logo.width);
-                        }
-
-                        // Positionner le logo en haut à gauche
-                        doc.addImage(logo, 'JPEG', margins.left, yPosition, logoWidth, logoHeight);
-
-                        // Mettre à jour la position verticale
-                        yPosition += Math.max(logoHeight, 20) + 5;
-                    } catch (error) {
-                        console.warn("Impossible de charger le logo:", error);
-                        // Continuer sans le logo
-                        yPosition += 10;
-                    }
-                }
-
-                // Ajouter le titre
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text("RAPPORT DÉTAILLÉ DES INTERVENTIONS", pageWidth / 2, yPosition, { align: 'center' });
-
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'normal');
-                yPosition += 8;
-                doc.text("Assemblées de Dieu du Bénin - Église BERACA", pageWidth / 2, yPosition, { align: 'center' });
-
-                // Ajouter la date de génération
-                yPosition += 8;
-                doc.setFontSize(10);
-                doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, pageWidth / 2, yPosition, { align: 'center' });
-
-                yPosition += 12;
-
-                // Générer le tableau des interventions
-                const tableData = interventionsToShow.map((intervention, index) => {
-                    // Trouver les informations de l'intervenant
-                    const intervenant = intervenantsDB.find(i =>
-                        i.firstName === intervention.firstName && i.lastName === intervention.lastName
-                    );
-
-                    const categoryLabels = {
-                        'clergy': 'Clergé',
-                        'members': 'Membres',
-                        'singers': 'Chanteurs',
-                        'musicians': 'Musiciens',
-                        'technical': 'Technique',
-                        'volunteers': 'Bénévoles'
-                    };
-
-                    const category = intervenant ? categoryLabels[intervenant.category] || intervenant.category : 'Inconnue';
-
-                    return [
-                        (index + 1).toString(),
-                        formatDateForDisplay(intervention.date),
-                        intervention.dayOfWeek,
-                        intervention.cultType,
-                        intervention.place,
-                        intervention.theme,
-                        intervention.fullName,
-                        category,
-                        intervention.observations || ''
-                    ];
-                });
-
-                // En-têtes du tableau
-                const headers = [
-                    "#",
-                    "Date",
-                    "Jour",
-                    "Type de culte",
-                    "Lieu",
-                    "Thème",
-                    "Intervenant",
-                    "Catégorie",
-                    "Observations"
-                ];
-
-                // Vérifier si jspdf-autotable est disponible
-                if (typeof doc.autoTable !== 'function') {
-                    throw new Error("jspdf-autotable n'est pas chargé correctement.");
-                }
-
-                // Ajouter le tableau
-                doc.autoTable({
-                    head: [headers],
-                    body: tableData,
-                    startY: yPosition,
-                    margin: { top: margins.top, right: margins.right, bottom: margins.bottom, left: margins.left },
-                    styles: {
-                        fontSize: 8,
-                        cellPadding: 3
-                    },
-                    headStyles: {
-                        fillColor: [41, 128, 185],
-                        textColor: [255, 255, 255],
-                        fontStyle: 'bold'
-                    },
-                    bodyStyles: {
-                        textColor: [0, 0, 0]
-                    },
-                    alternateRowStyles: {
-                        fillColor: [240, 240, 240]
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 10 }, // Numéro
-                        1: { cellWidth: 25 }, // Date
-                        2: { cellWidth: 20 }, // Jour
-                        3: { cellWidth: 30 }, // Type de culte
-                        4: { cellWidth: 25 }, // Lieu
-                        5: { cellWidth: 35 }, // Thème
-                        6: { cellWidth: 40 }, // Intervenant
-                        7: { cellWidth: 25 }, // Catégorie
-                        8: { cellWidth: 35 }  // Observations
-                    },
-                    didDrawPage: function(data) {
-                        // Ajouter les numéros de page
-                        const pageCount = doc.getNumberOfPages();
-                        doc.setFontSize(10);
-                        const pageText = `Page ${data.pageNumber} sur ${pageCount}`;
-                        doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: 'center' });
-                    }
-                });
-
-                // Sauvegarder le PDF
-                doc.save(`${fileName}.pdf`);
-
-                // Afficher une alerte de succès
-                showAlert(`PDF "${fileName}.pdf" généré avec succès!`, 'success');
-
-                return doc;
-            } catch (error) {
-                console.error("Erreur lors de la génération du PDF:", error);
-                showAlert(`Erreur lors de la génération du PDF: ${error.message}`, 'danger');
-                return null;
-            }
-        }
-
-        // Fonction pour formater la date pour l'affichage
-        function formatDateForDisplay(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        }
-
-        // Fonction pour afficher la modale de personnalisation PDF
         function showPdfCustomizationModal() {
-            // Pré-remplir le nom du fichier
-            const defaultName = `Rapport_Interventions_${new Date().toISOString().slice(0, 10)}`;
-            document.getElementById('pdf-filename').value = defaultName;
-
+            // Vérifier qu'il y a des données à exporter
+            if (interventions.length === 0) {
+                showAlert('Aucune donnée à exporter. Veuillez d\'abord charger des interventions.', 'warning');
+                return;
+            }
+            
             // Ouvrir la modale
             const modal = new bootstrap.Modal(document.getElementById('pdfCustomizationModal'));
             modal.show();
         }
 
-
-        // Fonction pour publier les données
-        function publishData() {
-            // Vérifier s'il y a des interventions à publier
-            if (interventions.length === 0) {
-                showAlert('Veuillez créer au moins une intervention avant de publier.', 'warning');
-                return;
-            }
-
-            // Récupérer toutes les données nécessaires
-            const dataToPublish = {
-                interventions: interventions,
-                intervenantsDB: intervenantsDB,
-                generalInfo: {
-                    churchName: 'EGLISE EVANGELIQUE DES ASSEMBLEES DE DIEU DU BENIN', // Valeurs par défaut
-                    region: 'ATACORA',
-                    section: 'NATITINGOU',
-                    temple: 'BERACA',
-                    year: '2025',
-                    quarter: '4'
-                },
-                configurations: {
-                    days: [],
-                    types: [],
-                    places: [],
-                    otherType: '',
-                    otherPlace: ''
-                },
-                theme: document.body.className.replace('theme-', ''),
-                publishedAt: new Date().toISOString()
-            };
-
-            // Récupérer les configurations cochées (pour les besoins de la publication)
-            document.querySelectorAll('input[id^="day-"]:checked').forEach(checkbox => {
-                dataToPublish.configurations.days.push(checkbox.value);
-            });
-
-            document.querySelectorAll('input[id^="type-"]:checked').forEach(checkbox => {
-                dataToPublish.configurations.types.push(checkbox.value);
-            });
-
-            document.querySelectorAll('input[id^="place-"]:checked').forEach(checkbox => {
-                dataToPublish.configurations.places.push(checkbox.value);
-            });
-
+        async function generatePDF() {
             try {
-                // Convertir les données en chaîne JSON
-                const dataStr = JSON.stringify(dataToPublish);
-
-                // Encoder les données pour l'URL (compression et encodage sécurisé)
-                const encodedData = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-                    return String.fromCharCode('0x' + p1);
-                }));
-
-                // Générer l'URL de partage
-                const currentUrl = window.location.href.split('?')[0]; // Retirer les paramètres existants
-                const publishUrl = `${currentUrl}?data=${encodedData}`;
-
-                // Afficher une modale avec le lien de partage
-                showPublishModal(publishUrl);
-
-                // Ajouter les données au stockage local sans date d'expiration
-                const storageKey = `published_data_${Date.now()}`;
-                const storedData = {
-                    data: dataToPublish,
-                    createdAt: new Date().toISOString(),
-                    isPermanent: true // Indique que cette publication est permanente
+                // Récupérer les options
+                const fileName = document.getElementById('pdf-filename').value || 'Rapport_Interventions';
+                const orientation = document.getElementById('pdf-orientation').value;
+                const format = document.getElementById('pdf-format').value;
+                const includeLogo = document.getElementById('pdf-include-logo').checked;
+                const margins = {
+                    top: parseInt(document.getElementById('pdf-margin-top').value) || 10,
+                    right: parseInt(document.getElementById('pdf-margin-right').value) || 10,
+                    bottom: parseInt(document.getElementById('pdf-margin-bottom').value) || 10,
+                    left: parseInt(document.getElementById('pdf-margin-left').value) || 10
                 };
-
-                localStorage.setItem(storageKey, JSON.stringify(storedData));
-
-                // Sauvegarder la clé dans une liste pour gestion future
-                let publishedKeys = JSON.parse(localStorage.getItem('published_keys') || '[]');
-                publishedKeys.push({
-                    key: storageKey,
-                    url: publishUrl,
-                    createdAt: new Date().toISOString(),
-                    isPermanent: true
+                
+                // Récupérer les interventions filtrées actuelles
+                const tableRows = document.querySelectorAll('#interventions-table-body tr:not(#no-data-row)');
+                if (tableRows.length === 0) {
+                    showAlert('Aucune intervention à exporter.', 'warning');
+                    return;
+                }
+                
+                // Générer le PDF
+                await generatePDFReport(tableRows, {
+                    fileName,
+                    orientation,
+                    format,
+                    includeLogo,
+                    margins
                 });
-                localStorage.setItem('published_keys', JSON.stringify(publishedKeys));
-
-                showAlert('Données publiées avec succès !', 'success');
+                
+                // Fermer la modale
+                const modal = bootstrap.Modal.getInstance(document.getElementById('pdfCustomizationModal'));
+                modal.hide();
+                
             } catch (error) {
-                console.error('Erreur lors de la publication:', error);
-                showAlert('Erreur lors de la publication des données: ' + error.message, 'danger');
+                console.error('Erreur lors de la génération du PDF:', error);
+                showAlert('Erreur lors de la génération du PDF: ' + error.message, 'danger');
             }
         }
 
-        // Fonction pour afficher la modale de publication
-        function showPublishModal(publishUrl) {
-            // Créer la modale si elle n'existe pas
-            let modal = document.getElementById('publishModal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'publishModal';
-                modal.className = 'modal fade';
-                modal.tabIndex = -1;
-                modal.innerHTML = `
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title"><i class="fas fa-share-alt me-2"></i>Publication des Données</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Voici le lien pour accéder à ces données publiées :</p>
-                                <div class="input-group mb-3">
-                                    <input type="text" class="form-control" id="publish-link" readonly>
-                                    <button class="btn btn-outline-secondary" type="button" id="copy-link-btn">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
+        async function generatePDFReport(tableRows, options) {
+            // Vérifier que jsPDF est disponible
+            if (typeof window.jspdf === 'undefined') {
+                showAlert('La bibliothèque PDF n\'est pas chargée correctement.', 'danger');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            
+            // Créer un nouveau document PDF
+            const doc = new jsPDF({
+                orientation: options.orientation,
+                unit: 'mm',
+                format: options.format
+            });
+            
+            // Titre
+            doc.setFontSize(18);
+            doc.setTextColor(0, 0, 128);
+            doc.text('RAPPORT DÉTAILLÉ DES INTERVENTIONS', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Église BERACA - Assemblées de Dieu du Bénin', 105, 28, { align: 'center' });
+            
+            // Date de génération
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('fr-FR');
+            doc.setFontSize(10);
+            doc.text(`Généré le: ${dateStr}`, 195, 10, { align: 'right' });
+            
+            // En-têtes du tableau
+            const headers = [
+                'Date',
+                'Jour',
+                'Type de culte',
+                'Lieu',
+                'Thème',
+                'Intervenant',
+                'Catégorie',
+                'Observations'
+            ];
+            
+            // Extraire les données du tableau
+            const data = [];
+            tableRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [];
+                cells.forEach(cell => {
+                    rowData.push(cell.textContent.trim());
+                });
+                data.push(rowData);
+            });
+            
+            // Ajouter le tableau
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 35,
+                margin: options.margins,
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3,
+                    overflow: 'linebreak'
+                },
+                headStyles: {
+                    fillColor: [41, 128, 185],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                columnStyles: {
+                    0: { cellWidth: 25 }, // Date
+                    1: { cellWidth: 20 }, // Jour
+                    2: { cellWidth: 30 }, // Type
+                    3: { cellWidth: 25 }, // Lieu
+                    4: { cellWidth: 40 }, // Thème
+                    5: { cellWidth: 35 }, // Intervenant
+                    6: { cellWidth: 25 }, // Catégorie
+                    7: { cellWidth: 40 }  // Observations
+                },
+                didDrawPage: function(data) {
+                    // Numéro de page
+                    doc.setFontSize(10);
+                    doc.text(
+                        `Page ${data.pageNumber}`,
+                        doc.internal.pageSize.width / 2,
+                        doc.internal.pageSize.height - 10,
+                        { align: 'center' }
+                    );
+                }
+            });
+            
+            // Sauvegarder le PDF
+            doc.save(`${options.fileName}.pdf`);
+            
+            showAlert('PDF généré avec succès !', 'success');
+        }
+
+        function publishData() {
+            if (interventions.length === 0) {
+                showAlert('Aucune intervention à publier.', 'warning');
+                return;
+            }
+            
+            try {
+                // Préparer les données à publier
+                const dataToPublish = {
+                    interventions: interventions,
+                    intervenantsDB: intervenantsDB,
+                    theme: document.body.className.replace('theme-', ''),
+                    publishedAt: new Date().toISOString()
+                };
+                
+                // Convertir en JSON
+                const jsonData = JSON.stringify(dataToPublish);
+                
+                // Encoder en base64 pour l'URL
+                const base64Data = btoa(unescape(encodeURIComponent(jsonData)));
+                
+                // Créer l'URL de partage
+                const baseUrl = window.location.origin + window.location.pathname;
+                const shareUrl = `${baseUrl}?data=${base64Data}`;
+                
+                // Créer une modale pour afficher le lien
+                const modalHtml = `
+                    <div class="modal fade" id="shareModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Lien de partage</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    Ce lien permet d'accéder aux données planifiées.
-                                    Les données sont stockées localement et accessibles via ce lien.
+                                <div class="modal-body">
+                                    <p>Voici le lien pour partager ces données :</p>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="share-url" value="${shareUrl}" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" id="copy-url-btn">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Partagez ce lien pour permettre à d'autres de voir ce rapport.
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
-                document.body.appendChild(modal);
+                
+                // Ajouter la modale au document
+                const existingModal = document.getElementById('shareModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Afficher la modale
+                const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+                modal.show();
+                
+                // Configurer le bouton de copie
+                document.getElementById('copy-url-btn').addEventListener('click', function() {
+                    const urlInput = document.getElementById('share-url');
+                    urlInput.select();
+                    document.execCommand('copy');
+                    
+                    // Changer l'icône temporairement
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-check';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 2000);
+                    
+                    showAlert('Lien copié dans le presse-papiers !', 'success');
+                });
+                
+            } catch (error) {
+                console.error('Erreur lors de la publication:', error);
+                showAlert('Erreur lors de la publication: ' + error.message, 'danger');
             }
-
-            // Mettre à jour le lien dans la modale
-            document.getElementById('publish-link').value = publishUrl;
-
-            // Configurer le bouton de copie
-            document.getElementById('copy-link-btn').onclick = function() {
-                const linkInput = document.getElementById('publish-link');
-                linkInput.select();
-                document.execCommand('copy');
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-check"></i> Copié!';
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                }, 2000);
-                showAlert('Lien copié dans le presse-papiers', 'success');
-            };
-
-            // Afficher la modale
-            const bootstrapModal = new bootstrap.Modal(modal);
-            bootstrapModal.show();
         }
-    </script>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        function changeTheme(theme) {
+            // Supprimer toutes les classes de thème
+            const allowedThemes = ['light', 'dark', 'neon', 'galaxy', 'rainbow', 'high-contrast', 'pastel'];
+            allowedThemes.forEach(t => {
+                document.body.classList.remove(`theme-${t}`);
+            });
+            
+            // Ajouter le nouveau thème
+            document.body.classList.add(`theme-${theme}`);
+        }
 
-    <script src="supabase-config.js"></script>
-    <script>
-        // Charger les données depuis Supabase au chargement de la page et activer la synchronisation
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeAutoSync();
-        });
+        function showAlert(message, type) {
+            // Supprimer les alertes existantes
+            const existingAlerts = document.querySelectorAll('.alert-custom');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Créer la nouvelle alerte
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-custom alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Style de l'alerte
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            
+            // Ajouter au document
+            document.body.appendChild(alertDiv);
+            
+            // Supprimer automatiquement après 5 secondes
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Pour compatibilité
+        function loadFromLocalStorage() {
+            return loadDataFromLocalStorage();
+        }
+
+        function loadPublishedDataForReport() {
+            return loadPublishedDataFromURL();
+        }
+
+        function cleanupExpiredDataForReport() {
+            // Ne rien faire pour le moment
+        }
     </script>
 </body>
 </html>
