@@ -871,22 +871,15 @@
 /* --- Variables Globales --- */
 
 /* --- Typographie Globale --- */
-@font-face {
-    font-family: 'Cambria Math';
-    src: local('Cambria Math'), local('Cambria'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/fonts/HTML-CSS/TeX/woff/MathJax_Main-Regular.woff');
-    font-weight: normal;
-    font-style: normal;
-}
-
 body {
-    font-family: "Cambria Math", "Cambria", "Times New Roman", serif !important;
+    font-family: "Cambria", "Times New Roman", serif !important;
     background-color: var(--background-light);
     color: var(--text-dark);
 }
 
 /* Appliquer la police aux éléments d'interface */
 button, input, select, textarea, .btn, .navbar-brand {
-    font-family: "Cambria Math", "Cambria", serif !important;
+    font-family: "Cambria", serif !important;
 }
 
 /* --- Styles d'Exportation & En-têtes --- */

@@ -1,6 +1,3 @@
-// Imports
-import '../style.css';
-
 // Bootstrap et Chart.js sont chargés via le fichier HTML, donc nous utilisons les versions globales
 const Modal = window.bootstrap.Modal;
 const Chart = window.Chart;

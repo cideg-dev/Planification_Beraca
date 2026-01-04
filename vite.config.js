@@ -1,22 +1,24 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/Planification_Beraca/', // Chemin vers le dépôt GitHub pour que l'application fonctionne sur GitHub Pages
+  root: '.',
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    minify: 'terser',
-    sourcemap: true,
     rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor': ['bootstrap'],
-          'chart': ['chart.js/auto'],
-        }
-      }
-    }
+      input: {
+        main: resolve(__dirname, 'index.html'),
+      },
+    },
   },
-  define: {
-    'process.env': {}
-  }
-})
+  server: {
+    // Assure que le CSS est correctement servi
+    headers: {
+      'Content-Type': 'text/css',
+    },
+  },
+  css: {
+    modules: {
+      localsConvention: 'camelCase',
+    },
+  },
+});
