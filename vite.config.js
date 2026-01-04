@@ -1,40 +1,22 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
-import { VitePWA } from 'vite-plugin-pwa';
+import { defineConfig } from 'vite'
 
 export default defineConfig({
-  plugins: [
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['AD.jpeg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-      manifest: {
-        name: 'AD BERACA Planning',
-        short_name: 'AD Beraca',
-        description: 'Planificateur d\'interventions pour l\'église AD Beraca',
-        theme_color: '#0d6efd',
-        icons: [
-          {
-            src: 'AD.jpeg',
-            sizes: '192x192',
-            type: 'image/jpeg'
-          },
-          {
-            src: 'AD.jpeg',
-            sizes: '512x512',
-            type: 'image/jpeg'
-          }
-        ]
-      }
-    })
-  ],
+  base: '/Planification_Beraca/', // Chemin vers le dépôt GitHub pour que l'application fonctionne sur GitHub Pages
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    minify: 'terser',
+    sourcemap: true,
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-      },
-    },
+      output: {
+        manualChunks: {
+          'vendor': ['bootstrap', '@fortawesome/fontawesome-free'],
+          'chart': ['chart.js/auto'],
+        }
+      }
+    }
   },
-  server: {
-    open: true
+  define: {
+    'process.env': {}
   }
-});
+})
