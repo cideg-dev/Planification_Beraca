@@ -1,6 +1,7 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+// Utilisation des versions globales chargées via CDN
+// jsPDF est disponible via la variable globale jsPDF
+// jspdf-autotable étend jsPDF
+// xlsx est disponible via la variable globale XLSX
 
 // Utilitaire pour charger une image en Base64
 const loadImage = (url) => {
