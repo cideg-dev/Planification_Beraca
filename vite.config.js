@@ -11,14 +11,14 @@ export default defineConfig({
     },
   },
   server: {
-    // Assure que le CSS est correctement servi
+    // Configuration du serveur pour éviter les erreurs de type MIME
     headers: {
-      'Content-Type': 'text/css',
+      'Content-Type': 'text/html; charset=utf-8',
     },
+    // Empêcher le chargement de CSS comme modules
+    strictPort: false,
   },
   css: {
-    modules: {
-      localsConvention: 'camelCase',
-    },
+    modules: false, // Désactiver les modules CSS pour éviter les erreurs
   },
 });
