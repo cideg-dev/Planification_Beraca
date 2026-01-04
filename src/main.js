@@ -1,9 +1,18 @@
 // Imports
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import { Modal } from 'bootstrap';
 import Chart from 'chart.js/auto'; // Import Chart.js
 import '../style.css';
+
+// Importation des CSS via JavaScript pour éviter les erreurs dans les modules
+const bootstrapCSS = document.createElement('link');
+bootstrapCSS.rel = 'stylesheet';
+bootstrapCSS.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css';
+document.head.appendChild(bootstrapCSS);
+
+const fontawesomeCSS = document.createElement('link');
+fontawesomeCSS.rel = 'stylesheet';
+fontawesomeCSS.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+document.head.appendChild(fontawesomeCSS);
 
 import { DataService } from './services/dataService.js';
 import { ExportService } from './services/exportService.js';
