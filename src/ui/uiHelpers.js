@@ -1,5 +1,6 @@
 // Utilitaires pour l'interface utilisateur
-import { Alert } from 'bootstrap';
+// Bootstrap est chargé via le fichier HTML, donc nous utilisons la version globale
+const Alert = window.bootstrap.Alert;
 
 export const UI = {
     /**

@@ -1,7 +1,9 @@
 // Imports
-import { Modal } from 'bootstrap/dist/js/bootstrap.esm.js';
 import Chart from 'chart.js/auto'; // Import Chart.js
 import '../style.css';
+
+// Bootstrap est chargé via le fichier HTML, donc nous utilisons la version globale
+const Modal = window.bootstrap.Modal;
 
 import { DataService } from './services/dataService.js';
 import { ExportService } from './services/exportService.js';
