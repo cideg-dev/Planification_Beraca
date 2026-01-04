@@ -1,5 +1,5 @@
 // Imports
-import { Modal } from 'bootstrap';
+import { Modal } from 'bootstrap/dist/js/bootstrap.esm.js';
 import Chart from 'chart.js/auto'; // Import Chart.js
 import '../style.css';
 
