@@ -10,7 +10,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['bootstrap', '@fortawesome/fontawesome-free'],
+          'vendor': ['bootstrap'],
           'chart': ['chart.js/auto'],
         }
       }
