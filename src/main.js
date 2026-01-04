@@ -1,9 +1,9 @@
 // Imports
-import Chart from 'chart.js/auto'; // Import Chart.js
 import '../style.css';
 
-// Bootstrap est chargé via le fichier HTML, donc nous utilisons la version globale
+// Bootstrap et Chart.js sont chargés via le fichier HTML, donc nous utilisons les versions globales
 const Modal = window.bootstrap.Modal;
+const Chart = window.Chart;
 
 import { DataService } from './services/dataService.js';
 import { ExportService } from './services/exportService.js';
