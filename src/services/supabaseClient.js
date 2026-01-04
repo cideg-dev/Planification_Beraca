@@ -1,14 +1,8 @@
+import { createClient } from '@supabase/supabase-js';
 import { CONFIG } from '../config.js';
 
-// Vérification de la disponibilité de la librairie Supabase
-if (typeof supabase === 'undefined') {
-    console.error("La librairie Supabase n'est pas chargée. Assurez-vous d'inclure le script CDN dans votre HTML.");
-}
-
 // Initialisation du client (Singleton)
-export const supabaseClient = typeof supabase !== 'undefined' 
-    ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY)
-    : null;
+export const supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
 /**
  * Vérifie la connexion à Supabase
@@ -17,10 +11,45 @@ export const supabaseClient = typeof supabase !== 'undefined'
 export async function checkConnection() {
     if (!supabaseClient) return false;
     try {
-        const { error } = await supabaseClient.from('app_config').select('count', { count: 'exact', head: true });
-        return !error;
+        // Test simple : récupérer la date du serveur ou une table légère
+        const { data, error } = await supabaseClient.from('interventions').select('id').limit(1);
+        if (error) {
+            console.error("Erreur de connexion Supabase:", error);
+            return false;
+        }
+        return true;
     } catch (e) {
         console.error("Erreur de connexion Supabase:", e);
+        return false;
+    }
+}
+
+/**
+ * Teste la connexion à Supabase en récupérant des informations sur le projet
+ * @returns {Promise<boolean>}
+ */
+export async function testConnection() {
+    if (!supabaseClient) {
+        console.error("Client Supabase non initialisé");
+        return false;
+    }
+
+    try {
+        // Test de la connexion en exécutant une requête simple
+        const { data, error } = await supabaseClient
+            .from('interventions')
+            .select('*')
+            .limit(1);
+
+        if (error) {
+            console.error("Erreur lors du test de connexion:", error);
+            return false;
+        }
+
+        console.log("Connexion Supabase réussie, données récupérées:", data);
+        return true;
+    } catch (e) {
+        console.error("Erreur lors du test de connexion:", e);
         return false;
     }
 }

@@ -1,58 +1,40 @@
-# Planificateur d'Interventions - Assemblées de Dieu du Bénin
+# Planificateur d'Interventions - AD BERACA (V2)
 
-## Structure de l'Application
+Application de gestion de planning pour l'église AD BERACA.
+Version modernisée utilisant Vite, Supabase et une architecture modulaire.
 
-Ce projet contient un planificateur d'interventions pour les Assemblées de Dieu du Bénin avec les fonctionnalités suivantes :
+## Fonctionnalités
 
-### Pages de l'Application
+- **Planification** : Ajout rapide d'interventions (Culte, Enseignement, etc.).
+- **Données Relationnelles** : Utilisation d'une base de données SQL (Supabase).
+- **Exports** : Génération de fichiers PDF et Excel.
+- **Migration** : Outil intégré pour importer les données de l'ancienne version V1.
+- **Sécurité** : Gestion des clés API via variables d'environnement.
 
-1. **accueil.html** - Page d'accueil principale
-   - Point d'entrée unique pour l'application
-   - Permet d'accéder à la planification ou au rapport
-   - Interface pour accéder aux publications partagées
+## Installation et Démarrage
 
-2. **index.html** - Page de planification
-   - Interface pour créer et gérer les interventions
-   - Configuration des cultes et lieux
-   - Gestion des intervenants
-   - Possibilité de publier les données et d'accéder au rapport
+1. **Installer les dépendances :**
+   ```bash
+   npm install
+   ```
 
-3. **rapport.html** - Page de rapport
-   - Visualisation des interventions avec filtres avancés
-   - Exportation PDF des données filtrées
-   - Affichage des données publiées via liens
+2. **Configurer l'environnement :**
+   Assurez-vous d'avoir le fichier `.env` à la racine avec vos clés Supabase.
 
-### Fonctionnalités
+3. **Lancer en développement :**
+   ```bash
+   npm run dev
+   ```
 
-- **Planification des interventions** : Ajout, modification et suppression d'interventions
-- **Gestion des intervenants** : Base de données locale des intervenants
-- **Fonctionnalité de publication** : Partage de données via liens uniques
-- **Filtres avancés** : Filtres multiples sur la page de rapport
-- **Exportation PDF** : Génération de rapports PDF avec options de personnalisation
-- **Stockage local** : Sauvegarde des données dans le navigateur
-- **Thèmes visuels** : Plusieurs thèmes disponibles (clair, sombre, néon, etc.)
+4. **Construire pour la production :**
+   ```bash
+   npm run build
+   ```
+   Les fichiers seront générés dans le dossier `dist/`.
 
-### Architecture de Navigation
+## Architecture
 
-- La page d'accueil (accueil.html) sert de point d'entrée principal
-- Depuis la page d'accueil, on peut accéder au rapport (rapport.html) directement
-- Pour accéder à la planification (index.html), un code administrateur est requis
-- Depuis la page de planification (index.html), on peut accéder à la page de rapport (rapport.html)
-- La page de rapport (rapport.html) ne permet pas de revenir à la page de planification
-- Les données publiées sont accessibles via des liens uniques sur les pages index.html et rapport.html
-
-### Système d'Authentification
-
-- L'accès à la page de planification (index.html) est protégé par un code administrateur
-- Code administrateur requis : **BeraComi26**
-- L'authentification est stockée dans le stockage local du navigateur
-- Les administrateurs peuvent se déconnecter via le bouton de déconnexion sur la page d'accueil
-- L'accès non autorisé à la page de planification redirige vers la page d'accueil
-
-### Technologies Utilisées
-
-- HTML5, CSS3, JavaScript
-- Bootstrap 5 pour le design responsive
-- Select2 pour les sélecteurs avancés
-- jsPDF pour l'exportation PDF
-- Stockage local du navigateur pour la persistance des données
+- `src/main.js` : Point d'entrée principal.
+- `src/services/` : Logique métier (Data, Export, Migration).
+- `src/ui/` : Gestionnaires d'interface.
+- `index.html` : Page unique de l'application.

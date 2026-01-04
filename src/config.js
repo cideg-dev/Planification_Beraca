@@ -1,9 +1,9 @@
 // Configuration de l'application et constantes
 
 export const CONFIG = {
-    SUPABASE_URL: 'https://supywgkoghcphlynktmr.supabase.co',
-    SUPABASE_ANON_KEY: 'sb_publishable_S5gpJnrrWvc6QtTgbuD6gg_dtOFU8y4', // Note: Ceci devrait idéalement être dans des variables d'env
-    ADMIN_CODE: 'BeraComi26'
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
 };
 
 export const CONSTANTS = {

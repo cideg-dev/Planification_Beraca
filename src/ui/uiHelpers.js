@@ -1,4 +1,5 @@
 // Utilitaires pour l'interface utilisateur
+import { Alert } from 'bootstrap';
 
 export const UI = {
     /**
@@ -22,8 +23,11 @@ export const UI = {
 
         // Auto-dismiss après 5 secondes
         setTimeout(() => {
-            const alert = bootstrap.Alert.getOrCreateInstance(wrapper.querySelector('.alert'));
-            if (alert) alert.close();
+            const alertElement = wrapper.querySelector('.alert');
+            if (alertElement) {
+                const bsAlert = Alert.getOrCreateInstance(alertElement);
+                if (bsAlert) bsAlert.close();
+            }
         }, 5000);
     },
 

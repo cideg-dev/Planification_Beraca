@@ -3,319 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificateur d'Interventions - Assemblées de Dieu</title>
+    <title>Planificateur AD BERACA</title>
     <link rel="icon" href="AD.jpeg" type="image/jpeg">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="AD.jpeg">
 </head>
-<body class="theme-light">
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid d-flex align-items-center">
-            <a class="navbar-brand" href="#">
-                <img src="AD.jpeg" alt="Logo AD" class="img-fluid" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; margin-right: 15px;">
-                <span class="glow-text">Planificateur d'Interventions</span>
+<body class="bg-light">
+    <!-- Navigation (Simplifiée) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="AD.jpeg" alt="Logo" width="32" height="32" class="me-2 rounded">
+                <span class="fw-bold tracking-tight">AD BERACA Planning</span>
             </a>
-
-            <div class="theme-selector">
-                <div class="theme-btn theme-light-btn" title="Clair" onclick="changeTheme('light')"></div>
-                <div class="theme-btn theme-dark-btn" title="Sombre" onclick="changeTheme('dark')"></div>
-                <div class="theme-btn theme-neon-btn" title="Néon" onclick="changeTheme('neon')"></div>
-                <div class="theme-btn theme-galaxy-btn" title="Galaxie" onclick="changeTheme('galaxy')"></div>
-                <div class="theme-btn theme-rainbow-btn" title="Arc-en-ciel" onclick="changeTheme('rainbow')"></div>
-                <div class="theme-btn theme-high-contrast-btn" title="Contraste élevé" onclick="changeTheme('high-contrast')">HC</div>
-                <div class="theme-btn theme-pastel-btn" title="Pastel" onclick="changeTheme('pastel')">P</div>
-            </div>
-
-            <div class="navbar-text me-3">
-                <span class="badge bg-warning text-dark">Église BERACA</span>
-            </div>
-
-            <div class="ms-3">
-                <button class="btn btn-outline-info" id="help-btn" title="Aide">
-                    <i class="fas fa-question-circle"></i>
-                </button>
-            </div>
-
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown">
-                    <i class="fas fa-globe me-1"></i>FR
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" onclick="changeLanguage('fr')">Français</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Navigation Vues -->
+                <ul class="nav nav-pills" id="main-nav">
+                    <li class="nav-item">
+                        <button class="nav-link active btn-sm text-white" data-view="planning-view">
+                            <i class="fas fa-calendar-alt me-2"></i>Planning
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="dashboard-view">
+                            <i class="fas fa-chart-pie me-2"></i>Tableau de Bord
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="preview-view">
+                            <i class="fas fa-print me-2"></i>Aperçu
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="visualization-view">
+                            <i class="fas fa-eye me-2"></i>Visualisation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="settings-view">
+                            <i class="fas fa-cogs me-2"></i>Configuration
+                        </button>
+                    </li>
                 </ul>
-            </div>
 
-            <div class="ms-3">
-                <button class="btn btn-outline-primary" id="stats-report-btn" title="Rapports statistiques">
-                    <i class="fas fa-chart-line"></i>
-                </button>
-            </div>
-
-            <div class="ms-3">
-                <button class="btn btn-outline-primary" id="auto-plan-btn" title="Planification automatique">
-                    <i class="fas fa-robot"></i>
-                </button>
-            </div>
-
-            <div class="ms-3">
-                <button class="btn btn-outline-primary" id="history-btn" title="Historique des modifications">
-                    <i class="fas fa-history"></i>
-                </button>
-            </div>
-
-            <div class="ms-3">
-                <button class="btn btn-outline-primary" id="customize-theme-btn" title="Personnaliser le thème">
-                    <i class="fas fa-palette"></i>
-                </button>
-            </div>
-
-            <div class="ms-3">
-                <button class="btn btn-outline-warning" id="logout-btn" title="Déconnexion administrateur">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
+                <div class="d-flex align-items-center gap-3">
+                    <button id="theme-toggle" class="btn btn-sm btn-outline-light" title="Changer le thème">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div id="sync-indicator" class="text-white-50 small ms-2 border-start ps-3"></div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <!-- En-tête AD -->
-        <div class="ad-header">
-            <h1><i class="fas fa-church me-2"></i>ASSEMBLÉES DE DIEU DU BÉNIN</h1>
-            <p>Plan d'Action Trimestriel - Gestion des Interventions</p>
-        </div>
+    <div class="container-fluid mt-3 px-4">
+        <div id="alert-placeholder"></div>
 
-        <!-- Cartes d'options -->
-        <div class="row mt-5">
-            <div class="col-md-6 mb-4">
-                <div class="card main-card h-100">
-                    <div class="card-body text-center">
-                        <div class="card-icon mb-4">
-                            <i class="fas fa-calendar-alt fa-3x text-primary"></i>
-                        </div>
-                        <h4 class="card-title">Planification</h4>
-                        <p class="card-text">Créer et gérer les interventions planifiées</p>
-                        <button class="btn btn-primary btn-lg" id="access-planning-btn">
-                            <i class="fas fa-edit me-2"></i>Accéder à la planification
+        <!-- VUE CONFIGURATION / EN-TÊTE -->
+        <div id="settings-view" class="view-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-8">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-primary fw-bold mb-0"><i class="fas fa-sliders-h me-2"></i>Gestion de l'En-tête et Paramètres</h4>
+                        <button class="btn btn-primary shadow-sm" id="btn-save-settings">
+                            <i class="fas fa-save me-2"></i>Enregistrer les modifications
                         </button>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="card main-card h-100">
-                    <div class="card-body text-center">
-                        <div class="card-icon mb-4">
-                            <i class="fas fa-chart-bar fa-3x text-success"></i>
+
+                    <div class="row g-4">
+                        <!-- Carte Identité & Période -->
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white fw-bold text-primary">
+                                    <i class="fas fa-church me-2"></i>Identité & Période
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Titre / Nom de l'Église</label>
+                                        <input type="text" class="form-control" id="config-church" placeholder="Ex: AD BERACA">
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Région</label>
+                                            <input type="text" class="form-control" id="config-region">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Section</label>
+                                            <input type="text" class="form-control" id="config-section">
+                                        </div>
+                                    </div>
+                                    <hr class="text-muted opacity-25">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Année</label>
+                                            <input type="number" class="form-control" id="config-year">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Trimestre</label>
+                                            <select class="form-select" id="config-quarter">
+                                                <option value="1">1er Trimestre</option>
+                                                <option value="2">2ème Trimestre</option>
+                                                <option value="3">3ème Trimestre</option>
+                                                <option value="4">4ème Trimestre</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <h4 class="card-title">Rapport</h4>
-                        <p class="card-text">Visualiser et exporter les interventions</p>
-                        <a href="rapport.html" class="btn btn-success btn-lg">
-                            <i class="fas fa-file-alt me-2"></i>Accéder au rapport
-                        </a>
+
+                        <!-- Carte Contacts & Visuel -->
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white fw-bold text-success">
+                                    <i class="fas fa-address-card me-2"></i>Contacts & Visuel
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Téléphone / WhatsApp</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
+                                            <input type="text" class="form-control" id="config-phone" placeholder="+229 ...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Email de contact</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="config-email" placeholder="contact@eglise.com">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Chemin du Logo</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                            <input type="text" class="form-control" id="config-logo" value="AD.jpeg" placeholder="Nom du fichier image">
+                                        </div>
+                                        <div class="form-text small">L'image doit être présente à la racine du projet.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carte Finances -->
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white fw-bold text-warning">
+                                    <i class="fas fa-university me-2"></i>Informations Financières
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Compte Bancaire / Mobile Money</label>
+                                        <input type="text" class="form-control" id="config-bank" placeholder="Ex: Banque Atlantique: 12345... ou MoMo: 97...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Section pour les liens de publication -->
-        <div class="card main-card mt-5">
-            <div class="card-header">
-                <h4><i class="fas fa-link me-2"></i>Accès aux publications</h4>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <p>Entrez un lien de publication pour accéder à des données partagées :</p>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="publish-link-input" placeholder="Collez le lien de publication ici...">
-                            <button class="btn btn-primary" type="button" id="access-publish-link">
-                                <i class="fas fa-external-link-alt me-2"></i>Accéder
-                            </button>
+        <!-- VUE PLANNING (Par défaut) -->
+        <div id="planning-view" class="view-section">
+            <div class="row g-4">
+                <!-- COLONNE GAUCHE : FORMULAIRE OPTIMISÉ -->
+                <div class="col-lg-4 col-xl-3">
+                    <div class="card shadow-sm border-0 sticky-top" style="top: 20px; z-index: 100;">
+                        <!-- ... Contenu existant du formulaire ... -->
+                        <div class="card-header bg-white pt-3 border-0">
+                            <h5 class="card-title text-primary fw-bold mb-0">
+                                <i class="fas fa-plus-circle me-2"></i>Intervention
+                            </h5>
+                        </div>
+                        <div class="card-body pt-0">
+                            <form id="main-form" class="needs-validation" novalidate>
+                                <!-- ... Champs du formulaire ... -->
+                                
+                                <!-- GROUPE 1 : QUAND & OÙ -->
+                                <p class="text-uppercase text-muted small fw-bold mb-2 mt-2" style="font-size: 0.7rem;">Cadre</p>
+                                
+                                <div class="form-floating mb-2">
+                                    <input type="date" class="form-control" id="date" required placeholder="Date">
+                                    <label for="date">Date *</label>
+                                </div>
+                                
+                                <!-- Le jour est calculé et affiché ici discrètement -->
+                                <div id="day-display" class="badge bg-light text-primary border mb-2 w-100 text-start px-3 py-2" style="display:none;">
+                                    <i class="fas fa-calendar-day me-2"></i><span id="day-text">...</span>
+                                </div>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="place" required>
+                                                <option value="BERACA" selected>BERACA</option>
+                                                <option value="KPOTEYEI">KPOTEYEI</option>
+                                                <option value="WINKE">WINKE</option>
+                                                <option value="GROS PORTEUR">GROS PORTEUR</option>
+                                            </select>
+                                            <label for="place">Lieu *</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="type" required>
+                                                <option value="Culte Principal">Culte P.</option>
+                                                <option value="Enseignement">Enseign.</option>
+                                                <option value="Réunion">Réunion</option>
+                                                <option value="Prière">Prière</option>
+                                                <option value="Veillée">Veillée</option>
+                                                <option value="Jeune">Jeûne</option>
+                                                <option value="Autre">Autre</option>
+                                            </select>
+                                            <label for="type">Type *</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- GROUPE 2 : CONTENU -->
+                                <p class="text-uppercase text-muted small fw-bold mb-2 mt-3" style="font-size: 0.7rem;">Contenu</p>
+
+                                <div class="form-floating mb-2">
+                                    <input type="text" class="form-control" id="theme" placeholder="Thème">
+                                    <label for="theme">Thème / Titre</label>
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <div class="form-floating flex-grow-1">
+                                        <select class="form-select" id="intervenant" required>
+                                            <option value="">Sélectionner...</option>
+                                        </select>
+                                        <label for="intervenant">Intervenant *</label>
+                                    </div>
+                                    <button class="btn btn-warning text-white" type="button" id="btn-suggest-intervenant" title="Suggestion IA">
+                                        <i class="fas fa-magic"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" id="btn-add-intervenant" title="Nouveau" data-bs-toggle="modal" data-bs-target="#modalNewIntervenant">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning" type="button" id="btn-modify-intervenant" title="Modifier">
+                                        <i class="fas fa-user-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" type="button" id="btn-history-intervenant" title="Historique">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                </div>
+
+                                <!-- GROUPE 3 : DÉTAILS (Progressive Disclosure) -->
+                                <div class="accordion accordion-flush mt-3" id="accordionDetails">
+                                    <div class="accordion-item border rounded-2">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed py-2 small bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails">
+                                                <i class="fas fa-sticky-note me-2 text-muted"></i> Détails
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDetails" class="accordion-collapse collapse" data-bs-parent="#accordionDetails">
+                                            <div class="accordion-body p-2">
+                                                <div class="mb-2">
+                                                    <label class="form-label small fw-bold">Récurrence</label>
+                                                    <select class="form-select form-select-sm" id="recurrence">
+                                                        <option value="none">Aucune</option>
+                                                        <option value="daily">Quotidienne</option>
+                                                        <option value="weekly">Hebdomadaire</option>
+                                                        <option value="monthly">Mensuelle</option>
+                                                        <option value="yearly">Annuelle</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label small fw-bold">Date de fin</label>
+                                                    <input type="date" class="form-control form-control-sm" id="recurrence-end-date">
+                                                </div>
+                                                <textarea class="form-control border-0 bg-transparent mt-2" id="obs" rows="2" placeholder="Notes, instructions spécifiques..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIONS -->
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="submit" class="btn btn-primary shadow-sm fw-bold">
+                                        <i class="fas fa-check me-2"></i>Enregistrer
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm text-muted" id="btn-reset">
+                                        Réinitialiser
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <p class="text-center">Ou utilisez directement l'URL :</p>
-                        <p class="text-center">
-                            <code>rapport.html?data=...</code>
-                        </p>
+                </div>
+
+                <!-- COLONNE DROITE : LISTE -->
+                <div class="col-lg-8 col-xl-9">
+                    <div class="card shadow-sm border-0 h-100">
+                        <!-- Toolbar -->
+                        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <h5 class="mb-0 text-dark fw-bold">Planning</h5>
+                                <span class="badge bg-light text-dark border" id="count-badge">0</span>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <!-- Recherche intégrée -->
+                                <div class="input-group input-group-sm" style="width: 200px;">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="search-input" placeholder="Filtrer...">
+                                </div>
+                                
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-success" id="export-excel-btn" title="Excel"><i class="fas fa-file-excel"></i></button>
+                                    <button class="btn btn-outline-danger" id="export-pdf-btn" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                                    <button class="btn btn-outline-secondary" id="refresh-btn" title="Actualiser"><i class="fas fa-sync"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0 bg-light">
+                            <div id="planning-container" class="list-group list-group-flush p-2">
+                                <!-- Loader -->
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VUE DASHBOARD (Masquée par défaut) -->
+        <div id="dashboard-view" class="view-section" style="display: none;">
+            <!-- KPIs -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 border-start border-4 border-primary">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Total Interventions</h6>
+                            <h2 class="display-6 fw-bold mb-0 text-primary" id="kpi-total">-</h2>
+                            <small class="text-muted">sur la période</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 border-start border-4 border-success">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Top Intervenant</h6>
+                            <h2 class="h3 fw-bold mb-0 text-success text-truncate" id="kpi-speaker">-</h2>
+                            <small class="text-muted">Le plus sollicité</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 border-start border-4 border-warning">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Lieu Principal</h6>
+                            <h2 class="h3 fw-bold mb-0 text-warning" id="kpi-place">-</h2>
+                            <small class="text-muted">Zone la plus active</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Activité Annuelle</div>
+                        <div class="card-body">
+                            <canvas id="chart-timeline"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Répartition par Type</div>
+                        <div class="card-body">
+                            <canvas id="chart-types"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Top 5 des Intervenants</div>
+                        <div class="card-body">
+                            <canvas id="chart-speakers" height="300"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Charger les données sauvegardées
-        document.addEventListener('DOMContentLoaded', function() {
-            // Charger le thème sauvegardé
-            const savedTheme = localStorage.getItem('selectedTheme') || 'light';
-            changeTheme(savedTheme);
-            
-            // Configurer les événements
-            setupAccueilEventListeners();
-        });
+    <!-- VUE VISUALISATION (Masquée par défaut) -->
+    <div id="visualization-view" class="view-section" style="display: none;">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-eye me-2"></i>Visualisation des Données</h5>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="visualization-type" style="width: auto;">
+                                <option value="timeline">Chronologie</option>
+                                <option value="monthly">Vue Mensuelle</option>
+                                <option value="by-type">Par Type d'Intervention</option>
+                                <option value="by-place">Par Lieu</option>
+                                <option value="by-speaker">Par Intervenant</option>
+                            </select>
+                            <button class="btn btn-outline-primary btn-sm" id="refresh-visualization">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="date" class="form-control" id="vis-start-date">
+                                    <span class="input-group-text">à</span>
+                                    <input type="date" class="form-control" id="vis-end-date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control form-control-sm" id="vis-search" placeholder="Rechercher...">
+                                    <button class="btn btn-primary btn-sm" id="apply-filters">
+                                        <i class="fas fa-filter me-1"></i>Appliquer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="visualization-container" class="p-2" style="min-height: 500px;">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Sélectionnez un type de visualisation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function setupAccueilEventListeners() {
-            document.getElementById('access-publish-link').addEventListener('click', function() {
-                const link = document.getElementById('publish-link-input').value;
-                if (link) {
-                    // Extraire le paramètre data de l'URL
-                    const url = new URL(link);
-                    const dataParam = url.searchParams.get('data');
+    <!-- MODAL : NOUVEL INTERVENANT -->
+    <div class="modal fade" id="modalNewIntervenant" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white py-2">
+                    <h6 class="modal-title small fw-bold"><i class="fas fa-user-plus me-2"></i>Nouveau</h6>
+                    <button type="button" class="btn-close btn-close-white small" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <form id="form-create-intervenant">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold mb-1">Titre</label>
+                            <select class="form-select form-select-sm" id="modal-iv-title">
+                                <option value="">Aucun</option>
+                                <option value="Pasteur">Pasteur</option>
+                                <option value="Diacre">Diacre</option>
+                                <option value="Ancien">Ancien</option>
+                                <option value="Frère">Frère</option>
+                                <option value="Sœur">Sœur</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold mb-1">Prénom *</label>
+                            <input type="text" class="form-control form-control-sm" id="modal-iv-firstname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold mb-1">Nom *</label>
+                            <input type="text" class="form-control form-control-sm" id="modal-iv-lastname" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Créer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    if (dataParam) {
-                        // Rediriger vers la page de rapport avec les données
-                        window.location.href = `rapport.html?data=${dataParam}`;
-                    } else {
-                        alert('Lien de publication invalide. Veuillez vérifier le format du lien.');
-                    }
-                } else {
-                    alert('Veuillez entrer un lien de publication.');
-                }
-            });
+    <!-- MODAL : SUGGESTIONS IA -->
+    <div class="modal fade" id="modalSuggestions" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-magic me-2"></i>Suggestions Intelligentes</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="list-group list-group-flush" id="suggestions-list">
+                        <!-- Items injectés par JS -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-warning" role="status"></div>
+                            <p class="mt-2 small text-muted">Analyse de l'historique...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            document.getElementById('help-btn').addEventListener('click', function() {
-                alert('Bienvenue dans le Planificateur d\'Interventions des Assemblées de Dieu du Bénin. Utilisez les cartes ci-dessus pour accéder aux différentes fonctionnalités.');
-            });
+    <!-- VUE APERÇU (Masquée par défaut) -->
+    <div id="preview-view" class="view-section" style="display: none;">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-print me-2"></i>Aperçu avant Impression/Export</h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm" id="export-preview-pdf">
+                                <i class="fas fa-file-pdf me-1"></i>Exporter PDF
+                            </button>
+                            <button class="btn btn-success btn-sm" id="export-preview-excel">
+                                <i class="fas fa-file-excel me-1"></i>Exporter Excel
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" id="refresh-preview">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="date" class="form-control" id="preview-start-date">
+                                    <span class="input-group-text">à</span>
+                                    <input type="date" class="form-control" id="preview-end-date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control form-control-sm" id="preview-search" placeholder="Rechercher...">
+                                    <button class="btn btn-primary btn-sm" id="apply-preview-filters">
+                                        <i class="fas fa-filter me-1"></i>Appliquer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded bg-light p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i>En-tête de l'Église</h6>
+                                <small class="text-muted">Affiché dans l'export</small>
+                            </div>
+                            <div class="mt-2">
+                                <div class="d-flex align-items-center">
+                                    <img src="" id="preview-logo" alt="Logo" class="me-3" style="max-height: 60px; max-width: 60px;">
+                                    <div>
+                                        <h5 id="preview-church-name" class="mb-0 fw-bold">Église AD BERACA</h5>
+                                        <p id="preview-church-details" class="mb-0 text-muted small">Région: ATACORA | Section: NATITINGOU</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="preview-container" class="p-4 bg-white border rounded" style="min-height: 500px;">
+                            <div class="text-center py-5">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Sélectionnez les filtres pour générer l'aperçu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            document.getElementById('stats-report-btn').addEventListener('click', function() {
-                // Charger la fonction de rapports statistiques depuis script.js
-                if (typeof showStatsReportModal === 'function') {
-                    showStatsReportModal();
-                } else {
-                    // Charger le script si ce n'est pas encore fait
-                    const script = document.createElement('script');
-                    script.src = 'script.js';
-                    document.head.appendChild(script);
-
-                    script.onload = function() {
-                        showStatsReportModal();
-                    };
-                }
-            });
-
-            document.getElementById('auto-plan-btn').addEventListener('click', function() {
-                // Charger la fonction de planification automatique depuis script.js
-                if (typeof showAutoPlanModal === 'function') {
-                    showAutoPlanModal();
-                } else {
-                    // Charger le script si ce n'est pas encore fait
-                    const script = document.createElement('script');
-                    script.src = 'script.js';
-                    document.head.appendChild(script);
-
-                    script.onload = function() {
-                        showAutoPlanModal();
-                    };
-                }
-            });
-
-            document.getElementById('history-btn').addEventListener('click', function() {
-                // Charger la fonction d'historique depuis script.js
-                if (typeof showHistoryModal === 'function') {
-                    showHistoryModal();
-                } else {
-                    // Charger le script si ce n'est pas encore fait
-                    const script = document.createElement('script');
-                    script.src = 'script.js';
-                    document.head.appendChild(script);
-
-                    script.onload = function() {
-                        showHistoryModal();
-                    };
-                }
-            });
-
-            document.getElementById('customize-theme-btn').addEventListener('click', function() {
-                // Charger la fonction de personnalisation du thème depuis script.js
-                if (typeof showThemeCustomizationModal === 'function') {
-                    showThemeCustomizationModal();
-                } else {
-                    // Charger le script si ce n'est pas encore fait
-                    const script = document.createElement('script');
-                    script.src = 'script.js';
-                    document.head.appendChild(script);
-
-                    script.onload = function() {
-                        showThemeCustomizationModal();
-                    };
-                }
-            });
-        }
-
-        function changeTheme(theme) {
-            // Valider que le thème est autorisé pour éviter les injections CSS
-            const allowedThemes = ['light', 'dark', 'neon', 'galaxy', 'rainbow', 'high-contrast', 'pastel'];
-            if (!allowedThemes.includes(theme)) {
-                console.warn(`Thème non autorisé : ${theme}`);
-                return;
-            }
-
-            document.body.className = 'theme-' + theme;
-            
-            // Sauvegarder le thème sélectionné
-            localStorage.setItem('selectedTheme', theme);
-        }
-
-        function changeLanguage(lang) {
-            // Cette fonction est conservée pour la compatibilité avec l'interface
-            localStorage.setItem('selectedLanguage', lang);
-            alert('La langue a été changée en ' + (lang === 'fr' ? 'Français' : 'English'));
-        }
-
-        // Fonction pour vérifier l'accès à la planification
-        function checkAccess() {
-            // Vérifier si l'utilisateur est déjà authentifié
-            const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
-
-            if (isAuthenticated) {
-                // Accès direct si déjà authentifié
-                window.location.href = 'planification.html';
-                return;
-            }
-
-            const adminCode = 'BeraComi26';
-            const enteredCode = prompt('Veuillez entrer le code administrateur pour accéder à la planification :');
-
-            if (enteredCode === adminCode) {
-                // Stocker l'état d'authentification
-                localStorage.setItem('adminAccess', 'true');
-                // Rediriger vers la page de planification
-                window.location.href = 'planification.html';
-            } else if (enteredCode !== null) {
-                alert('Code administrateur incorrect. Accès refusé.');
-            }
-            // Si l'utilisateur annule, ne rien faire
-        }
-
-        // Fonction pour vérifier l'authentification sur la page de planification
-        function checkPlanificationAccess() {
-            const isAuthenticated = localStorage.getItem('adminAccess') === 'true';
-
-            if (!isAuthenticated) {
-                // Rediriger vers la page d'accueil si non authentifié
-                alert('Accès refusé. Veuillez vous authentifier sur la page d\'accueil.');
-                window.location.href = 'index.html';
-                return false;
-            }
-            return true;
-        }
-
-        // Configurer le bouton d'accès à la planification
-        document.getElementById('access-planning-btn').addEventListener('click', checkAccess);
-
-        // Configurer le bouton de déconnexion
-        document.getElementById('logout-btn').addEventListener('click', function() {
-            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ? Cela supprimera votre accès administrateur.')) {
-                localStorage.removeItem('adminAccess');
-                alert('Vous avez été déconnecté avec succès.');
-            }
-        });
-    </script>
+    <!-- Script Module Vite -->
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>

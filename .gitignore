@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+npm-debug.log
+
+# Environment variables
+.env
+.env.local
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+
+# Build output
+dist/
+build/
+
+# Heavy binaries/installers (should not be in repo)
+*.deb
+*.tar.xz
+*.zip
+*.gz
