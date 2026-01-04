@@ -1,8 +1,8 @@
+import { createClient } from '@supabase/supabase-js';
 import { CONFIG } from '../config.js';
 
 // Initialisation du client (Singleton)
-// Utilisation de la version globale chargée via CDN
-export const supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+export const supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
 /**
  * Vérifie la connexion à Supabase
