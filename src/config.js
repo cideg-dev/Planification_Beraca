@@ -1,5 +1,5 @@
 // Configuration de l'application
-// Vite remplace ces valeurs au moment du build (statiquement)
+// Ces lignes seront remplacées physiquement par leurs valeurs lors du build.
 export const CONFIG = {
     SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
     SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
