@@ -79,6 +79,8 @@ export const ExportService = {
      * @param {Object} config - Configuration globale
      */
     async exportToPdf(interventions, config = {}) {
+        // Correction pour jsPDF v2+ chargé via CDN
+        const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
         // Charger le logo défini dans la config ou par défaut
@@ -158,7 +160,8 @@ export const ExportService = {
             tableRows.push(interventionData);
         });
 
-        autoTable(doc, {
+        // Utiliser doc.autoTable si disponible (extension par le plugin)
+        (doc.autoTable || window.autoTable)(doc, {
             head: [tableColumn],
             body: tableRows,
             startY: yPos + 10,
