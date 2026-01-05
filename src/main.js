@@ -210,7 +210,9 @@ async function initApp() {
     // Vérifier la connexion à Supabase
     const isConnected = await testConnection();
     if (!isConnected) {
-        UI.showAlert('Erreur de connexion à la base de données. Veuillez vérifier la configuration des secrets sur GitHub.', 'danger');
+        console.warn('Connexion à Supabase échouée. L\'application fonctionnera en mode dégradé.');
+        // Ne pas afficher d'alerte à l'utilisateur pour éviter de surcharger l'interface
+        // UI.showAlert('Erreur de connexion à la base de données. Veuillez vérifier la configuration des secrets sur GitHub.', 'danger');
     }
 
     setupEventListeners();
