@@ -1,18 +1,10 @@
-// Configuration de l'application et constantes
-
-// Safely get Vite environment variables
-const env = (import.meta && import.meta.env) ? import.meta.env : {};
-
+// Configuration de l'application
 export const CONFIG = {
-    // Priority: 1. Build-time variables, 2. Manual LocalStorage fallback
-    SUPABASE_URL: env.VITE_SUPABASE_URL || localStorage.getItem('supabase_url') || '',
-    SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('supabase_anon_key') || '',
-    ADMIN_CODE: env.VITE_ADMIN_CODE || localStorage.getItem('admin_code') || ''
+    // Vite remplacera ces valeurs au moment du build (npm run build)
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
 };
-
-if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) {
-    console.warn("Attention: Configuration Supabase non détectée dans le build. Utilisation du stockage local.");
-}
 
 export const CONSTANTS = {
     DAYS_OF_WEEK: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],

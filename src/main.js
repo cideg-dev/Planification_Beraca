@@ -204,14 +204,7 @@ async function initApp() {
     // Vérifier la connexion à Supabase
     const isConnected = await testConnection();
     if (!isConnected) {
-        // Vérifier si la config est vide, si oui, proposer le setup
-        const { CONFIG } = await import('./config.js');
-        if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) {
-            promptForSupabaseConfig();
-            return; // Arrêter l'initialisation ici
-        } else {
-            UI.showAlert('Erreur de connexion à la base de données. Veuillez vérifier votre configuration.', 'danger');
-        }
+        UI.showAlert('Erreur de connexion à la base de données. Veuillez vérifier la configuration des secrets sur GitHub.', 'danger');
     }
 
     setupEventListeners();
@@ -221,27 +214,6 @@ async function initApp() {
     await loadData();
     initNotifications(); // Initialiser les notifications
     initializeChangeNotifications(); // Initialiser les notifications de modifications
-}
-
-// Fonction de configuration manuelle (Fallback ultime)
-function promptForSupabaseConfig() {
-    const confirmSetup = confirm("La configuration Supabase est manquante. Voulez-vous la saisir manuellement maintenant ? (Elle sera sauvegardée dans votre navigateur)");
-    if (!confirmSetup) return;
-
-    const url = prompt("Entrez l'URL de votre projet Supabase (https://xyz.supabase.co) :");
-    if (!url) return;
-
-    const key = prompt("Entrez la clé publique (Anon Key) de Supabase :");
-    if (!key) return;
-    
-    const adminCode = prompt("Choisissez un code Admin pour protéger les modifications :", "Beraca2024");
-
-    localStorage.setItem('supabase_url', url.trim());
-    localStorage.setItem('supabase_anon_key', key.trim());
-    localStorage.setItem('admin_code', adminCode ? adminCode.trim() : 'Beraca2024');
-
-    alert("Configuration sauvegardée ! L'application va redémarrer.");
-    window.location.reload();
 }
 
 // Initialisation
