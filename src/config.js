@@ -1,9 +1,8 @@
 // Configuration de l'application
 export const CONFIG = {
-    // Vite remplacera ces valeurs au moment du build (npm run build)
-    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
-    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE || ''
 };
 
 export const CONSTANTS = {
