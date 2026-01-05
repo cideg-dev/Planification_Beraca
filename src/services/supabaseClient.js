@@ -10,15 +10,24 @@ if (!createClient) {
 // Initialisation du client (Singleton)
 let client = null;
 
-// Vérification simplifiée pour permettre l'initialisation
-if (createClient && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_URL.startsWith('http')) {
+// Vérification pour permettre l'initialisation
+if (createClient &&
+    CONFIG.SUPABASE_URL &&
+    CONFIG.SUPABASE_URL !== 'VITE_SUPABASE_URL_PLACEHOLDER' &&
+    CONFIG.SUPABASE_URL.startsWith('http')) {
     try {
         client = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+        if (CONFIG.SUPABASE_ANON_KEY === 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER') {
+            console.warn("⚠️  Attention: La clé Supabase est encore un placeholder. La connexion pourrait échouer.");
+        }
     } catch (e) {
         console.error("Erreur d'initialisation Supabase:", e);
     }
 } else {
-    console.error("Supabase non initialisé : URL manquante ou invalide.", { url: CONFIG.SUPABASE_URL });
+    console.error("Supabase non initialisé : URL manquante ou invalide.", {
+        url: CONFIG.SUPABASE_URL,
+        isPlaceholder: CONFIG.SUPABASE_URL === 'VITE_SUPABASE_URL_PLACEHOLDER'
+    });
 }
 
 export const supabaseClient = client;
