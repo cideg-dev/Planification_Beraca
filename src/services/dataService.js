@@ -4,7 +4,6 @@ export const DataService = {
     async getIntervenants() {
         if (!supabaseClient) return [];
         try {
-            // Correction: last_name au lieu de lastname
             const { data, error } = await supabaseClient.from('intervenants').select('*').order('last_name');
             if (error) throw error;
             return data || [];
@@ -57,7 +56,6 @@ export const DataService = {
     async getConfig() {
         if (!supabaseClient) return null;
         try {
-            // Correction: app_config au lieu de configurations
             const { data, error } = await supabaseClient.from('app_config').select('*').limit(1);
             if (error) throw error;
             return data[0] || null;
@@ -70,11 +68,9 @@ export const DataService = {
     async updateConfig(payload) {
         if (!supabaseClient) return null;
         try {
-            // Correction: app_config au lieu de configurations
             const current = await this.getConfig();
             let result;
             if (current) {
-                // app_config utilise 'key' comme clé primaire dans la migration
                 result = await supabaseClient.from('app_config').update({ value: payload }).eq('key', current.key).select();
             } else {
                 result = await supabaseClient.from('app_config').insert([{ key: 'main_config', value: payload }]).select();
@@ -84,5 +80,53 @@ export const DataService = {
             console.error("Erreur updateConfig:", e);
             return null;
         }
+    },
+
+    // --- COMMENTAIRES ---
+    async getCommentsByIntervention(interventionId) {
+        if (!supabaseClient) return [];
+        try {
+            const { data, error } = await supabaseClient
+                .from('comments')
+                .select('*')
+                .eq('intervention_id', interventionId)
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return data || [];
+        } catch (e) {
+            console.error("Erreur getComments:", e);
+            return [];
+        }
+    },
+
+    async addComment(payload) {
+        if (!supabaseClient) throw new Error("Client non initialisé");
+        const { data, error } = await supabaseClient.from('comments').insert([payload]).select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- FEEDBACKS ---
+    async getFeedbacksByIntervention(interventionId) {
+        if (!supabaseClient) return [];
+        try {
+            const { data, error } = await supabaseClient
+                .from('feedbacks')
+                .select('*')
+                .eq('intervention_id', interventionId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (e) {
+            console.error("Erreur getFeedbacks:", e);
+            return [];
+        }
+    },
+
+    async addFeedback(payload) {
+        if (!supabaseClient) throw new Error("Client non initialisé");
+        const { data, error } = await supabaseClient.from('feedbacks').insert([payload]).select();
+        if (error) throw error;
+        return data[0];
     }
 };

@@ -300,6 +300,9 @@ window.markNotificationRead = async (id) => {
     await refreshNotificationsUI();
 };
 
+window.showComments = showComments;
+window.showFeedback = showFeedback;
+
 // --- FONCTION DE TEST TEMPORAIRE ---
 window.testNotif = async () => {
     console.log("Envoi d'une notification de test...");
