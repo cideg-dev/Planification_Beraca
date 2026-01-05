@@ -38,3 +38,4 @@ Version modernisée utilisant Vite, Supabase et une architecture modulaire.
 - `src/services/` : Logique métier (Data, Export, Migration).
 - `src/ui/` : Gestionnaires d'interface.
 - `index.html` : Page unique de l'application.
+
