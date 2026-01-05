@@ -4,11 +4,12 @@ export const DataService = {
     async getIntervenants() {
         if (!supabaseClient) return [];
         try {
-            const { data, error } = await supabaseClient.from('intervenants').select('*').order('lastname');
+            // Correction: last_name au lieu de lastname
+            const { data, error } = await supabaseClient.from('intervenants').select('*').order('last_name');
             if (error) throw error;
             return data || [];
         } catch (e) {
-            console.error(e);
+            console.error("Erreur getIntervenants:", e);
             return [];
         }
     },
@@ -20,7 +21,7 @@ export const DataService = {
             if (error) throw error;
             return data || [];
         } catch (e) {
-            console.error(e);
+            console.error("Erreur getInterventions:", e);
             return [];
         }
     },
@@ -56,11 +57,12 @@ export const DataService = {
     async getConfig() {
         if (!supabaseClient) return null;
         try {
-            const { data, error } = await supabaseClient.from('configurations').select('*').limit(1);
+            // Correction: app_config au lieu de configurations
+            const { data, error } = await supabaseClient.from('app_config').select('*').limit(1);
             if (error) throw error;
             return data[0] || null;
         } catch (e) {
-            console.error(e);
+            console.error("Erreur getConfig:", e);
             return null;
         }
     },
@@ -68,17 +70,18 @@ export const DataService = {
     async updateConfig(payload) {
         if (!supabaseClient) return null;
         try {
-            // On récupère d'abord l'ID s'il existe
+            // Correction: app_config au lieu de configurations
             const current = await this.getConfig();
             let result;
             if (current) {
-                result = await supabaseClient.from('configurations').update(payload).eq('id', current.id).select();
+                // app_config utilise 'key' comme clé primaire dans la migration
+                result = await supabaseClient.from('app_config').update({ value: payload }).eq('key', current.key).select();
             } else {
-                result = await supabaseClient.from('configurations').insert([payload]).select();
+                result = await supabaseClient.from('app_config').insert([{ key: 'main_config', value: payload }]).select();
             }
-            return result.data[0];
+            return result.data ? result.data[0] : null;
         } catch (e) {
-            console.error(e);
+            console.error("Erreur updateConfig:", e);
             return null;
         }
     }
