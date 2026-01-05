@@ -1,9 +1,9 @@
 // Configuration de l'application
 // Ces valeurs sont chargées depuis les variables d'environnement (.env)
 export const CONFIG = {
-    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'VITE_SUPABASE_URL_PLACEHOLDER',
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER',
-    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE || 'VITE_ADMIN_CODE_PLACEHOLDER'
+    SUPABASE_URL: typeof import?.meta?.env !== 'undefined' ? import.meta.env.VITE_SUPABASE_URL || 'VITE_SUPABASE_URL_PLACEHOLDER' : 'VITE_SUPABASE_URL_PLACEHOLDER',
+    SUPABASE_ANON_KEY: typeof import?.meta?.env !== 'undefined' ? import.meta.env.VITE_SUPABASE_ANON_KEY || 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER' : 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER',
+    ADMIN_CODE: typeof import?.meta?.env !== 'undefined' ? import.meta.env.VITE_ADMIN_CODE || 'VITE_ADMIN_CODE_PLACEHOLDER' : 'VITE_ADMIN_CODE_PLACEHOLDER'
 };
 
 export const CONSTANTS = {
