@@ -1,15 +1,10 @@
 // Configuration de l'application
-// Note : Vite remplace ces valeurs au moment du build (statiquement)
+// Vite remplacera ces valeurs par les secrets GitHub lors du build (statiquement)
 export const CONFIG = {
-    SUPABASE_URL: (import.meta.env && import.meta.env.VITE_SUPABASE_URL) ? import.meta.env.VITE_SUPABASE_URL : '',
-    SUPABASE_ANON_KEY: (import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) ? import.meta.env.VITE_SUPABASE_ANON_KEY : '',
-    ADMIN_CODE: (import.meta.env && import.meta.env.VITE_ADMIN_CODE) ? import.meta.env.VITE_ADMIN_CODE : ''
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
 };
-
-// Vérification pour le débogage en production
-if (!CONFIG.SUPABASE_URL) {
-    console.warn("Attention : Les clés Supabase sont absentes du build final.");
-}
 
 export const CONSTANTS = {
     DAYS_OF_WEEK: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
