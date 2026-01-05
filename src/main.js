@@ -35,7 +35,7 @@ const state = {
         phone: '',
         email: '',
         bank: '',
-        logo: '/Planification_Beraca/AD.jpeg'
+        logo: 'AD.jpeg'
     },
     filters: {
         searchQuery: '',
