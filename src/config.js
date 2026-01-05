@@ -1,9 +1,17 @@
 // Configuration de l'application
-// Ces lignes seront remplacées physiquement par leurs valeurs lors du build.
+// Utilisation d'un accès ultra-sécurisé pour éviter le crash 'undefined'
+const getViteEnv = (key) => {
+    try {
+        return import.meta.env[key];
+    } catch (e) {
+        return null;
+    }
+};
+
 export const CONFIG = {
-    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
-    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
+    SUPABASE_URL: getViteEnv('VITE_SUPABASE_URL') || '',
+    SUPABASE_ANON_KEY: getViteEnv('VITE_SUPABASE_ANON_KEY') || '',
+    ADMIN_CODE: getViteEnv('VITE_ADMIN_CODE') || ''
 };
 
 export const CONSTANTS = {

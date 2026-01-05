@@ -1,5 +1,5 @@
 // Utilisation des versions globales chargées via CDN
-// jsPDF est disponible via la variable globale jsPDF
+// jsPDF est disponible via la variable globale jspdf.jsPDF
 // jspdf-autotable étend jsPDF
 // xlsx est disponible via la variable globale XLSX
 
@@ -79,16 +79,13 @@ export const ExportService = {
      * @param {Object} config - Configuration globale
      */
     async exportToPdf(interventions, config = {}) {
-        // Correction pour jsPDF v2+ chargé via CDN
+        // Initialisation de jsPDF (format UMD)
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
         // Charger le logo défini dans la config ou par défaut
         const logoPath = config.logo && config.logo.trim() !== '' ? config.logo : 'AD.jpeg';
         const logoData = await loadImage(logoPath);
-
-        // --- CONFIGURATION DE LA POLICE ---
-        doc.setFont("times", "normal"); 
 
         // --- EN-TÊTE ---
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -107,12 +104,10 @@ export const ExportService = {
         
         yPos += 8;
         doc.setFontSize(14);
-        doc.setFont("times", "bold");
         doc.text(`ÉGLISE : ${config.church || 'AD BERACA'}`, pageWidth / 2, yPos, { align: 'center' });
         
         yPos += 7;
         doc.setFontSize(11);
-        doc.setFont("times", "normal");
         doc.setTextColor(100);
         doc.text(`Région: ${config.region || 'ATACORA'} | Section: ${config.section || 'NATITINGOU'}`, pageWidth / 2, yPos, { align: 'center' });
         
@@ -128,7 +123,7 @@ export const ExportService = {
         }
 
         doc.setFontSize(11);
-        doc.setTextColor(44, 62, 80); // Retour au noir/gris foncé
+        doc.setTextColor(44, 62, 80);
         doc.text(`Planning Année: ${config.year || '2026'} - Trimestre: ${config.quarter || '1'}`, pageWidth / 2, yPos, { align: 'center' });
         
         // Ligne de séparation
@@ -160,34 +155,22 @@ export const ExportService = {
             tableRows.push(interventionData);
         });
 
-        // Utiliser doc.autoTable si disponible (extension par le plugin)
-        (doc.autoTable || window.autoTable)(doc, {
+        // Utilisation de autoTable (Extension jsPDF)
+        // L'erreur getTextColor vient souvent d'un mauvais passage de l'instance doc
+        doc.autoTable({
             head: [tableColumn],
             body: tableRows,
             startY: yPos + 10,
             theme: 'grid',
             styles: { 
-                font: "times",
                 fontSize: 10,
                 cellPadding: 3,
-                valign: 'middle',
-                lineWidth: 0.1,
-                lineColor: [200, 200, 200]
+                valign: 'middle'
             },
             headStyles: { 
                 fillColor: [240, 240, 240],
                 textColor: [44, 62, 80],
-                fontStyle: 'bold',
-                lineWidth: 0.1,
-                lineColor: [100, 100, 100]
-            },
-            columnStyles: {
-                0: { cellWidth: 22 },
-                1: { cellWidth: 22 },
-                2: { cellWidth: 25 },
-                3: { cellWidth: 25 },
-                4: { cellWidth: 40, fontStyle: 'bold' },
-                5: { cellWidth: 'auto' }
+                fontStyle: 'bold'
             },
             // Pied de page du tableau
             didDrawPage: function (data) {
