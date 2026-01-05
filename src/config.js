@@ -1,9 +1,27 @@
-// Configuration de l'application
-export const CONFIG = {
-    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE || ''
+// Configuration de l'application sécurisée contre les erreurs de type 'undefined'
+
+// On récupère l'objet env de manière ultra-sécurisée
+const getEnvObj = () => {
+    try {
+        return import.meta.env || {};
+    } catch (e) {
+        return {};
+    }
 };
+
+const env = getEnvObj();
+
+export const CONFIG = {
+    // Accès sécurisé : si env est undefined, on renvoie une chaîne vide au lieu de crasher
+    SUPABASE_URL: env.VITE_SUPABASE_URL || '',
+    SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY || '',
+    ADMIN_CODE: env.VITE_ADMIN_CODE || ''
+};
+
+// Vérification silencieuse pour le développeur
+if (!CONFIG.SUPABASE_URL) {
+    console.warn("Note: Configuration Supabase non détectée.");
+}
 
 export const CONSTANTS = {
     DAYS_OF_WEEK: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
