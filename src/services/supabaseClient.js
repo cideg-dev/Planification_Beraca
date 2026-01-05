@@ -1,82 +1,72 @@
-// import { createClient } from '@supabase/supabase-js'; // Commenté pour éviter l'erreur "bare module" en prod sans build
 import { CONFIG } from '../config.js';
 
-// Récupération de createClient depuis l'objet global injecté par le CDN (index.html)
+// Get createClient from the global object injected by the CDN (index.html)
 const createClient = window.supabase ? window.supabase.createClient : null;
 
 if (!createClient) {
-    console.error("Erreur critique : La bibliothèque Supabase n'est pas chargée. Vérifiez le script CDN dans index.html.");
+    console.error("Critical Error: Supabase library not loaded. Check CDN script in index.html.");
 }
 
-// Initialisation du client (Singleton) avec sécurité anti-crash
+// Client initialization (Singleton) with crash protection
 let client = null;
 
 if (createClient && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY) {
     try {
         client = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     } catch (e) {
-        console.error("Erreur d'initialisation Supabase:", e);
+        console.error("Supabase initialization error:", e);
     }
 } else {
-    console.warn("Supabase non initialisé : URL ou Clé manquante.");
+    console.warn("Supabase not initialized: URL or Key missing.");
 }
 
 export const supabaseClient = client;
 
 /**
- * Vérifie la connexion à Supabase
- * @returns {Promise<boolean>}
- */
-export async function checkConnection() {
-    if (!supabaseClient) return false;
-    // ... (reste de la fonction inchangé)
-
-/**
- * Vérifie la connexion à Supabase
+ * Checks the connection to Supabase
  * @returns {Promise<boolean>}
  */
 export async function checkConnection() {
     if (!supabaseClient) return false;
     try {
-        // Test simple : récupérer la date du serveur ou une table légère
+        // Simple test: fetch one record
         const { data, error } = await supabaseClient.from('interventions').select('id').limit(1);
         if (error) {
-            console.error("Erreur de connexion Supabase:", error);
+            console.error("Supabase connection error:", error);
             return false;
         }
         return true;
     } catch (e) {
-        console.error("Erreur de connexion Supabase:", e);
+        console.error("Supabase connection error:", e);
         return false;
     }
 }
 
 /**
- * Teste la connexion à Supabase en récupérant des informations sur le projet
+ * Tests the connection to Supabase by fetching project info
  * @returns {Promise<boolean>}
  */
 export async function testConnection() {
     if (!supabaseClient) {
-        console.error("Client Supabase non initialisé");
+        console.error("Supabase client not initialized");
         return false;
     }
 
     try {
-        // Test de la connexion en exécutant une requête simple
         const { data, error } = await supabaseClient
             .from('interventions')
             .select('*')
             .limit(1);
 
         if (error) {
-            console.error("Erreur lors du test de connexion:", error);
+            console.error("Connection test error:", error);
             return false;
         }
 
-        console.log("Connexion Supabase réussie, données récupérées:", data);
+        console.log("Supabase connection successful:", data);
         return true;
     } catch (e) {
-        console.error("Erreur lors du test de connexion:", e);
+        console.error("Connection test error:", e);
         return false;
     }
 }
