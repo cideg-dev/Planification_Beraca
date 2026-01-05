@@ -1,26 +1,16 @@
 // Configuration de l'application et constantes
 
-// Sécurisation de l'accès aux variables d'environnement
-const getEnv = (key) => {
-    // 1. Priorité : Vite (import.meta.env)
-    if (import.meta && import.meta.env && import.meta.env[key]) {
-        return import.meta.env[key];
-    }
-    // 2. Fallback : process.env (injecté via vite.config.js define)
-    if (typeof process !== 'undefined' && process.env && process.env[key]) {
-        return process.env[key];
-    }
-    
-    // Fallback pour éviter le crash (mais l'app ne fonctionnera pas sans connexion DB)
-    console.warn(`Attention: La variable d'environnement ${key} n'est pas définie.`);
-    return '';
+export const CONFIG = {
+    // Accès statique obligatoire pour que Vite puisse effectuer le remplacement lors du build
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_URL : ''),
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_ANON_KEY : ''),
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE || (typeof process !== 'undefined' ? process.env.VITE_ADMIN_CODE : '')
 };
 
-export const CONFIG = {
-    SUPABASE_URL: getEnv('VITE_SUPABASE_URL'),
-    SUPABASE_ANON_KEY: getEnv('VITE_SUPABASE_ANON_KEY'),
-    ADMIN_CODE: getEnv('VITE_ADMIN_CODE')
-};
+// Vérification de sécurité au chargement
+if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) {
+    console.warn("Attention: Les variables d'environnement Supabase ne sont pas définies/détectées.");
+}
 
 export const CONSTANTS = {
     DAYS_OF_WEEK: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
