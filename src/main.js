@@ -557,7 +557,7 @@ async function createRecurringInterventions(basePayload) {
         const newPayload = {
             ...baseData,
             date: currentDate.toISOString().split('T')[0],
-            day: CONSTANTS.DAYS_OF_WEEK[currentDate.getDay()]
+            day_of_week: CONSTANTS.DAYS_OF_WEEK[currentDate.getDay()]
         };
 
         // Ajouter l'intervention
@@ -2666,9 +2666,9 @@ function renderPlanning() {
                 </div>
                 <div class="flex-grow-1">
                     <div class="d-flex align-items-center mb-1">
-                        <span class="badge bg-primary me-2" style="font-size: 0.7em;">${item.type}</span>
+                        <span class="badge bg-primary me-2" style="font-size: 0.7em;">${item.cult_type || 'Culte'}</span>
                         <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${item.place}</small>
-                        <small class="text-muted ms-2 border-start ps-2">${item.day}</small>
+                        <small class="text-muted ms-2 border-start ps-2">${item.day_of_week || ''}</small>
                     </div>
                     <h6 class="mb-0 fw-bold text-dark">
                         ${item.intervenants ? 
@@ -2771,14 +2771,12 @@ async function handleAddIntervention(e) {
             // Mode édition - mise à jour d'une intervention existante
             const payload = {
                 date: dateVal,
-                day: dayVal !== '...' ? dayVal : CONSTANTS.DAYS_OF_WEEK[new Date(dateVal).getDay()],
+                day_of_week: dayVal !== '...' ? dayVal : CONSTANTS.DAYS_OF_WEEK[new Date(dateVal).getDay()],
                 place: placeVal,
-                type: typeVal,
+                cult_type: typeVal,
                 description: finalDesc,
-                intervenantId: ivId,
-                intervenantStr: ivText,
-                recurrence: recurrenceVal,
-                recurrence_end_date: recurrenceEndDate
+                intervenant_id: ivId || null,
+                intervenant_name_snapshot: ivText
             };
 
             await DataService.updateIntervention(state.editingId, payload);
@@ -2801,12 +2799,12 @@ async function handleAddIntervention(e) {
             // Mode création - ajout d'une nouvelle intervention
             const payload = {
                 date: dateVal,
-                day: dayVal !== '...' ? dayVal : CONSTANTS.DAYS_OF_WEEK[new Date(dateVal).getDay()],
+                day_of_week: dayVal !== '...' ? dayVal : CONSTANTS.DAYS_OF_WEEK[new Date(dateVal).getDay()],
                 place: placeVal,
-                type: typeVal,
+                cult_type: typeVal,
                 description: finalDesc,
-                intervenantId: ivId,
-                intervenantStr: ivText,
+                intervenant_id: ivId || null,
+                intervenant_name_snapshot: ivText,
                 recurrence: recurrenceVal,
                 recurrence_end_date: recurrenceEndDate
             };
@@ -2815,7 +2813,9 @@ async function handleAddIntervention(e) {
             if (recurrenceVal !== 'none') {
                 await createRecurringInterventions(payload);
             } else {
-                await DataService.addIntervention(payload);
+                // Supprimer les champs temporaires avant l'envoi à Supabase
+                const { recurrence, recurrence_end_date, ...dbPayload } = payload;
+                await DataService.addIntervention(dbPayload);
             }
 
             UI.showAlert('Enregistré !', 'success');
