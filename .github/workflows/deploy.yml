@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: github-pages # AJOUT CLÉ : Permet d'accéder aux secrets de l'environnement
     steps:
       - name: Checkout
         uses: actions/checkout@v4

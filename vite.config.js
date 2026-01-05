@@ -20,10 +20,10 @@ export default defineConfig(({ mode }) => {
       strictPort: false,
     },
     define: {
-      // Injection des variables dans le code global
-      __SUPABASE_URL__: JSON.stringify(env.VITE_SUPABASE_URL),
-      __SUPABASE_ANON_KEY__: JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
-      __ADMIN_CODE__: JSON.stringify(env.VITE_ADMIN_CODE),
+      // Injection des variables : On cherche dans 'env' (chargé par Vite) OU dans 'process.env' (système)
+      __SUPABASE_URL__: JSON.stringify(env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''),
+      __SUPABASE_ANON_KEY__: JSON.stringify(env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''),
+      __ADMIN_CODE__: JSON.stringify(env.VITE_ADMIN_CODE || process.env.VITE_ADMIN_CODE || ''),
     },
   };
 });
