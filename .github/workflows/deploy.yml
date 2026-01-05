@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
     
@@ -24,11 +24,10 @@ jobs:
     
     - name: Build with environment variables
       run: npm run build
-      # C'EST ICI QUE VOUS DEVEZ PASSER LES SECRETS !
       env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        VITE_ADMIN_CODE: ${{ secrets.VITE_ADMIN_CODE }}
+        VITE_SUPABASE_URL: "https://supywgkoghcphlynktmr.supabase.co"
+        VITE_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1cHl3Z2tvZ2hjcGhseW5rdG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NTYzNjQsImV4cCI6MjA4MjQzMjM2NH0.b_6COwOKkt2sWOuzM42W-LZfraPJJSKXhax69IUGwWc"
+        VITE_ADMIN_CODE: "Sarah2017"
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
