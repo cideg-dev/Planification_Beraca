@@ -406,18 +406,23 @@ function setupNavigation() {
             }
 
             // 1. Activer le bouton
-            navButtons.forEach(b => {
-                b.classList.remove('active', 'opacity-100');
-                b.classList.add('opacity-75');
-            });
-            e.currentTarget.classList.add('active', 'opacity-100');
-            e.currentTarget.classList.remove('opacity-75');
+            if (e.currentTarget) {
+                navButtons.forEach(b => {
+                    if (b) {
+                        b.classList.remove('active', 'opacity-100');
+                        b.classList.add('opacity-75');
+                    }
+                });
+                e.currentTarget.classList.add('active', 'opacity-100');
+                e.currentTarget.classList.remove('opacity-75');
+            }
 
             // 2. Changer la vue
             document.querySelectorAll('.view-section').forEach(view => {
-                view.style.display = 'none';
+                if (view) view.style.display = 'none';
             });
-            document.getElementById(targetView).style.display = 'block';
+            const viewEl = document.getElementById(targetView);
+            if (viewEl) viewEl.style.display = 'block';
 
             // 3. Charger Dashboard si nécessaire
             if (targetView === 'dashboard-view') {
@@ -956,10 +961,15 @@ function renderTimelineVisualization(container, data) {
                 <div class="card border-start border-4 border-primary h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-primary">${item.type}</span>
+                            <span class="badge bg-primary">${item.cult_type || item.type || 'Culte'}</span>
                             <small class="text-muted">${formattedDate}</small>
                         </div>
-                        <h6 class="card-title fw-bold">${item.intervenantStr || 'Non assigné'}</h6>
+                        <h6 class="card-title fw-bold">
+                            ${item.intervenants ? 
+                                `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.trim() : 
+                                (item.intervenant_name_snapshot || 'Non assigné')
+                            }
+                        </h6>
                         <p class="card-text small mb-1"><i class="fas fa-map-marker-alt me-1 text-muted"></i> ${item.place}</p>
                         ${item.description ? `<p class="card-text small text-muted fst-italic">${item.description}</p>` : ''}
                     </div>
@@ -1339,10 +1349,15 @@ function renderPreview() {
             html += `
                 <tr>
                     <td>${formattedDate}</td>
-                    <td>${item.day}</td>
-                    <td>${item.type}</td>
+                    <td>${item.day_of_week || item.day || ''}</td>
+                    <td>${item.cult_type || item.type || ''}</td>
                     <td>${item.place}</td>
-                    <td>${item.intervenantStr || 'Non assigné'}</td>
+                    <td>
+                        ${item.intervenants ? 
+                            `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.trim() : 
+                            (item.intervenant_name_snapshot || 'Non assigné')
+                        }
+                    </td>
                     <td>${item.description || ''}</td>
                 </tr>
             `;

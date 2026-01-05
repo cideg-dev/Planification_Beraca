@@ -86,6 +86,11 @@ export const DataService = {
         }
     },
 
+    // Alias pour compatibilité
+    async saveConfig(key, payload) {
+        return this.updateConfig(payload);
+    },
+
     // --- COMMENTAIRES ---
     async getCommentsByIntervention(interventionId) {
         if (!supabaseClient) return [];

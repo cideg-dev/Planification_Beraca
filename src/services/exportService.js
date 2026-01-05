@@ -33,14 +33,23 @@ export const ExportService = {
      */
     exportToExcel(interventions, config = {}) {
         // 1. Préparer les données
-        const data = interventions.map(item => ({
-            'Date': new Date(item.date).toLocaleDateString('fr-FR'),
-            'Jour': item.day,
-            'Type': item.type,
-            'Lieu': item.place,
-            'Thème/Desc': item.description || '',
-            'Intervenant': item.intervenantStr || item.intervenant?.last_name || 'Non assigné'
-        }));
+        const data = interventions.map(item => {
+            let speaker = 'Non assigné';
+            if (item.intervenants) {
+                speaker = `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.trim();
+            } else {
+                speaker = item.intervenant_name_snapshot || item.intervenantStr || 'Non assigné';
+            }
+
+            return {
+                'Date': new Date(item.date).toLocaleDateString('fr-FR'),
+                'Jour': item.day_of_week || item.day || '',
+                'Type': item.cult_type || item.type || '',
+                'Lieu': item.place,
+                'Thème/Desc': item.description || '',
+                'Intervenant': speaker
+            };
+        });
 
         // 2. Créer le workbook
         const ws = XLSX.utils.json_to_sheet([]);
@@ -131,12 +140,19 @@ export const ExportService = {
         const tableRows = [];
 
         interventions.forEach(item => {
+            let speaker = 'Non assigné';
+            if (item.intervenants) {
+                speaker = `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.trim();
+            } else {
+                speaker = item.intervenant_name_snapshot || item.intervenantStr || 'Non assigné';
+            }
+
             const interventionData = [
                 new Date(item.date).toLocaleDateString('fr-FR'),
-                item.day,
-                item.type,
+                item.day_of_week || item.day || '',
+                item.cult_type || item.type || '',
                 item.place,
-                item.intervenantStr || (item.intervenant ? `${item.intervenant.first_name} ${item.intervenant.last_name}` : ''),
+                speaker,
                 item.description || ''
             ];
             tableRows.push(interventionData);

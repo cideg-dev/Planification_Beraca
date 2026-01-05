@@ -8,13 +8,19 @@ export const StatsService = {
         // 1. Répartition par Type (pour Camembert)
         const typeCount = {};
         interventions.forEach(i => {
-            typeCount[i.type] = (typeCount[i.type] || 0) + 1;
+            const type = i.cult_type || i.type || 'Inconnu';
+            typeCount[type] = (typeCount[type] || 0) + 1;
         });
 
         // 2. Top Intervenants (pour Barres)
         const speakerCount = {};
         interventions.forEach(i => {
-            const name = i.intervenantStr || i.intervenant?.last_name || 'Inconnu';
+            let name = 'Inconnu';
+            if (i.intervenants) {
+                name = `${i.intervenants.title || ''} ${i.intervenants.first_name || ''} ${i.intervenants.last_name || ''}`.trim();
+            } else {
+                name = i.intervenant_name_snapshot || i.intervenantStr || i.intervenant?.last_name || 'Inconnu';
+            }
             speakerCount[name] = (speakerCount[name] || 0) + 1;
         });
         
@@ -38,9 +44,10 @@ export const StatsService = {
         const placeCount = {};
         let topPlace = { name: '-', count: 0 };
         interventions.forEach(i => {
-            placeCount[i.place] = (placeCount[i.place] || 0) + 1;
-            if (placeCount[i.place] > topPlace.count) {
-                topPlace = { name: i.place, count: placeCount[i.place] };
+            const place = i.place || '-';
+            placeCount[place] = (placeCount[place] || 0) + 1;
+            if (placeCount[place] > topPlace.count) {
+                topPlace = { name: place, count: placeCount[place] };
             }
         });
 
