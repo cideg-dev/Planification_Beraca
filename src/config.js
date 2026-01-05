@@ -1,15 +1,9 @@
-// Configuration de l'application - Définitive
+// Configuration de l'application - Remplacement direct par le serveur
 export const CONFIG = {
-    // Ces constantes sont injectées par vite.config.js lors du build
-    SUPABASE_URL: typeof __VITE_SUPABASE_URL__ !== 'undefined' ? __VITE_SUPABASE_URL__ : '',
-    SUPABASE_ANON_KEY: typeof __VITE_SUPABASE_ANON_KEY__ !== 'undefined' ? __VITE_SUPABASE_ANON_KEY__ : '',
-    ADMIN_CODE: typeof __VITE_ADMIN_CODE__ !== 'undefined' ? __VITE_ADMIN_CODE__ : ''
+    SUPABASE_URL: '___VITE_SUPABASE_URL___',
+    SUPABASE_ANON_KEY: '___VITE_SUPABASE_ANON_KEY___',
+    ADMIN_CODE: '___VITE_ADMIN_CODE___'
 };
-
-// Log de sécurité pour le débogage (les clés restent masquées)
-if (!CONFIG.SUPABASE_URL) {
-    console.error("ERREUR CRITIQUE : La configuration Supabase n'a pas été injectée lors du build.");
-}
 
 export const CONSTANTS = {
     DAYS_OF_WEEK: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
