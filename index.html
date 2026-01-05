@@ -52,6 +52,25 @@
                 </ul>
 
                 <div class="d-flex align-items-center gap-3">
+                    <!-- Cloche de Notification -->
+                    <div class="dropdown" id="notification-dropdown">
+                        <button class="btn btn-sm btn-outline-light position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="btn-notifications">
+                            <i class="fas fa-bell"></i>
+                            <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                0
+                            </span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg p-0" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                            <div class="p-2 border-bottom bg-light d-flex justify-content-between align-items-center">
+                                <span class="fw-bold small">Notifications</span>
+                                <button class="btn btn-link btn-sm p-0 text-decoration-none small" id="btn-mark-all-read">Tout lire</button>
+                            </div>
+                            <div id="notifications-list" class="list-group list-group-flush">
+                                <div class="text-center py-3 text-muted small">Aucune notification</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <button id="theme-toggle" class="btn btn-sm btn-outline-light" title="Changer le thème">
                         <i class="fas fa-moon"></i>
                     </button>

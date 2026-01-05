@@ -201,22 +201,152 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => console.log('PWA Ready'));
 }
 
-async function initApp() {
-    initializeTheme(); // Initialiser le thème avant tout
+import { notificationService } from './services/notificationService.js';
 
-    // Vérifier la connexion à Supabase
-    const isConnected = await testConnection();
-    if (!isConnected) {
-        UI.showAlert('Erreur de connexion à la base de données. Veuillez vérifier votre configuration.', 'danger');
+// ... (Gardez les autres imports)
+
+// État de l'application
+const state = {
+    // ...
+    notifications: [],
+};
+
+// ... (Autre code)
+
+async function initApp() {
+    initializeTheme();
+    // ...
+    await loadData();
+    initNotifications(); // Ajout ici
+    initializeChangeNotifications();
+}
+
+/**
+ * Initialisation du système de notifications
+ */
+async function initNotifications() {
+    const btnNotifications = document.getElementById('btn-notifications');
+    const notificationsList = document.getElementById('notifications-list');
+    const badge = document.getElementById('notification-badge');
+    const btnMarkAll = document.getElementById('btn-mark-all-read');
+
+    if (!btnNotifications) return;
+
+    // Charger les notifications initiales
+    await refreshNotificationsUI();
+
+    // Demander la permission Push au clic si pas encore fait
+    btnNotifications.addEventListener('click', async () => {
+        if (Notification.permission === 'default') {
+            const granted = await notificationService.requestPermission();
+            if (granted) {
+                console.log("Web Push activé pour cet utilisateur");
+            }
+        }
+    });
+
+    // Tout marquer comme lu
+    btnMarkAll?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        // Pour la démo, on utilise un ID utilisateur fictif ou le state
+        await notificationService.markAllAsRead('default-user'); 
+        await refreshNotificationsUI();
+    });
+}
+
+/**
+ * Met à jour l'interface des notifications
+ */
+async function refreshNotificationsUI() {
+    const notificationsList = document.getElementById('notifications-list');
+    const badge = document.getElementById('notification-badge');
+    
+    // Pour la démo, on récupère les notifications (remplacer 'default-user' par le vrai ID)
+    const notifications = await notificationService.getNotifications('default-user');
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+
+    // Mise à jour du badge
+    if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
     }
 
-    setupEventListeners();
-    setupNavigation(); // Navigation Tabs
-    setupSmartDate();
-    loadPreferences();
-    await loadData();
-    initializeChangeNotifications(); // Initialiser les notifications de modifications
+    // Mise à jour de la liste
+    if (notifications.length === 0) {
+        notificationsList.innerHTML = '<div class="text-center py-3 text-muted small">Aucune notification</div>';
+        return;
+    }
+
+    notificationsList.innerHTML = notifications.map(n => `
+        <button class="list-group-item list-group-item-action p-2 border-start-0 border-end-0 ${n.is_read ? '' : 'bg-light fw-bold'}" 
+                onclick="markNotificationRead('${n.id}')">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small text-primary">${n.type}</span>
+                <span class="text-muted" style="font-size: 0.7rem;">${new Date(n.created_at).toLocaleDateString()}</span>
+            </div>
+            <p class="mb-0 small text-truncate">${n.title}</p>
+            <p class="mb-0 text-muted" style="font-size: 0.75rem;">${n.message}</p>
+        </button>
+    `).join('');
 }
+
+// Exposer globalement pour le onclick
+window.markNotificationRead = async (id) => {
+    await notificationService.markAsRead(id);
+    await refreshNotificationsUI();
+};
+
+// --- FONCTION DE TEST TEMPORAIRE ---
+window.testNotif = async () => {
+    console.log("Envoi d'une notification de test...");
+    
+    // Simuler une insertion dans Supabase (ou insérer vraiment si la table existe)
+    const fakeNotif = {
+        user_id: 'default-user',
+        title: 'Rappel de culte',
+        message: 'N\'oubliez pas le culte de ce soir à 19h.',
+        type: 'reminder',
+        channel: 'in_app',
+        is_read: false
+    };
+
+    try {
+        const { error } = await supabaseClient.from('notifications').insert([fakeNotif]);
+        if (error) {
+            console.warn("Table 'notifications' non trouvée ou erreur RLS. Mode simulation activé.", error);
+            // Simulation locale pour la démo UI si la DB n'est pas prête
+            const list = document.getElementById('notifications-list');
+            const badge = document.getElementById('notification-badge');
+            
+            // Mise à jour visuelle forcée
+            badge.style.display = 'block';
+            badge.textContent = parseInt(badge.textContent || '0') + 1;
+            
+            const itemHTML = `
+            <button class="list-group-item list-group-item-action p-2 border-start-0 border-end-0 bg-light fw-bold">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small text-primary">Test</span>
+                    <span class="text-muted" style="font-size: 0.7rem;">À l'instant</span>
+                </div>
+                <p class="mb-0 small text-truncate">${fakeNotif.title}</p>
+                <p class="mb-0 text-muted" style="font-size: 0.75rem;">${fakeNotif.message}</p>
+            </button>`;
+            
+            if (list.innerHTML.includes('Aucune notification')) {
+                list.innerHTML = itemHTML;
+            } else {
+                list.insertAdjacentHTML('afterbegin', itemHTML);
+            }
+        } else {
+            console.log("Notification insérée dans Supabase !");
+            await refreshNotificationsUI();
+        }
+    } catch (e) {
+        console.error(e);
+    }
+};
 
 // Fonction pour initialiser le thème au chargement
 function initializeTheme() {
