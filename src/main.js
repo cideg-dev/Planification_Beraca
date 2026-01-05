@@ -37,7 +37,13 @@ const state = {
         bank: '',
         logo: 'AD.jpeg'
     },
-    searchQuery: '',
+    filters: {
+        searchQuery: '',
+        month: '',
+        place: '',
+        type: '',
+        intervenant: ''
+    },
     currentDate: new Date().toISOString().split('T')[0],
     charts: {}, // Pour stocker les instances de charts
     passwordHash: 1234567890, // Hash du mot de passe de configuration (remplacé à la volée)
@@ -834,7 +840,32 @@ function setupEventListeners() {
             : UI.showAlert('Rien à exporter', 'warning');
     });
     document.getElementById('search-input')?.addEventListener('input', (e) => {
-        state.searchQuery = e.target.value ? e.target.value.toLowerCase() : '';
+        state.filters.searchQuery = e.target.value ? e.target.value.toLowerCase() : '';
+        savePreferences();
+        renderPlanning();
+    });
+
+    // Gestion des filtres avancés
+    document.getElementById('filter-month')?.addEventListener('change', (e) => {
+        state.filters.month = e.target.value;
+        savePreferences();
+        renderPlanning();
+    });
+
+    document.getElementById('filter-place')?.addEventListener('change', (e) => {
+        state.filters.place = e.target.value;
+        savePreferences();
+        renderPlanning();
+    });
+
+    document.getElementById('filter-type')?.addEventListener('change', (e) => {
+        state.filters.type = e.target.value;
+        savePreferences();
+        renderPlanning();
+    });
+
+    document.getElementById('filter-intervenant')?.addEventListener('change', (e) => {
+        state.filters.intervenant = e.target.value;
         savePreferences();
         renderPlanning();
     });
@@ -1522,6 +1553,12 @@ async function loadData() {
         populateIntervenantsList(document.getElementById('intervenant').value);
         renderPlanning();
         UI.updateSyncStatus('synced');
+
+        // Charger les valeurs des filtres dans les éléments du DOM
+        if (state.filters.month) document.getElementById('filter-month').value = state.filters.month;
+        if (state.filters.place) document.getElementById('filter-place').value = state.filters.place;
+        if (state.filters.type) document.getElementById('filter-type').value = state.filters.type;
+        if (state.filters.intervenant) document.getElementById('filter-intervenant').value = state.filters.intervenant;
     } catch (err) { console.error(err); UI.showAlert('Erreur chargement', 'danger'); } 
     finally { UI.toggleLoading(false); }
 }
@@ -1574,6 +1611,41 @@ function populateIntervenantsList(selectedId = null) {
         select.appendChild(opt);
     });
     if (currentSelection) select.value = currentSelection;
+
+    // Mettre à jour le filtre des intervenants
+    populateIntervenantsFilter();
+}
+
+// Fonction pour peupler le filtre des intervenants
+function populateIntervenantsFilter() {
+    const filterSelect = document.getElementById('filter-intervenant');
+    if (!filterSelect) return;
+
+    // Sauvegarder la sélection actuelle
+    const currentSelection = filterSelect.value;
+
+    // Effacer les options existantes (sauf la première)
+    filterSelect.innerHTML = '<option value="">Tous les intervenants</option>';
+
+    // Générer une liste unique d'intervenants à partir des interventions
+    const uniqueSpeakers = [...new Set(state.interventions
+        .filter(i => i.intervenantStr)
+        .map(i => i.intervenantStr)
+    )];
+
+    // Trier alphabétiquement
+    uniqueSpeakers.sort();
+
+    // Ajouter les options
+    uniqueSpeakers.forEach(speaker => {
+        const option = document.createElement('option');
+        option.value = speaker;
+        option.textContent = speaker;
+        filterSelect.appendChild(option);
+    });
+
+    // Restaurer la sélection
+    filterSelect.value = currentSelection;
 }
 
 // Fonction pour afficher l'historique d'un intervenant sélectionné
@@ -2651,14 +2723,41 @@ function createHistoryModal() {
     return document.getElementById('history-modal');
 }
 
-// Fonction pour obtenir les interventions filtrées selon le critère de recherche
+// Fonction pour obtenir les interventions filtrées selon les critères de recherche
 function getFilteredInterventions() {
     return state.interventions.filter(i => {
-        if (!state.searchQuery) return true;
-        const s = state.searchQuery.toLowerCase();
-        return (i.place && i.place.toLowerCase().includes(s)) ||
-               (i.type && i.type.toLowerCase().includes(s)) ||
-               (i.intervenantStr && i.intervenantStr.toLowerCase().includes(s));
+        // Filtrer par terme de recherche global
+        if (state.filters.searchQuery) {
+            const s = state.filters.searchQuery.toLowerCase();
+            const matchesSearch = (i.place && i.place.toLowerCase().includes(s)) ||
+                                  (i.type && i.type.toLowerCase().includes(s)) ||
+                                  (i.intervenantStr && i.intervenantStr.toLowerCase().includes(s)) ||
+                                  (i.description && i.description.toLowerCase().includes(s));
+            if (!matchesSearch) return false;
+        }
+
+        // Filtrer par mois
+        if (state.filters.month) {
+            const itemMonth = new Date(i.date).getMonth() + 1; // Les mois commencent à 0
+            if (itemMonth != state.filters.month) return false;
+        }
+
+        // Filtrer par lieu
+        if (state.filters.place && i.place !== state.filters.place) {
+            return false;
+        }
+
+        // Filtrer par type
+        if (state.filters.type && i.type !== state.filters.type) {
+            return false;
+        }
+
+        // Filtrer par intervenant
+        if (state.filters.intervenant && i.intervenantStr !== state.filters.intervenant) {
+            return false;
+        }
+
+        return true;
     });
 }
 
@@ -2718,7 +2817,9 @@ function renderPlanning() {
 }
 
 function savePreferences() {
-    const prefs = { search: state.searchQuery };
+    const prefs = {
+        filters: state.filters
+    };
     localStorage.setItem('ad_planning_prefs', JSON.stringify(prefs));
 }
 
@@ -2727,9 +2828,9 @@ function loadPreferences() {
     if (prefs) {
         try {
             const p = JSON.parse(prefs);
-            if (p.search) {
-                state.searchQuery = p.search;
-                document.getElementById('search-input').value = p.search;
+            if (p.filters) {
+                state.filters = { ...state.filters, ...p.filters };
+                document.getElementById('search-input').value = state.filters.searchQuery || '';
             }
         } catch (e) { console.error('Erreur chargement prefs', e); }
     }

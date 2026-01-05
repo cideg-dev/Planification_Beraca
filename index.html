@@ -328,13 +328,56 @@
                                 <span class="badge bg-light text-dark border" id="count-badge">0</span>
                             </div>
                             
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2 flex-wrap">
                                 <!-- Recherche intégrée -->
-                                <div class="input-group input-group-sm" style="width: 200px;">
+                                <div class="input-group input-group-sm" style="width: 180px;">
                                     <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                    <input type="text" class="form-control border-start-0 ps-0" id="search-input" placeholder="Filtrer...">
+                                    <input type="text" class="form-control border-start-0 ps-0" id="search-input" placeholder="Recherche...">
                                 </div>
-                                
+
+                                <!-- Filtre par mois -->
+                                <select class="form-select form-select-sm" id="filter-month" style="width: auto; min-width: 120px;">
+                                    <option value="">Tous les mois</option>
+                                    <option value="1">Janvier</option>
+                                    <option value="2">Février</option>
+                                    <option value="3">Mars</option>
+                                    <option value="4">Avril</option>
+                                    <option value="5">Mai</option>
+                                    <option value="6">Juin</option>
+                                    <option value="7">Juillet</option>
+                                    <option value="8">Août</option>
+                                    <option value="9">Septembre</option>
+                                    <option value="10">Octobre</option>
+                                    <option value="11">Novembre</option>
+                                    <option value="12">Décembre</option>
+                                </select>
+
+                                <!-- Filtre par lieu -->
+                                <select class="form-select form-select-sm" id="filter-place" style="width: auto; min-width: 120px;">
+                                    <option value="">Tous les lieux</option>
+                                    <option value="BERACA">BERACA</option>
+                                    <option value="KPOTEYEI">KPOTEYEI</option>
+                                    <option value="WINKE">WINKE</option>
+                                    <option value="GROS PORTEUR">GROS PORTEUR</option>
+                                </select>
+
+                                <!-- Filtre par type -->
+                                <select class="form-select form-select-sm" id="filter-type" style="width: auto; min-width: 150px;">
+                                    <option value="">Tous les types</option>
+                                    <option value="Culte Principal">Culte Principal</option>
+                                    <option value="Enseignement">Enseignement</option>
+                                    <option value="Réunion">Réunion</option>
+                                    <option value="Prière">Prière</option>
+                                    <option value="Veillée">Veillée</option>
+                                    <option value="Jeune">Jeûne</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+
+                                <!-- Filtre par intervenant -->
+                                <select class="form-select form-select-sm" id="filter-intervenant" style="width: auto; min-width: 150px;">
+                                    <option value="">Tous les intervenants</option>
+                                </select>
+
                                 <div class="btn-group btn-group-sm">
                                     <button class="btn btn-outline-success" id="export-excel-btn" title="Excel"><i class="fas fa-file-excel"></i></button>
                                     <button class="btn btn-outline-danger" id="export-pdf-btn" title="PDF"><i class="fas fa-file-pdf"></i></button>
