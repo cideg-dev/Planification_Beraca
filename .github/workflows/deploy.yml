@@ -4,13 +4,11 @@ on:
   push:
     branches: [main]
 
-# Autorise GitHub Actions à déployer sur GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Permet un seul déploiement en cours à la fois
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -32,9 +30,10 @@ jobs:
         run: npm ci
 
       - name: Build
+        # On passe les secrets directement dans l'environnement de build
+        # C'est ici que Vite les récupère pour les injecter dans config.js
         run: npm run build
         env:
-          # Injection EXPLICITE des secrets que j'ai vus sur votre image 1.png
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_ADMIN_CODE: ${{ secrets.VITE_ADMIN_CODE }}
