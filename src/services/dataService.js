@@ -16,7 +16,11 @@ export const DataService = {
     async getInterventions() {
         if (!supabaseClient) return [];
         try {
-            const { data, error } = await supabaseClient.from('interventions').select('*').order('date', { ascending: true });
+            // Jointure pour récupérer les infos de l'intervenant lié
+            const { data, error } = await supabaseClient
+                .from('interventions')
+                .select('*, intervenants(*)')
+                .order('date', { ascending: true });
             if (error) throw error;
             return data || [];
         } catch (e) {

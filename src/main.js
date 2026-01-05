@@ -2670,7 +2670,12 @@ function renderPlanning() {
                         <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${item.place}</small>
                         <small class="text-muted ms-2 border-start ps-2">${item.day}</small>
                     </div>
-                    <h6 class="mb-0 fw-bold text-dark">${item.intervenantStr || item.intervenant?.last_name || 'Non assigné'}</h6>
+                    <h6 class="mb-0 fw-bold text-dark">
+                        ${item.intervenants ? 
+                            `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.trim() : 
+                            (item.intervenant_name_snapshot || 'Non assigné')
+                        }
+                    </h6>
                     ${item.description ? `<div class="small text-muted mt-1 fst-italic text-truncate" style="max-width: 300px;">${item.description}</div>` : ''}
                 </div>
                 <div class="d-flex gap-2">
