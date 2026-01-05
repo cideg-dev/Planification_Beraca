@@ -1,26 +1,14 @@
-// Configuration de l'application sécurisée contre les erreurs de type 'undefined'
-
-// On récupère l'objet env de manière ultra-sécurisée
-const getEnvObj = () => {
-    try {
-        return import.meta.env || {};
-    } catch (e) {
-        return {};
-    }
-};
-
-const env = getEnvObj();
-
+// Configuration de l'application - Définitive
 export const CONFIG = {
-    // Accès sécurisé : si env est undefined, on renvoie une chaîne vide au lieu de crasher
-    SUPABASE_URL: env.VITE_SUPABASE_URL || '',
-    SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY || '',
-    ADMIN_CODE: env.VITE_ADMIN_CODE || ''
+    // Ces constantes sont injectées par vite.config.js lors du build
+    SUPABASE_URL: typeof __VITE_SUPABASE_URL__ !== 'undefined' ? __VITE_SUPABASE_URL__ : '',
+    SUPABASE_ANON_KEY: typeof __VITE_SUPABASE_ANON_KEY__ !== 'undefined' ? __VITE_SUPABASE_ANON_KEY__ : '',
+    ADMIN_CODE: typeof __VITE_ADMIN_CODE__ !== 'undefined' ? __VITE_ADMIN_CODE__ : ''
 };
 
-// Vérification silencieuse pour le développeur
+// Log de sécurité pour le débogage (les clés restent masquées)
 if (!CONFIG.SUPABASE_URL) {
-    console.warn("Note: Configuration Supabase non détectée.");
+    console.error("ERREUR CRITIQUE : La configuration Supabase n'a pas été injectée lors du build.");
 }
 
 export const CONSTANTS = {

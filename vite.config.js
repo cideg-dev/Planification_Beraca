@@ -11,6 +11,12 @@ export default defineConfig({
       },
     },
   },
+  // Injection directe et forcée des secrets dans le code
+  define: {
+    '__VITE_SUPABASE_URL__': JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
+    '__VITE_SUPABASE_ANON_KEY__': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || ''),
+    '__VITE_ADMIN_CODE__': JSON.stringify(process.env.VITE_ADMIN_CODE || '')
+  },
   server: {
     strictPort: false,
   }
