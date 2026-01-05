@@ -834,7 +834,7 @@ function setupEventListeners() {
             : UI.showAlert('Rien à exporter', 'warning');
     });
     document.getElementById('search-input')?.addEventListener('input', (e) => {
-        state.searchQuery = e.target.value.toLowerCase();
+        state.searchQuery = e.target.value ? e.target.value.toLowerCase() : '';
         savePreferences();
         renderPlanning();
     });
@@ -890,9 +890,9 @@ function renderVisualization() {
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
         filteredData = filteredData.filter(item =>
-            item.place.toLowerCase().includes(searchQuery) ||
-            item.type.toLowerCase().includes(searchQuery) ||
-            (item.intervenantStr || '').toLowerCase().includes(searchQuery)
+            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
+            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
         );
     }
 
@@ -1266,9 +1266,9 @@ function renderPreview() {
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
         filteredData = filteredData.filter(item =>
-            item.place.toLowerCase().includes(searchQuery) ||
-            item.type.toLowerCase().includes(searchQuery) ||
-            (item.intervenantStr || '').toLowerCase().includes(searchQuery)
+            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
+            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
         );
     }
 
@@ -1422,9 +1422,9 @@ async function exportPreviewAsPdf() {
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
         filteredData = filteredData.filter(item =>
-            item.place.toLowerCase().includes(searchQuery) ||
-            item.type.toLowerCase().includes(searchQuery) ||
-            (item.intervenantStr || '').toLowerCase().includes(searchQuery)
+            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
+            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
         );
     }
 
@@ -1459,9 +1459,9 @@ async function exportPreviewAsExcel() {
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
         filteredData = filteredData.filter(item =>
-            item.place.toLowerCase().includes(searchQuery) ||
-            item.type.toLowerCase().includes(searchQuery) ||
-            (item.intervenantStr || '').toLowerCase().includes(searchQuery)
+            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
+            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
         );
     }
 
@@ -2655,8 +2655,10 @@ function createHistoryModal() {
 function getFilteredInterventions() {
     return state.interventions.filter(i => {
         if (!state.searchQuery) return true;
-        const s = state.searchQuery;
-        return (i.place.toLowerCase().includes(s) || i.type.toLowerCase().includes(s) || (i.intervenantStr || '').toLowerCase().includes(s));
+        const s = state.searchQuery.toLowerCase();
+        return (i.place && i.place.toLowerCase().includes(s)) ||
+               (i.type && i.type.toLowerCase().includes(s)) ||
+               (i.intervenantStr && i.intervenantStr.toLowerCase().includes(s));
     });
 }
 
