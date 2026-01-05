@@ -1,10 +1,9 @@
 // Configuration de l'application
-// Vite remplacera ces expressions par les valeurs réelles lors du build.
-// Le ?. empêche le crash si Vite n'a pas pu faire le remplacement.
+// Ces valeurs sont remplacées par Vite au moment du build grâce au bloc 'define' de vite.config.js
 export const CONFIG = {
-    SUPABASE_URL: import.meta.env?.VITE_SUPABASE_URL || '',
-    SUPABASE_ANON_KEY: import.meta.env?.VITE_SUPABASE_ANON_KEY || '',
-    ADMIN_CODE: import.meta.env?.VITE_ADMIN_CODE || ''
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
 };
 
 export const CONSTANTS = {
