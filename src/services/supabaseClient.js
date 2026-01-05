@@ -1,8 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js'; // Commenté pour éviter l'erreur "bare module" en prod sans build
 import { CONFIG } from '../config.js';
 
+// Récupération de createClient depuis l'objet global injecté par le CDN (index.html)
+// Le CDN Supabase expose généralement 'supabase' ou 'Supabase' dans window.
+const createClient = window.supabase ? window.supabase.createClient : null;
+
+if (!createClient) {
+    console.error("Erreur critique : La bibliothèque Supabase n'est pas chargée. Vérifiez le script CDN dans index.html.");
+}
+
 // Initialisation du client (Singleton)
-export const supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+export const supabaseClient = createClient ? createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY) : null;
 
 /**
  * Vérifie la connexion à Supabase
