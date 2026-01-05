@@ -4,13 +4,11 @@ on:
   push:
     branches: [main]
 
-# Autorisations nécessaires pour GitHub Pages et l'authentification OIDC
 permissions:
   contents: write
   pages: write
   id-token: write
 
-# Permet un seul déploiement en cours à la fois
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -31,13 +29,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Hard-Inject Secrets into Code
-        # On remplace physiquement les placeholders par les secrets GitHub
+      - name: Generate config.js from Secrets
+        # On réécrit le fichier directement pour éviter tout échec de recherche/remplacement
         run: |
-          sed -i "s|VITE_SUPABASE_URL_PLACEHOLDER|${{ secrets.VITE_SUPABASE_URL }}|g" src/config.js
-          sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|${{ secrets.VITE_SUPABASE_ANON_KEY }}|g" src/config.js
-          sed -i "s|VITE_ADMIN_CODE_PLACEHOLDER|${{ secrets.VITE_ADMIN_CODE }}|g" src/config.js
-          echo "Injection de force terminée."
+          cat <<EOF > src/config.js
+          export const CONFIG = {
+              SUPABASE_URL: '${{ secrets.VITE_SUPABASE_URL }}',
+              SUPABASE_ANON_KEY: '${{ secrets.VITE_SUPABASE_ANON_KEY }}',
+              ADMIN_CODE: '${{ secrets.VITE_ADMIN_CODE }}'
+          };
+          
+          export const CONSTANTS = {
+              DAYS_OF_WEEK: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+              CULT_TYPES_BY_DAY: {
+                  'Dimanche': ['Principal', 'Enseignement', 'Culte des enfants', 'Culte des Adolescents'],
+                  'Lundi': ['Réunion'],
+                  'Mardi': ['Prière hebdomadaire', 'Enseignement'],
+                  'Mercredi': ['Enseignement', 'Réunion', 'Culte des Adolescents'],
+                  'Jeudi': ['Témoignage/Action de grâce/Prière', 'Réunion'],
+                  'Vendredi': ['Enseignement', 'Veillée de prière', 'Réunion'],
+                  'Samedi': ['Jeune et Prière', 'Veillée de prière', 'Culte des Adolescents']
+              }
+          };
+          EOF
 
       - name: Build
         run: npm run build
