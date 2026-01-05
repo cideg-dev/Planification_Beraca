@@ -278,8 +278,8 @@ async function initNotifications() {
     // Tout marquer comme lu
     btnMarkAll?.addEventListener('click', async (e) => {
         e.stopPropagation();
-        // Pour la démo, on utilise un ID utilisateur fictif ou le state
-        await notificationService.markAllAsRead('default-user'); 
+        // Pour la démo, on utilise un UUID fictif valide
+        await notificationService.markAllAsRead('00000000-0000-0000-0000-000000000000'); 
         await refreshNotificationsUI();
     });
 }
@@ -291,8 +291,8 @@ async function refreshNotificationsUI() {
     const notificationsList = document.getElementById('notifications-list');
     const badge = document.getElementById('notification-badge');
     
-    // Pour la démo, on récupère les notifications (remplacer 'default-user' par le vrai ID)
-    const notifications = await notificationService.getNotifications('default-user');
+    // On utilise un UUID fictif valide pour les utilisateurs non connectés
+    const notifications = await notificationService.getNotifications('00000000-0000-0000-0000-000000000000');
     const unreadCount = notifications.filter(n => !n.is_read).length;
 
     // Mise à jour du badge
@@ -332,9 +332,9 @@ window.markNotificationRead = async (id) => {
 window.testNotif = async () => {
     console.log("Envoi d'une notification de test...");
     
-    // Simuler une insertion dans Supabase (ou insérer vraiment si la table existe)
+    // Simuler une insertion dans Supabase avec un UUID valide
     const fakeNotif = {
-        user_id: 'default-user',
+        user_id: '00000000-0000-0000-0000-000000000000',
         title: 'Rappel de culte',
         message: 'N\'oubliez pas le culte de ce soir à 19h.',
         type: 'reminder',
