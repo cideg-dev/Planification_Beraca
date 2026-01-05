@@ -1,9 +1,10 @@
 // Configuration de l'application
-// Vite remplacera ces valeurs par les secrets GitHub lors du build (statiquement)
+// Vite remplacera ces expressions par les valeurs réelles lors du build.
+// Le ?. empêche le crash si Vite n'a pas pu faire le remplacement.
 export const CONFIG = {
-    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
-    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
+    SUPABASE_URL: import.meta.env?.VITE_SUPABASE_URL || '',
+    SUPABASE_ANON_KEY: import.meta.env?.VITE_SUPABASE_ANON_KEY || '',
+    ADMIN_CODE: import.meta.env?.VITE_ADMIN_CODE || ''
 };
 
 export const CONSTANTS = {
