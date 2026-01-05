@@ -872,6 +872,10 @@ function setupEventListeners() {
         renderPlanning();
     });
 
+    // Gestion des nouveaux boutons
+    document.getElementById('filter-by-me-btn')?.addEventListener('click', filterByCurrentUser);
+    document.getElementById('export-filtered-btn')?.addEventListener('click', exportFilteredData);
+
     // Gestion des événements pour la page de visualisation
     document.getElementById('visualization-type')?.addEventListener('change', renderVisualization);
     document.getElementById('refresh-visualization')?.addEventListener('click', renderVisualization);
@@ -1648,6 +1652,56 @@ function populateIntervenantsFilter() {
 
     // Restaurer la sélection
     filterSelect.value = currentSelection;
+}
+
+// Fonction pour permettre à un utilisateur de filtrer par son nom
+function filterByCurrentUser() {
+    // Pour l'instant, on va demander à l'utilisateur son nom
+    // Dans une version ultérieure, cela pourrait être lié à un système d'authentification
+    const userName = prompt("Entrez votre nom pour filtrer vos interventions :");
+    if (userName) {
+        // Mettre à jour le filtre avec le nom de l'utilisateur
+        state.filters.intervenant = userName.trim();
+
+        // Mettre à jour l'interface
+        const filterSelect = document.getElementById('filter-intervenant');
+        if (filterSelect) {
+            filterSelect.value = userName.trim();
+        }
+
+        // Sauvegarder les préférences et rafraîchir l'affichage
+        savePreferences();
+        renderPlanning();
+
+        UI.showAlert(`Filtré par : ${userName}`, 'info');
+    }
+}
+
+// Fonction pour exporter les données filtrées
+function exportFilteredData() {
+    const filteredData = getFilteredInterventions();
+
+    if (filteredData.length === 0) {
+        UI.showAlert('Aucune donnée à exporter avec les filtres actuels', 'warning');
+        return;
+    }
+
+    // Créer un objet Blob avec les données filtrées
+    const dataStr = JSON.stringify(filteredData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+
+    // Créer un lien de téléchargement
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `interventions_filtrees_${new Date().toISOString().slice(0, 10)}.json`;
+
+    // Déclencher le téléchargement
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    UI.showAlert(`Exporté ${filteredData.length} interventions`, 'success');
 }
 
 // Fonction pour afficher l'historique d'un intervenant sélectionné
