@@ -7,17 +7,25 @@ if (!createClient) {
     console.error("Critical Error: Supabase library not loaded. Check CDN script in index.html.");
 }
 
-// Client initialization (Singleton) with crash protection
+// Initialisation du client (Singleton) avec sécurité anti-crash
 let client = null;
 
-if (createClient && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY) {
+const isValidUrl = (url) => {
+    try {
+        return url && url.startsWith('http');
+    } catch (e) {
+        return false;
+    }
+};
+
+if (createClient && isValidUrl(CONFIG.SUPABASE_URL) && CONFIG.SUPABASE_ANON_KEY && !CONFIG.SUPABASE_ANON_KEY.startsWith('___')) {
     try {
         client = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     } catch (e) {
         console.error("Supabase initialization error:", e);
     }
 } else {
-    console.warn("Supabase not initialized: URL or Key missing.");
+    console.warn("Supabase non initialisé : URL invalide ou Clé manquante.");
 }
 
 export const supabaseClient = client;

@@ -51,5 +51,35 @@ export const DataService = {
         const { data, error } = await supabaseClient.from('intervenants').insert([payload]).select();
         if (error) throw error;
         return data[0];
+    },
+
+    async getConfig() {
+        if (!supabaseClient) return null;
+        try {
+            const { data, error } = await supabaseClient.from('configurations').select('*').limit(1);
+            if (error) throw error;
+            return data[0] || null;
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    async updateConfig(payload) {
+        if (!supabaseClient) return null;
+        try {
+            // On récupère d'abord l'ID s'il existe
+            const current = await this.getConfig();
+            let result;
+            if (current) {
+                result = await supabaseClient.from('configurations').update(payload).eq('id', current.id).select();
+            } else {
+                result = await supabaseClient.from('configurations').insert([payload]).select();
+            }
+            return result.data[0];
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
     }
 };
