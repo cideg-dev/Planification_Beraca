@@ -2,15 +2,34 @@
 import { CONFIG } from '../config.js';
 
 // Récupération de createClient depuis l'objet global injecté par le CDN (index.html)
-// Le CDN Supabase expose généralement 'supabase' ou 'Supabase' dans window.
 const createClient = window.supabase ? window.supabase.createClient : null;
 
 if (!createClient) {
     console.error("Erreur critique : La bibliothèque Supabase n'est pas chargée. Vérifiez le script CDN dans index.html.");
 }
 
-// Initialisation du client (Singleton)
-export const supabaseClient = createClient ? createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY) : null;
+// Initialisation du client (Singleton) avec sécurité anti-crash
+let client = null;
+
+if (createClient && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY) {
+    try {
+        client = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    } catch (e) {
+        console.error("Erreur d'initialisation Supabase:", e);
+    }
+} else {
+    console.warn("Supabase non initialisé : URL ou Clé manquante.");
+}
+
+export const supabaseClient = client;
+
+/**
+ * Vérifie la connexion à Supabase
+ * @returns {Promise<boolean>}
+ */
+export async function checkConnection() {
+    if (!supabaseClient) return false;
+    // ... (reste de la fonction inchangé)
 
 /**
  * Vérifie la connexion à Supabase
