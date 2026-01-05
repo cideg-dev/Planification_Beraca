@@ -16,8 +16,9 @@ export default defineConfig({
     strictPort: false,
   },
   define: {
-    'process.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL),
-    'process.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY),
-    'process.env.VITE_ADMIN_CODE': JSON.stringify(process.env.VITE_ADMIN_CODE),
+    // Création de constantes globales remplacées à la compilation
+    __SUPABASE_URL__: JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
+    __SUPABASE_ANON_KEY__: JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || ''),
+    __ADMIN_CODE__: JSON.stringify(process.env.VITE_ADMIN_CODE || ''),
   },
 });
