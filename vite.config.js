@@ -15,4 +15,9 @@ export default defineConfig({
     // Empêcher le chargement de CSS comme modules
     strictPort: false,
   },
+  define: {
+    'process.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL),
+    'process.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY),
+    'process.env.VITE_ADMIN_CODE': JSON.stringify(process.env.VITE_ADMIN_CODE),
+  },
 });

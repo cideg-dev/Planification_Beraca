@@ -2,12 +2,17 @@
 
 // Sécurisation de l'accès aux variables d'environnement
 const getEnv = (key) => {
-    // Vérifie si import.meta.env existe (Vite)
+    // 1. Priorité : Vite (import.meta.env)
     if (import.meta && import.meta.env && import.meta.env[key]) {
         return import.meta.env[key];
     }
+    // 2. Fallback : process.env (injecté via vite.config.js define)
+    if (typeof process !== 'undefined' && process.env && process.env[key]) {
+        return process.env[key];
+    }
+    
     // Fallback pour éviter le crash (mais l'app ne fonctionnera pas sans connexion DB)
-    console.warn(`Attention: La variable d'environnement ${key} n'est pas définie. Assurez-vous de construire l'application (npm run build) pour la production.`);
+    console.warn(`Attention: La variable d'environnement ${key} n'est pas définie.`);
     return '';
 };
 
