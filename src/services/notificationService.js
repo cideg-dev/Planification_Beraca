@@ -23,7 +23,7 @@ export const notificationService = {
      * Récupère les notifications depuis Supabase
      */
     async getNotifications(userId) {
-        if (!userId) return [];
+        if (!supabaseClient || !userId) return [];
         
         const { data, error } = await supabaseClient
             .from('notifications')

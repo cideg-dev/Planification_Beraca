@@ -8,11 +8,11 @@ export const DataService = {
     // --- GESTION DES INTERVENANTS ---
 
     async getIntervenants() {
-        const { data, error } = await supabaseClient
-            .from('intervenants')
-            .select('*')
-            .eq('is_active', true)
-            .order('last_name', { ascending: true });
+        if (!supabaseClient) {
+            console.error("Supabase client non initialisé dans DataService");
+            return [];
+        }
+        const { data, error } = await supabaseClient.from('intervenants').select('*').order('lastname');
             
         if (error) throw error;
         return data;
