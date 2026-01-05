@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificateur AD BERACA</title>
+    <link rel="icon" href="/Planification_Beraca/assets/AD-Dg1WkABv.jpeg" type="image/jpeg">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="/Planification_Beraca/assets/AD-Dg1WkABv.jpeg">
+
+    <!-- CSS pour l'application -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" crossorigin src="/Planification_Beraca/assets/main-BFcBg2u5.js"></script>
+  <link rel="stylesheet" crossorigin href="/Planification_Beraca/assets/main-DYE_aVfo.css">
+</head>
+<body class="bg-light">
+    <!-- Navigation (Simplifiée) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="/Planification_Beraca/assets/AD-Dg1WkABv.jpeg" alt="Logo" width="32" height="32" class="me-2 rounded">
+                <span class="fw-bold tracking-tight">AD BERACA Planning</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Navigation Vues -->
+                <ul class="nav nav-pills" id="main-nav">
+                    <li class="nav-item">
+                        <button class="nav-link active btn-sm text-white" data-view="planning-view">
+                            <i class="fas fa-calendar-alt me-2"></i>Planning
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="dashboard-view">
+                            <i class="fas fa-chart-pie me-2"></i>Tableau de Bord
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="preview-view">
+                            <i class="fas fa-print me-2"></i>Aperçu
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="visualization-view">
+                            <i class="fas fa-eye me-2"></i>Visualisation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-white opacity-75" data-view="settings-view">
+                            <i class="fas fa-cogs me-2"></i>Configuration
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Cloche de Notification -->
+                    <div class="dropdown" id="notification-dropdown">
+                        <button class="btn btn-sm btn-outline-light position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="btn-notifications">
+                            <i class="fas fa-bell"></i>
+                            <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                0
+                            </span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg p-0" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                            <div class="p-2 border-bottom bg-light d-flex justify-content-between align-items-center">
+                                <span class="fw-bold small">Notifications</span>
+                                <button class="btn btn-link btn-sm p-0 text-decoration-none small" id="btn-mark-all-read">Tout lire</button>
+                            </div>
+                            <div id="notifications-list" class="list-group list-group-flush">
+                                <div class="text-center py-3 text-muted small">Aucune notification</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="theme-toggle" class="btn btn-sm btn-outline-light" title="Changer le thème">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div id="sync-indicator" class="text-white-50 small ms-2 border-start ps-3"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3 px-4">
+        <div id="alert-placeholder"></div>
+
+        <!-- VUE CONFIGURATION / EN-TÊTE -->
+        <div id="settings-view" class="view-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-8">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-primary fw-bold mb-0"><i class="fas fa-sliders-h me-2"></i>Gestion de l'En-tête et Paramètres</h4>
+                        <button class="btn btn-primary shadow-sm" id="btn-save-settings">
+                            <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Carte Identité & Période -->
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white fw-bold text-primary">
+                                    <i class="fas fa-church me-2"></i>Identité & Période
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Titre / Nom de l'Église</label>
+                                        <input type="text" class="form-control" id="config-church" placeholder="Ex: AD BERACA">
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Région</label>
+                                            <input type="text" class="form-control" id="config-region">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Section</label>
+                                            <input type="text" class="form-control" id="config-section">
+                                        </div>
+                                    </div>
+                                    <hr class="text-muted opacity-25">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Année</label>
+                                            <input type="number" class="form-control" id="config-year">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Trimestre</label>
+                                            <select class="form-select" id="config-quarter">
+                                                <option value="1">1er Trimestre</option>
+                                                <option value="2">2ème Trimestre</option>
+                                                <option value="3">3ème Trimestre</option>
+                                                <option value="4">4ème Trimestre</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carte Contacts & Visuel -->
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white fw-bold text-success">
+                                    <i class="fas fa-address-card me-2"></i>Contacts & Visuel
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Téléphone / WhatsApp</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
+                                            <input type="text" class="form-control" id="config-phone" placeholder="+229 ...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Email de contact</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="config-email" placeholder="contact@eglise.com">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Chemin du Logo</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                            <input type="text" class="form-control" id="config-logo" value="AD.jpeg" placeholder="Nom du fichier image">
+                                        </div>
+                                        <div class="form-text small">L'image doit être présente à la racine du projet.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carte Finances -->
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white fw-bold text-warning">
+                                    <i class="fas fa-university me-2"></i>Informations Financières
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Compte Bancaire / Mobile Money</label>
+                                        <input type="text" class="form-control" id="config-bank" placeholder="Ex: Banque Atlantique: 12345... ou MoMo: 97...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VUE PLANNING (Par défaut) -->
+        <div id="planning-view" class="view-section">
+            <div class="row g-4">
+                <!-- COLONNE GAUCHE : FORMULAIRE OPTIMISÉ -->
+                <div class="col-lg-4 col-xl-3">
+                    <div class="card shadow-sm border-0 sticky-top" style="top: 20px; z-index: 100;">
+                        <!-- ... Contenu existant du formulaire ... -->
+                        <div class="card-header bg-white pt-3 border-0">
+                            <h5 class="card-title text-primary fw-bold mb-0">
+                                <i class="fas fa-plus-circle me-2"></i>Intervention
+                            </h5>
+                        </div>
+                        <div class="card-body pt-0">
+                            <form id="main-form" class="needs-validation" novalidate>
+                                <!-- ... Champs du formulaire ... -->
+                                
+                                <!-- GROUPE 1 : QUAND & OÙ -->
+                                <p class="text-uppercase text-muted small fw-bold mb-2 mt-2" style="font-size: 0.7rem;">Cadre</p>
+                                
+                                <div class="form-floating mb-2">
+                                    <input type="date" class="form-control" id="date" required placeholder="Date">
+                                    <label for="date">Date *</label>
+                                </div>
+                                
+                                <!-- Le jour est calculé et affiché ici discrètement -->
+                                <div id="day-display" class="badge bg-light text-primary border mb-2 w-100 text-start px-3 py-2" style="display:none;">
+                                    <i class="fas fa-calendar-day me-2"></i><span id="day-text">...</span>
+                                </div>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="place" required>
+                                                <option value="BERACA" selected>BERACA</option>
+                                                <option value="KPOTEYEI">KPOTEYEI</option>
+                                                <option value="WINKE">WINKE</option>
+                                                <option value="GROS PORTEUR">GROS PORTEUR</option>
+                                            </select>
+                                            <label for="place">Lieu *</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="type" required>
+                                                <option value="Culte Principal">Culte P.</option>
+                                                <option value="Enseignement">Enseign.</option>
+                                                <option value="Réunion">Réunion</option>
+                                                <option value="Prière">Prière</option>
+                                                <option value="Veillée">Veillée</option>
+                                                <option value="Jeune">Jeûne</option>
+                                                <option value="Autre">Autre</option>
+                                            </select>
+                                            <label for="type">Type *</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- GROUPE 2 : CONTENU -->
+                                <p class="text-uppercase text-muted small fw-bold mb-2 mt-3" style="font-size: 0.7rem;">Contenu</p>
+
+                                <div class="form-floating mb-2">
+                                    <input type="text" class="form-control" id="theme" placeholder="Thème">
+                                    <label for="theme">Thème / Titre</label>
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <div class="form-floating flex-grow-1">
+                                        <select class="form-select" id="intervenant" required>
+                                            <option value="">Sélectionner...</option>
+                                        </select>
+                                        <label for="intervenant">Intervenant *</label>
+                                    </div>
+                                    <button class="btn btn-warning text-white" type="button" id="btn-suggest-intervenant" title="Suggestion IA">
+                                        <i class="fas fa-magic"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" id="btn-add-intervenant" title="Nouveau" data-bs-toggle="modal" data-bs-target="#modalNewIntervenant">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning" type="button" id="btn-modify-intervenant" title="Modifier">
+                                        <i class="fas fa-user-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" type="button" id="btn-history-intervenant" title="Historique">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                </div>
+
+                                <!-- GROUPE 3 : DÉTAILS (Progressive Disclosure) -->
+                                <div class="accordion accordion-flush mt-3" id="accordionDetails">
+                                    <div class="accordion-item border rounded-2">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed py-2 small bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails">
+                                                <i class="fas fa-sticky-note me-2 text-muted"></i> Détails
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDetails" class="accordion-collapse collapse" data-bs-parent="#accordionDetails">
+                                            <div class="accordion-body p-2">
+                                                <div class="mb-2">
+                                                    <label class="form-label small fw-bold">Récurrence</label>
+                                                    <select class="form-select form-select-sm" id="recurrence">
+                                                        <option value="none">Aucune</option>
+                                                        <option value="daily">Quotidienne</option>
+                                                        <option value="weekly">Hebdomadaire</option>
+                                                        <option value="monthly">Mensuelle</option>
+                                                        <option value="yearly">Annuelle</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label small fw-bold">Date de fin</label>
+                                                    <input type="date" class="form-control form-control-sm" id="recurrence-end-date">
+                                                </div>
+                                                <textarea class="form-control border-0 bg-transparent mt-2" id="obs" rows="2" placeholder="Notes, instructions spécifiques..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIONS -->
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="submit" class="btn btn-primary shadow-sm fw-bold">
+                                        <i class="fas fa-check me-2"></i>Enregistrer
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm text-muted" id="btn-reset">
+                                        Réinitialiser
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE : LISTE -->
+                <div class="col-lg-8 col-xl-9">
+                    <div class="card shadow-sm border-0 h-100">
+                        <!-- Toolbar -->
+                        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <h5 class="mb-0 text-dark fw-bold">Planning</h5>
+                                <span class="badge bg-light text-dark border" id="count-badge">0</span>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <!-- Recherche intégrée -->
+                                <div class="input-group input-group-sm" style="width: 200px;">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="search-input" placeholder="Filtrer...">
+                                </div>
+                                
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-success" id="export-excel-btn" title="Excel"><i class="fas fa-file-excel"></i></button>
+                                    <button class="btn btn-outline-danger" id="export-pdf-btn" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                                    <button class="btn btn-outline-secondary" id="refresh-btn" title="Actualiser"><i class="fas fa-sync"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0 bg-light">
+                            <div id="planning-container" class="list-group list-group-flush p-2">
+                                <!-- Loader -->
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VUE DASHBOARD (Masquée par défaut) -->
+        <div id="dashboard-view" class="view-section" style="display: none;">
+            <!-- KPIs -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 border-start border-4 border-primary">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Total Interventions</h6>
+                            <h2 class="display-6 fw-bold mb-0 text-primary" id="kpi-total">-</h2>
+                            <small class="text-muted">sur la période</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 border-start border-4 border-success">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Top Intervenant</h6>
+                            <h2 class="h3 fw-bold mb-0 text-success text-truncate" id="kpi-speaker">-</h2>
+                            <small class="text-muted">Le plus sollicité</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 border-start border-4 border-warning">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Lieu Principal</h6>
+                            <h2 class="h3 fw-bold mb-0 text-warning" id="kpi-place">-</h2>
+                            <small class="text-muted">Zone la plus active</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Activité Annuelle</div>
+                        <div class="card-body">
+                            <canvas id="chart-timeline"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Répartition par Type</div>
+                        <div class="card-body">
+                            <canvas id="chart-types"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Top 5 des Intervenants</div>
+                        <div class="card-body">
+                            <canvas id="chart-speakers" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VUE VISUALISATION (Masquée par défaut) -->
+    <div id="visualization-view" class="view-section" style="display: none;">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-eye me-2"></i>Visualisation des Données</h5>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="visualization-type" style="width: auto;">
+                                <option value="timeline">Chronologie</option>
+                                <option value="monthly">Vue Mensuelle</option>
+                                <option value="by-type">Par Type d'Intervention</option>
+                                <option value="by-place">Par Lieu</option>
+                                <option value="by-speaker">Par Intervenant</option>
+                            </select>
+                            <button class="btn btn-outline-primary btn-sm" id="refresh-visualization">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="date" class="form-control" id="vis-start-date">
+                                    <span class="input-group-text">à</span>
+                                    <input type="date" class="form-control" id="vis-end-date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control form-control-sm" id="vis-search" placeholder="Rechercher...">
+                                    <button class="btn btn-primary btn-sm" id="apply-filters">
+                                        <i class="fas fa-filter me-1"></i>Appliquer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="visualization-container" class="p-2" style="min-height: 500px;">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Sélectionnez un type de visualisation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL : NOUVEL INTERVENANT -->
+    <div class="modal fade" id="modalNewIntervenant" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white py-2">
+                    <h6 class="modal-title small fw-bold"><i class="fas fa-user-plus me-2"></i>Nouveau</h6>
+                    <button type="button" class="btn-close btn-close-white small" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <form id="form-create-intervenant">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold mb-1">Titre</label>
+                            <select class="form-select form-select-sm" id="modal-iv-title">
+                                <option value="">Aucun</option>
+                                <option value="Pasteur">Pasteur</option>
+                                <option value="Diacre">Diacre</option>
+                                <option value="Ancien">Ancien</option>
+                                <option value="Frère">Frère</option>
+                                <option value="Sœur">Sœur</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold mb-1">Prénom *</label>
+                            <input type="text" class="form-control form-control-sm" id="modal-iv-firstname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold mb-1">Nom *</label>
+                            <input type="text" class="form-control form-control-sm" id="modal-iv-lastname" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Créer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL : SUGGESTIONS IA -->
+    <div class="modal fade" id="modalSuggestions" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-magic me-2"></i>Suggestions Intelligentes</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="list-group list-group-flush" id="suggestions-list">
+                        <!-- Items injectés par JS -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-warning" role="status"></div>
+                            <p class="mt-2 small text-muted">Analyse de l'historique...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VUE APERÇU (Masquée par défaut) -->
+    <div id="preview-view" class="view-section" style="display: none;">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-print me-2"></i>Aperçu avant Impression/Export</h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm" id="export-preview-pdf">
+                                <i class="fas fa-file-pdf me-1"></i>Exporter PDF
+                            </button>
+                            <button class="btn btn-success btn-sm" id="export-preview-excel">
+                                <i class="fas fa-file-excel me-1"></i>Exporter Excel
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" id="refresh-preview">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="date" class="form-control" id="preview-start-date">
+                                    <span class="input-group-text">à</span>
+                                    <input type="date" class="form-control" id="preview-end-date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control form-control-sm" id="preview-search" placeholder="Rechercher...">
+                                    <button class="btn btn-primary btn-sm" id="apply-preview-filters">
+                                        <i class="fas fa-filter me-1"></i>Appliquer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded bg-light p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i>En-tête de l'Église</h6>
+                                <small class="text-muted">Affiché dans l'export</small>
+                            </div>
+                            <div class="mt-2">
+                                <div class="d-flex align-items-center">
+                                    <img src="" id="preview-logo" alt="Logo" class="me-3" style="max-height: 60px; max-width: 60px;">
+                                    <div>
+                                        <h5 id="preview-church-name" class="mb-0 fw-bold">Église AD BERACA</h5>
+                                        <p id="preview-church-details" class="mb-0 text-muted small">Région: ATACORA | Section: NATITINGOU</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="preview-container" class="p-4 bg-white border rounded" style="min-height: 500px;">
+                            <div class="text-center py-5">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Sélectionnez les filtres pour générer l'aperçu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts pour Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <!-- Script pour Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.js"></script>
+
+    <!-- Scripts pour les exportations -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@3.0.4/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Script pour Supabase (Version UMD pour accès global via window.supabase) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+    <!-- Script Module Vite -->
+</body>
+</html>
