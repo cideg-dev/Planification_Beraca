@@ -4,9 +4,13 @@ on:
   push:
     branches: [main]
 
+# Autorisations nécessaires pour GitHub Pages et l'authentification OIDC
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
+# Permet un seul déploiement en cours à la fois
 concurrency:
   group: "pages"
   cancel-in-progress: true
