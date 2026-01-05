@@ -1,9 +1,10 @@
 // Configuration de l'application
-// Ces valeurs sont remplacées par Vite au moment du build grâce au bloc 'define' de vite.config.js
+// Ces valeurs sont remplacées par Vite au moment du build.
+// On utilise le chaînage optionnel (?.) pour éviter le crash si l'objet env est absent.
 export const CONFIG = {
-    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
-    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE
+    SUPABASE_URL: import.meta.env?.VITE_SUPABASE_URL || '',
+    SUPABASE_ANON_KEY: import.meta.env?.VITE_SUPABASE_ANON_KEY || '',
+    ADMIN_CODE: import.meta.env?.VITE_ADMIN_CODE || ''
 };
 
 export const CONSTANTS = {
