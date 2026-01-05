@@ -2680,10 +2680,10 @@ function renderPlanning() {
                     <button class="btn btn-sm btn-link text-primary opacity-75 hover-opacity-100 p-0" onclick="window.editIntervention('${item.id}')" title="Modifier">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-link text-info opacity-75 hover-opacity-100 p-0" onclick="showComments('${item.id}')" title="Commentaires">
+                    <button class="btn btn-sm btn-link text-info opacity-75 hover-opacity-100 p-0" onclick="window.showComments('${item.id}')" title="Commentaires">
                         <i class="fas fa-comments"></i>
                     </button>
-                    <button class="btn btn-sm btn-link text-warning opacity-75 hover-opacity-100 p-0" onclick="showFeedback('${item.id}')" title="Feedback">
+                    <button class="btn btn-sm btn-link text-warning opacity-75 hover-opacity-100 p-0" onclick="window.showFeedback('${item.id}')" title="Feedback">
                         <i class="fas fa-star"></i>
                     </button>
                     <button class="btn btn-sm btn-link text-danger opacity-50 hover-opacity-100 p-0" onclick="window.deleteIntervention('${item.id}')">
