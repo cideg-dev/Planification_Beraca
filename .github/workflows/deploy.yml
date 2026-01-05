@@ -22,16 +22,13 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Hard-inject Secrets into config.js
-      # Cette étape remplace physiquement les textes dans le code source
-      run: |
-        sed -i "s|___VITE_SUPABASE_URL___|${{ secrets.VITE_SUPABASE_URL }}|g" src/config.js
-        sed -i "s|___VITE_SUPABASE_ANON_KEY___|${{ secrets.VITE_SUPABASE_ANON_KEY }}|g" src/config.js
-        sed -i "s|___VITE_ADMIN_CODE___|${{ secrets.VITE_ADMIN_CODE }}|g" src/config.js
-        echo "Injection terminée avec succès."
-
     - name: Build
       run: npm run build
+      env:
+        # Injection directe des secrets GitHub dans l'environnement de build
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        VITE_ADMIN_CODE: ${{ secrets.VITE_ADMIN_CODE }}
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3

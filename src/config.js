@@ -1,8 +1,9 @@
-// Configuration de l'application - Remplacement direct par le serveur
+// Configuration de l'application
 export const CONFIG = {
-    SUPABASE_URL: '___VITE_SUPABASE_URL___',
-    SUPABASE_ANON_KEY: '___VITE_SUPABASE_ANON_KEY___',
-    ADMIN_CODE: '___VITE_ADMIN_CODE___'
+    // Vite remplacera ces variables par les secrets GitHub lors du build
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE || ''
 };
 
 export const CONSTANTS = {
