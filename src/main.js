@@ -6,6 +6,7 @@ import { DataService } from './services/dataService.js';
 import { ExportService } from './services/exportService.js';
 import { RecommendationService } from './services/recommendationService.js';
 import { StatsService } from './services/statsService.js'; // Import
+import { notificationService } from './services/notificationService.js'; // Import ajouté
 import { UI } from './ui/uiHelpers.js';
 import { CONSTANTS } from './config.js';
 import { testConnection } from './services/supabaseClient.js';
@@ -194,31 +195,32 @@ function initializeChangeNotifications() {
 // Initialiser le mot de passe au chargement de l'application
 initializePassword();
 
+/**
+ * Fonction principale d'initialisation de l'application
+ */
+async function initApp() {
+    initializeTheme(); // Initialiser le thème avant tout
+
+    // Vérifier la connexion à Supabase
+    const isConnected = await testConnection();
+    if (!isConnected) {
+        UI.showAlert('Erreur de connexion à la base de données. Veuillez vérifier votre configuration.', 'danger');
+    }
+
+    setupEventListeners();
+    setupNavigation(); // Navigation Tabs
+    setupSmartDate();
+    loadPreferences();
+    await loadData();
+    initNotifications(); // Initialiser les notifications
+    initializeChangeNotifications(); // Initialiser les notifications de modifications
+}
+
 // Initialisation
 document.addEventListener('DOMContentLoaded', initApp);
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => console.log('PWA Ready'));
-}
-
-import { notificationService } from './services/notificationService.js';
-
-// ... (Gardez les autres imports)
-
-// État de l'application
-const state = {
-    // ...
-    notifications: [],
-};
-
-// ... (Autre code)
-
-async function initApp() {
-    initializeTheme();
-    // ...
-    await loadData();
-    initNotifications(); // Ajout ici
-    initializeChangeNotifications();
 }
 
 /**
