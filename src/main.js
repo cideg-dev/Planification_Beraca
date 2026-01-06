@@ -927,11 +927,14 @@ function renderVisualization() {
 
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
-        filteredData = filteredData.filter(item =>
-            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
-            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
-            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
-        );
+        filteredData = filteredData.filter(item => {
+            const intervenantName = item.intervenants
+                ? `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.toLowerCase().trim()
+                : (item.intervenant_name_snapshot || '').toLowerCase();
+            return (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+                   (item.cult_type && item.cult_type.toLowerCase().includes(searchQuery)) ||
+                   (intervenantName && intervenantName.includes(searchQuery));
+        });
     }
 
     // Afficher le loader
@@ -1303,11 +1306,14 @@ function renderPreview() {
 
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
-        filteredData = filteredData.filter(item =>
-            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
-            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
-            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
-        );
+        filteredData = filteredData.filter(item => {
+            const intervenantName = item.intervenants
+                ? `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.toLowerCase().trim()
+                : (item.intervenant_name_snapshot || '').toLowerCase();
+            return (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+                   (item.cult_type && item.cult_type.toLowerCase().includes(searchQuery)) ||
+                   (intervenantName && intervenantName.includes(searchQuery));
+        });
     }
 
     // Afficher le loader
@@ -1459,15 +1465,18 @@ async function exportPreviewAsPdf() {
 
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
-        filteredData = filteredData.filter(item =>
-            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
-            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
-            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
-        );
+        filteredData = filteredData.filter(item => {
+            const intervenantName = item.intervenants
+                ? `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.toLowerCase().trim()
+                : (item.intervenant_name_snapshot || '').toLowerCase();
+            return (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+                   (item.cult_type && item.cult_type.toLowerCase().includes(searchQuery)) ||
+                   (intervenantName && intervenantName.includes(searchQuery));
+        });
     }
 
     try {
-        await ExportService.exportToPdf(filteredData, state.config, startDate, endDate);
+        await ExportService.exportToPdf(filteredData, state.config);
         UI.showAlert('Export PDF terminé avec succès !', 'success');
     } catch (error) {
         console.error('Erreur lors de l\'export PDF:', error);
@@ -1496,15 +1505,18 @@ async function exportPreviewAsExcel() {
 
     // Appliquer la recherche si spécifiée
     if (searchQuery) {
-        filteredData = filteredData.filter(item =>
-            (item.place && item.place.toLowerCase().includes(searchQuery)) ||
-            (item.type && item.type.toLowerCase().includes(searchQuery)) ||
-            (item.intervenantStr && item.intervenantStr.toLowerCase().includes(searchQuery))
-        );
+        filteredData = filteredData.filter(item => {
+            const intervenantName = item.intervenants
+                ? `${item.intervenants.title || ''} ${item.intervenants.first_name || ''} ${item.intervenants.last_name || ''}`.toLowerCase().trim()
+                : (item.intervenant_name_snapshot || '').toLowerCase();
+            return (item.place && item.place.toLowerCase().includes(searchQuery)) ||
+                   (item.cult_type && item.cult_type.toLowerCase().includes(searchQuery)) ||
+                   (intervenantName && intervenantName.includes(searchQuery));
+        });
     }
 
     try {
-        await ExportService.exportToExcel(filteredData, state.config, startDate, endDate);
+        await ExportService.exportToExcel(filteredData, state.config);
         UI.showAlert('Export Excel terminé avec succès !', 'success');
     } catch (error) {
         console.error('Erreur lors de l\'export Excel:', error);
