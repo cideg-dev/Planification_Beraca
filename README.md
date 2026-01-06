@@ -52,4 +52,3 @@ Version modernisée utilisant Vite, Supabase et une architecture modulaire.
 2. Redémarrez le serveur de développement
 
 ### En production (GitHub Pages)
-
