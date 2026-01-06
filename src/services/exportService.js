@@ -84,7 +84,7 @@ export const ExportService = {
         const doc = new jsPDF();
         
         // Charger le logo défini dans la config ou par défaut
-        const logoPath = config.logo && config.logo.trim() !== '' ? config.logo : 'ad.jpeg';
+        const logoPath = config.logo && config.logo.trim() !== '' ? config.logo : 'logo.jpeg';
         const logoData = await loadImage(logoPath);
 
         // --- EN-TÊTE ---

@@ -29,6 +29,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug Secrets Availability
+        run: |
+          echo "Checking secrets..."
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ]; then echo "VITE_SUPABASE_URL is set (length: ${#{{ secrets.VITE_SUPABASE_URL }}})"; else echo "::error::VITE_SUPABASE_URL is NOT set"; fi
+          if [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then echo "VITE_SUPABASE_ANON_KEY is set (length: ${#{{ secrets.VITE_SUPABASE_ANON_KEY }}})"; else echo "::error::VITE_SUPABASE_ANON_KEY is NOT set"; fi
+
       - name: Generate config.js from Secrets
         run: |
           echo "export const CONFIG = {" > src/config.js
