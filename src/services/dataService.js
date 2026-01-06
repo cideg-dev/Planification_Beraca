@@ -149,5 +149,28 @@ export const DataService = {
         const { data, error } = await client.from('feedbacks').insert([payload]).select();
         if (error) throw error;
         return data[0];
+    },
+
+    async getAverageRatingByIntervention(interventionId) {
+        const client = await getSupabaseClient();
+        if (!client) return 0;
+        try {
+            const { data, error } = await client
+                .from('feedbacks')
+                .select('rating')
+                .eq('intervention_id', interventionId);
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                return 0; // Aucun feedback
+            }
+
+            // Calculer la moyenne des évaluations
+            const sum = data.reduce((acc, curr) => acc + curr.rating, 0);
+            return sum / data.length;
+        } catch (e) {
+            console.error("Erreur getAverageRating:", e);
+            return 0;
+        }
     }
 };

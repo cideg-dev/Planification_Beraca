@@ -2026,10 +2026,17 @@ function showCommentsModal(intervention, comments) {
                 if (!content) return;
 
                 try {
-                    await DataService.addComment(interventionId, content, 'Utilisateur');
+                    // Créer le payload pour le commentaire
+                    const commentPayload = {
+                        intervention_id: intervention.id,
+                        content: content,
+                        author: 'Utilisateur',
+                        created_at: new Date().toISOString()
+                    };
+                    await DataService.addComment(commentPayload);
                     document.getElementById('new-comment').value = '';
                     // Recharger les commentaires
-                    const updatedComments = await DataService.getCommentsByIntervention(interventionId);
+                    const updatedComments = await DataService.getCommentsByIntervention(intervention.id);
                     showCommentsModal(intervention, updatedComments);
                 } catch (error) {
                     console.error('Erreur lors de l\'ajout du commentaire:', error);
@@ -2192,11 +2199,19 @@ function showFeedbackModal(intervention, feedbacks, averageRating) {
                 const comment = document.getElementById('new-feedback-comment').value.trim();
 
                 try {
-                    await DataService.addFeedback(interventionId, rating, comment, 'Utilisateur');
+                    // Créer le payload pour le feedback
+                    const feedbackPayload = {
+                        intervention_id: intervention.id,
+                        rating: rating,
+                        comment: comment,
+                        author: 'Utilisateur',
+                        created_at: new Date().toISOString()
+                    };
+                    await DataService.addFeedback(feedbackPayload);
                     document.getElementById('new-feedback-comment').value = '';
                     // Recharger les feedbacks
-                    const updatedFeedbacks = await DataService.getFeedbacksByIntervention(interventionId);
-                    const updatedAverage = await DataService.getAverageRatingByIntervention(interventionId);
+                    const updatedFeedbacks = await DataService.getFeedbacksByIntervention(intervention.id);
+                    const updatedAverage = await DataService.getAverageRatingByIntervention(intervention.id);
                     showFeedbackModal(intervention, updatedFeedbacks, updatedAverage);
                 } catch (error) {
                     console.error('Erreur lors de l\'ajout du feedback:', error);
