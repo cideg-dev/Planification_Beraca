@@ -1635,9 +1635,17 @@ function populateIntervenantsFilter() {
     filterSelect.innerHTML = '<option value="">Tous les intervenants</option>';
 
     // Générer une liste unique d'intervenants à partir des interventions
-    const uniqueSpeakers = [...new Set(state.interventions
-        .filter(i => i.intervenantStr)
-        .map(i => i.intervenantStr)
+    const uniqueSpeakers = [...new Set(
+        state.interventions
+            .map(i => {
+                if (i.intervenants) {
+                    return `${i.intervenants.title || ''} ${i.intervenants.first_name || ''} ${i.intervenants.last_name || ''}`.trim();
+                } else if (i.intervenant_name_snapshot) {
+                    return i.intervenant_name_snapshot;
+                }
+                return null;
+            })
+            .filter(name => name && name.trim() !== '')
     )];
 
     // Trier alphabétiquement
@@ -2786,9 +2794,12 @@ function getFilteredInterventions() {
         // Filtrer par terme de recherche global
         if (state.filters.searchQuery) {
             const s = state.filters.searchQuery.toLowerCase();
+            const intervenantName = i.intervenants
+                ? `${i.intervenants.title || ''} ${i.intervenants.first_name || ''} ${i.intervenants.last_name || ''}`.toLowerCase().trim()
+                : (i.intervenant_name_snapshot || '').toLowerCase();
             const matchesSearch = (i.place && i.place.toLowerCase().includes(s)) ||
-                                  (i.type && i.type.toLowerCase().includes(s)) ||
-                                  (i.intervenantStr && i.intervenantStr.toLowerCase().includes(s)) ||
+                                  (i.cult_type && i.cult_type.toLowerCase().includes(s)) ||
+                                  (intervenantName && intervenantName.includes(s)) ||
                                   (i.description && i.description.toLowerCase().includes(s));
             if (!matchesSearch) return false;
         }
@@ -2805,13 +2816,18 @@ function getFilteredInterventions() {
         }
 
         // Filtrer par type
-        if (state.filters.type && i.type !== state.filters.type) {
+        if (state.filters.type && i.cult_type !== state.filters.type) {
             return false;
         }
 
         // Filtrer par intervenant
-        if (state.filters.intervenant && i.intervenantStr !== state.filters.intervenant) {
-            return false;
+        if (state.filters.intervenant) {
+            const intervenantFullName = i.intervenants
+                ? `${i.intervenants.title || ''} ${i.intervenants.first_name || ''} ${i.intervenants.last_name || ''}`.trim()
+                : i.intervenant_name_snapshot || '';
+            if (intervenantFullName !== state.filters.intervenant) {
+                return false;
+            }
         }
 
         return true;
