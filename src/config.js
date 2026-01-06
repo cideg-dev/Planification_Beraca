@@ -1,8 +1,9 @@
 // Configuration de l'application
+const env = import.meta.env || {};
 export const CONFIG = {
-    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE || ''
+    SUPABASE_URL: env.VITE_SUPABASE_URL || '',
+    SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY || '',
+    ADMIN_CODE: env.VITE_ADMIN_CODE || ''
 };
 
 export const CONSTANTS = {
