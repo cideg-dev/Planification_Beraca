@@ -1,9 +1,8 @@
 // Configuration de l'application
-// Les valeurs sont injectées par Vite au moment du build via define
 export const CONFIG = {
-    SUPABASE_URL: '__VITE_SUPABASE_URL_PLACEHOLDER__',
-    SUPABASE_ANON_KEY: '__VITE_SUPABASE_ANON_KEY_PLACEHOLDER__',
-    ADMIN_CODE: '__VITE_ADMIN_CODE_PLACEHOLDER__'
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+    ADMIN_CODE: import.meta.env.VITE_ADMIN_CODE || ''
 };
 
 export const CONSTANTS = {
