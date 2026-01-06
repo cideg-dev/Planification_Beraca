@@ -2,7 +2,7 @@
 
 ## ⚠️ Erreur actuelle
 
-```
+```text
 Supabase non initialisé : URL manquante ou invalide
 Connexion à Supabase échouée. L'application fonctionnera en mode dégradé.
 ```
@@ -23,7 +23,7 @@ VITE_ADMIN_CODE=votre_code_admin
 
 ### 2. Obtenir vos identifiants Supabase
 
-1. Accédez à https://app.supabase.com
+1. Accédez à [https://app.supabase.com](https://app.supabase.com)
 2. Sélectionnez votre projet
 3. Allez à **Settings** → **API**
 4. Copiez :
@@ -44,27 +44,30 @@ Le serveur détectera automatiquement le fichier `.env`.
 
 ### 1. Accéder aux Secrets du Repository
 
-1. Allez à : https://github.com/cideg-dev/Planification_Beraca/settings/secrets/actions
+1. Allez à : [https://github.com/cideg-dev/Planification_Beraca/settings/secrets/actions](https://github.com/cideg-dev/Planification_Beraca/settings/secrets/actions)
 2. Cliquez sur **New repository secret**
 
 ### 2. Créer les 3 Secrets
 
 #### Secret 1 : `VITE_SUPABASE_URL`
+
 - **Name** : `VITE_SUPABASE_URL`
 - **Value** : `https://votre-projet.supabase.co`
 
 #### Secret 2 : `VITE_SUPABASE_ANON_KEY`
+
 - **Name** : `VITE_SUPABASE_ANON_KEY`
 - **Value** : `votre_clé_anon_ici`
 
 #### Secret 3 : `VITE_ADMIN_CODE`
+
 - **Name** : `VITE_ADMIN_CODE`
 - **Value** : `votre_code_admin`
 
 ### 3. Déclencher le Deploy
 
 1. Faites un `git push` sur la branche `main`
-2. Allez à : https://github.com/cideg-dev/Planification_Beraca/actions
+2. Allez à : [https://github.com/cideg-dev/Planification_Beraca/actions](https://github.com/cideg-dev/Planification_Beraca/actions)
 3. Observez le workflow **Deploy to GitHub Pages**
 
 Le workflow injectera automatiquement les secrets au moment du build.
@@ -76,14 +79,17 @@ Le workflow injectera automatiquement les secrets au moment du build.
 Après la configuration :
 
 1. **En développement** :
+
    ```bash
    npm run dev
    ```
+
    Ouvrez la console (F12) - le message d'erreur Supabase ne devrait plus apparaître
 
 2. **En production** :
+
    - Attendez que le deploy soit terminé (badge ✅ sur GitHub)
-   - Visitez https://cideg-dev.github.io/Planification_Beraca/
+   - Visitez [https://cideg-dev.github.io/Planification_Beraca/](https://cideg-dev.github.io/Planification_Beraca/)
    - Ouvrez la console (F12) - pas d'erreur Supabase
 
 ---
@@ -100,16 +106,18 @@ Après la configuration :
 ## 🐛 Dépannage
 
 ### Erreur : "URL manquante ou invalide"
+
 - ✅ Vérifiez que `.env` existe et contient les bonnes valeurs
 - ✅ Redémarrez le serveur avec `npm run dev`
 
 ### Erreur en production après push
-- ✅ Vérifiez les GitHub Secrets : https://github.com/cideg-dev/Planification_Beraca/settings/secrets/actions
+
+- ✅ Vérifiez les GitHub Secrets : [https://github.com/cideg-dev/Planification_Beraca/settings/secrets/actions](https://github.com/cideg-dev/Planification_Beraca/settings/secrets/actions)
 - ✅ Attendez la fin du workflow (visible sur la page Actions)
 - ✅ Videz le cache du navigateur (Ctrl+Shift+Del)
 
 ### La base de données ne se connecte pas
+
 - ✅ Vérifiez que le project Supabase est actif
 - ✅ Vérifiez les clés API (Settings → API)
 - ✅ Assurez-vous que les tables existent dans Supabase
-
