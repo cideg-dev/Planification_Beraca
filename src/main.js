@@ -1345,9 +1345,11 @@ function renderPreview() {
         let html = '<div class="preview-content">';
 
         // En-tête du document
+        // Construire le chemin absolu pour le logo dans le contexte de GitHub Pages
+        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${window.location.pathname.split('/')[1] || ''}/${state.config.logo}`.replace('//', '/');
         html += `
             <div class="text-center mb-4 pb-2 border-bottom">
-                <img src="${state.config.logo}" id="preview-logo" alt="Logo" class="mb-2" style="max-height: 80px; max-width: 80px;">
+                <img src="${logoPath}" id="preview-logo" alt="Logo" class="mb-2" style="max-height: 80px; max-width: 80px;">
                 <h2 class="mb-1">${state.config.church}</h2>
                 <p class="text-muted mb-0">${state.config.region} | ${state.config.section}</p>
                 <p class="text-muted small mb-0">${state.config.phone ? `Téléphone: ${state.config.phone}` : ''} ${state.config.email ? `| Email: ${state.config.email}` : ''}</p>
@@ -1433,7 +1435,9 @@ function updatePreviewHeader() {
     const churchDetailsElement = document.getElementById('preview-church-details');
 
     if (logoElement) {
-        logoElement.src = state.config.logo;
+        // Construire le chemin absolu pour le logo dans le contexte de GitHub Pages
+        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${window.location.pathname.split('/')[1] || ''}/${state.config.logo}`.replace('//', '/');
+        logoElement.src = logoPath;
         logoElement.alt = state.config.church;
     }
     if (churchNameElement) {

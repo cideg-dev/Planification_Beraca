@@ -84,7 +84,14 @@ export const ExportService = {
         const doc = new jsPDF();
         
         // Charger le logo défini dans la config ou par défaut
-        const logoPath = config.logo && config.logo.trim() !== '' ? config.logo : 'logo.jpeg';
+        // Pour l'exportation PDF, on construit le chemin absolu si nécessaire
+        let logoPath = config.logo && config.logo.trim() !== '' ? config.logo : 'logo.jpeg';
+        if (!logoPath.startsWith('/') && !logoPath.startsWith('http')) {
+            // Si le chemin est relatif, on le convertit en chemin absolu pour GitHub Pages
+            const basePath = window.location.pathname.split('/')[1] || '';
+            logoPath = basePath ? `/${basePath}/${logoPath}` : `/${logoPath}`;
+            logoPath = logoPath.replace('//', '/'); // Éviter les doubles slashs
+        }
         const logoData = await loadImage(logoPath);
 
         // --- EN-TÊTE ---
