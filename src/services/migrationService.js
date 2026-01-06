@@ -1,4 +1,4 @@
-import { supabaseClient } from './supabaseClient.js';
+import { getSupabaseClient } from './supabaseClient.js';
 
 export const MigrationService = {
     /**
@@ -6,9 +6,13 @@ export const MigrationService = {
      */
     async migrateData() {
         console.log("Démarrage de la migration...");
-        
+        const client = await getSupabaseClient();
+        if (!client) {
+            throw new Error("Client Supabase non initialisé pour la migration.");
+        }
+
         // 1. Récupérer les données brutes Legacy (JSON Blob)
-        const { data: legacyData, error: legacyError } = await supabaseClient
+        const { data: legacyData, error: legacyError } = await client
             .from('planning_data')
             .select('*')
             .eq('id', 'current')
@@ -22,7 +26,7 @@ export const MigrationService = {
         console.log(`${interventionsV1.length} interventions trouvées dans l'ancien format.`);
 
         // 2. Récupérer les intervenants V2 actuels pour faire le mapping
-        const { data: intervenantsV2, error: ivError } = await supabaseClient
+        const { data: intervenantsV2, error: ivError } = await client
             .from('intervenants')
             .select('*');
 
@@ -41,7 +45,7 @@ export const MigrationService = {
 
                 // Recherche naïve : on cherche si le nom V1 contient le nom de famille V2
                 // C'est imparfait mais ça couvre 80% des cas
-                const match = intervenantsV2.find(iv => 
+                const match = intervenantsV2.find(iv =>
                     snapshotName.toLowerCase().includes(iv.last_name.toLowerCase()) &&
                     snapshotName.toLowerCase().includes(iv.first_name.toLowerCase())
                 );
@@ -57,7 +61,7 @@ export const MigrationService = {
                 }
 
                 // Insertion V2
-                const { error: insertError } = await supabaseClient
+                const { error: insertError } = await client
                     .from('interventions')
                     .insert([{
                         date: item.date,

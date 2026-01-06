@@ -1,4 +1,4 @@
-import { supabaseClient } from './supabaseClient.js';
+import { getSupabaseClient } from './supabaseClient.js';
 
 export const notificationService = {
     /**
@@ -23,9 +23,10 @@ export const notificationService = {
      * Récupère les notifications depuis Supabase
      */
     async getNotifications(userId) {
-        if (!supabaseClient || !userId) return [];
-        
-        const { data, error } = await supabaseClient
+        const client = await getSupabaseClient();
+        if (!client || !userId) return [];
+
+        const { data, error } = await client
             .from('notifications')
             .select('*')
             .eq('user_id', userId)
@@ -43,7 +44,8 @@ export const notificationService = {
      * Marque une notification comme lue
      */
     async markAsRead(notificationId) {
-        const { error } = await supabaseClient
+        const client = await getSupabaseClient();
+        const { error } = await client
             .from('notifications')
             .update({ is_read: true })
             .eq('id', notificationId);
@@ -55,7 +57,8 @@ export const notificationService = {
      * Marque toutes les notifications comme lues
      */
     async markAllAsRead(userId) {
-        const { error } = await supabaseClient
+        const client = await getSupabaseClient();
+        const { error } = await client
             .from('notifications')
             .update({ is_read: true })
             .eq('user_id', userId)

@@ -10,6 +10,7 @@ if (!createClient) {
 // Initialisation du client (Singleton)
 let client = null;
 let initialized = false;
+let initPromise = null;
 
 // Tentative de chargement du runtime config (généré lors du build/déploiement)
 async function loadRuntimeConfig() {
@@ -28,49 +29,67 @@ async function loadRuntimeConfig() {
 
 // Initialise le client en utilisant d'abord la config compilée, puis le runtime config s'il existe
 async function initClient() {
-    if (initialized) return;
+    if (initialized) return client;
 
-    // Essayer de charger la config runtime
-    const runtime = await loadRuntimeConfig();
-    if (runtime && runtime.SUPABASE_URL) {
-        // Mutate the CONFIG object to include runtime values
-        CONFIG.SUPABASE_URL = runtime.SUPABASE_URL || CONFIG.SUPABASE_URL;
-        CONFIG.SUPABASE_ANON_KEY = runtime.SUPABASE_ANON_KEY || CONFIG.SUPABASE_ANON_KEY;
-        CONFIG.ADMIN_CODE = runtime.ADMIN_CODE || CONFIG.ADMIN_CODE;
-        console.info('✅ Runtime config chargée depuis runtime-config.json');
+    // Si l'initialisation est déjà en cours, attendre la promesse existante
+    if (initPromise) {
+        return await initPromise;
     }
 
-    if (!createClient) {
-        console.error('Erreur critique : La bibliothèque Supabase n\'est pas chargée via CDN.');
-        initialized = true;
-        return;
-    }
-
-    if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_URL.startsWith('http')) {
-        try {
-            client = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-            if (CONFIG.SUPABASE_ANON_KEY === 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER') {
-                console.warn("⚠️  Attention: La clé Supabase est encore un placeholder. La connexion pourrait échouer.");
-            }
-        } catch (e) {
-            console.error('Erreur d\'initialisation Supabase:', e);
+    // Démarrer l'initialisation
+    initPromise = (async () => {
+        // Essayer de charger la config runtime
+        const runtime = await loadRuntimeConfig();
+        if (runtime && runtime.SUPABASE_URL) {
+            // Mutate the CONFIG object to include runtime values
+            CONFIG.SUPABASE_URL = runtime.SUPABASE_URL || CONFIG.SUPABASE_URL;
+            CONFIG.SUPABASE_ANON_KEY = runtime.SUPABASE_ANON_KEY || CONFIG.SUPABASE_ANON_KEY;
+            CONFIG.ADMIN_CODE = runtime.ADMIN_CODE || CONFIG.ADMIN_CODE;
+            console.info('✅ Runtime config chargée depuis runtime-config.json');
         }
-    } else {
-        const isProduction = window.location.hostname !== 'localhost';
-        const setupGuide = isProduction 
-            ? '❌ En production : Ajoutez les GitHub Secrets (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_ADMIN_CODE) dans Settings → Secrets and variables → Actions'
-            : '❌ En développement : Créez un fichier .env avec VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_ADMIN_CODE';
-        console.error(
-            `%cSupabase non initialisé : URL manquante ou invalide.\n${setupGuide}`,
-            'color: red; font-weight: bold;',
-            { url: CONFIG.SUPABASE_URL }
-        );
-    }
 
-    initialized = true;
+        if (!createClient) {
+            console.error('Erreur critique : La bibliothèque Supabase n\'est pas chargée via CDN.');
+            initialized = true;
+            return client;
+        }
+
+        if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_URL.startsWith('http')) {
+            try {
+                client = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+                if (CONFIG.SUPABASE_ANON_KEY === 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER') {
+                    console.warn("⚠️  Attention: La clé Supabase est encore un placeholder. La connexion pourrait échouer.");
+                }
+                console.log('✅ Client Supabase initialisé avec succès');
+            } catch (e) {
+                console.error('Erreur d\'initialisation Supabase:', e);
+            }
+        } else {
+            const isProduction = window.location.hostname !== 'localhost';
+            const setupGuide = isProduction
+                ? '❌ En production : Ajoutez les GitHub Secrets (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_ADMIN_CODE) dans Settings → Secrets and variables → Actions'
+                : '❌ En développement : Créez un fichier .env avec VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_ADMIN_CODE';
+            console.error(
+                `%cSupabase non initialisé : URL manquante ou invalide.\n${setupGuide}`,
+                'color: red; font-weight: bold;',
+                { url: CONFIG.SUPABASE_URL }
+            );
+        }
+
+        initialized = true;
+        return client;
+    })();
+
+    return await initPromise;
 }
 
-export const supabaseClient = client;
+// Exporter une fonction pour obtenir le client initialisé
+export async function getSupabaseClient() {
+    return await initClient();
+}
+
+// Pour maintenir la compatibilité, on exporte aussi une promesse du client
+export const supabaseClient = initClient();
 
 /**
  * Vérifie la connexion à Supabase

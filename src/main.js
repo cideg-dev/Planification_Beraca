@@ -9,7 +9,7 @@ import { StatsService } from './services/statsService.js'; // Import
 import { notificationService } from './services/notificationService.js'; // Import ajouté
 import { UI } from './ui/uiHelpers.js';
 import { CONSTANTS } from './config.js';
-import { testConnection } from './services/supabaseClient.js';
+import { testConnection, getSupabaseClient } from './services/supabaseClient.js';
 
 // Fonction de hachage simple (pour usage local, pas pour des données sensibles)
 function hashPassword(password) {
@@ -326,7 +326,8 @@ window.testNotif = async () => {
     };
 
     try {
-        const { error } = await supabaseClient.from('notifications').insert([fakeNotif]);
+        const client = await getSupabaseClient();
+        const { error } = await client.from('notifications').insert([fakeNotif]);
         if (error) {
             console.warn("Table 'notifications' non trouvée ou erreur RLS. Mode simulation activé.", error);
             // Simulation locale pour la démo UI si la DB n'est pas prête

@@ -1,10 +1,11 @@
-import { supabaseClient } from './supabaseClient.js';
+import { getSupabaseClient } from './supabaseClient.js';
 
 export const DataService = {
     async getIntervenants() {
-        if (!supabaseClient) return [];
+        const client = await getSupabaseClient();
+        if (!client) return [];
         try {
-            const { data, error } = await supabaseClient.from('intervenants').select('*').order('last_name');
+            const { data, error } = await client.from('intervenants').select('*').order('last_name');
             if (error) throw error;
             return data || [];
         } catch (e) {
@@ -14,10 +15,11 @@ export const DataService = {
     },
 
     async getInterventions() {
-        if (!supabaseClient) return [];
+        const client = await getSupabaseClient();
+        if (!client) return [];
         try {
             // Jointure pour récupérer les infos de l'intervenant lié
-            const { data, error } = await supabaseClient
+            const { data, error } = await client
                 .from('interventions')
                 .select('*, intervenants(*)')
                 .order('date', { ascending: true });
@@ -30,37 +32,42 @@ export const DataService = {
     },
 
     async addIntervention(payload) {
-        if (!supabaseClient) throw new Error("Client non initialisé");
-        const { data, error } = await supabaseClient.from('interventions').insert([payload]).select();
+        const client = await getSupabaseClient();
+        if (!client) throw new Error("Client non initialisé");
+        const { data, error } = await client.from('interventions').insert([payload]).select();
         if (error) throw error;
         return data[0];
     },
 
     async updateIntervention(id, payload) {
-        if (!supabaseClient) throw new Error("Client non initialisé");
-        const { data, error } = await supabaseClient.from('interventions').update(payload).eq('id', id).select();
+        const client = await getSupabaseClient();
+        if (!client) throw new Error("Client non initialisé");
+        const { data, error } = await client.from('interventions').update(payload).eq('id', id).select();
         if (error) throw error;
         return data[0];
     },
 
     async deleteIntervention(id) {
-        if (!supabaseClient) throw new Error("Client non initialisé");
-        const { error } = await supabaseClient.from('interventions').delete().eq('id', id);
+        const client = await getSupabaseClient();
+        if (!client) throw new Error("Client non initialisé");
+        const { error } = await client.from('interventions').delete().eq('id', id);
         if (error) throw error;
         return true;
     },
 
     async addIntervenant(payload) {
-        if (!supabaseClient) throw new Error("Client non initialisé");
-        const { data, error } = await supabaseClient.from('intervenants').insert([payload]).select();
+        const client = await getSupabaseClient();
+        if (!client) throw new Error("Client non initialisé");
+        const { data, error } = await client.from('intervenants').insert([payload]).select();
         if (error) throw error;
         return data[0];
     },
 
     async getConfig() {
-        if (!supabaseClient) return null;
+        const client = await getSupabaseClient();
+        if (!client) return null;
         try {
-            const { data, error } = await supabaseClient.from('app_config').select('*').limit(1);
+            const { data, error } = await client.from('app_config').select('*').limit(1);
             if (error) throw error;
             return data[0] || null;
         } catch (e) {
@@ -70,14 +77,15 @@ export const DataService = {
     },
 
     async updateConfig(payload) {
-        if (!supabaseClient) return null;
+        const client = await getSupabaseClient();
+        if (!client) return null;
         try {
             const current = await this.getConfig();
             let result;
             if (current) {
-                result = await supabaseClient.from('app_config').update({ value: payload }).eq('key', current.key).select();
+                result = await client.from('app_config').update({ value: payload }).eq('key', current.key).select();
             } else {
-                result = await supabaseClient.from('app_config').insert([{ key: 'main_config', value: payload }]).select();
+                result = await client.from('app_config').insert([{ key: 'main_config', value: payload }]).select();
             }
             return result.data ? result.data[0] : null;
         } catch (e) {
@@ -93,9 +101,10 @@ export const DataService = {
 
     // --- COMMENTAIRES ---
     async getCommentsByIntervention(interventionId) {
-        if (!supabaseClient) return [];
+        const client = await getSupabaseClient();
+        if (!client) return [];
         try {
-            const { data, error } = await supabaseClient
+            const { data, error } = await client
                 .from('comments')
                 .select('*')
                 .eq('intervention_id', interventionId)
@@ -109,17 +118,19 @@ export const DataService = {
     },
 
     async addComment(payload) {
-        if (!supabaseClient) throw new Error("Client non initialisé");
-        const { data, error } = await supabaseClient.from('comments').insert([payload]).select();
+        const client = await getSupabaseClient();
+        if (!client) throw new Error("Client non initialisé");
+        const { data, error } = await client.from('comments').insert([payload]).select();
         if (error) throw error;
         return data[0];
     },
 
     // --- FEEDBACKS ---
     async getFeedbacksByIntervention(interventionId) {
-        if (!supabaseClient) return [];
+        const client = await getSupabaseClient();
+        if (!client) return [];
         try {
-            const { data, error } = await supabaseClient
+            const { data, error } = await client
                 .from('feedbacks')
                 .select('*')
                 .eq('intervention_id', interventionId)
@@ -133,8 +144,9 @@ export const DataService = {
     },
 
     async addFeedback(payload) {
-        if (!supabaseClient) throw new Error("Client non initialisé");
-        const { data, error } = await supabaseClient.from('feedbacks').insert([payload]).select();
+        const client = await getSupabaseClient();
+        if (!client) throw new Error("Client non initialisé");
+        const { data, error } = await client.from('feedbacks').insert([payload]).select();
         if (error) throw error;
         return data[0];
     }
