@@ -1,16 +1,9 @@
 // Configuration de l'application
-// Les valeurs sont injectées par Vite au moment du build via import.meta.env
-// Pour une compatibilité maximale, on vérifie la disponibilité de import.meta
+// Les valeurs sont injectées par Vite au moment du build via define
 export const CONFIG = {
-    SUPABASE_URL: (typeof import !== 'undefined' && import.meta && import.meta.env)
-        ? import.meta.env.VITE_SUPABASE_URL || 'VITE_SUPABASE_URL_PLACEHOLDER'
-        : 'VITE_SUPABASE_URL_PLACEHOLDER',
-    SUPABASE_ANON_KEY: (typeof import !== 'undefined' && import.meta && import.meta.env)
-        ? import.meta.env.VITE_SUPABASE_ANON_KEY || 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER'
-        : 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER',
-    ADMIN_CODE: (typeof import !== 'undefined' && import.meta && import.meta.env)
-        ? import.meta.env.VITE_ADMIN_CODE || 'VITE_ADMIN_CODE_PLACEHOLDER'
-        : 'VITE_ADMIN_CODE_PLACEHOLDER'
+    SUPABASE_URL: '__VITE_SUPABASE_URL_PLACEHOLDER__',
+    SUPABASE_ANON_KEY: '__VITE_SUPABASE_ANON_KEY_PLACEHOLDER__',
+    ADMIN_CODE: '__VITE_ADMIN_CODE_PLACEHOLDER__'
 };
 
 export const CONSTANTS = {
