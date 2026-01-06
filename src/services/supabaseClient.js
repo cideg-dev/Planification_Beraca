@@ -24,10 +24,16 @@ if (createClient &&
         console.error("Erreur d'initialisation Supabase:", e);
     }
 } else {
-    console.error("Supabase non initialisé : URL manquante ou invalide.", {
-        url: CONFIG.SUPABASE_URL,
-        isPlaceholder: CONFIG.SUPABASE_URL === 'VITE_SUPABASE_URL_PLACEHOLDER'
-    });
+    const isProduction = window.location.hostname !== 'localhost';
+    const setupGuide = isProduction 
+        ? '❌ En production : Ajoutez les GitHub Secrets (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_ADMIN_CODE) dans Settings → Secrets and variables → Actions'
+        : '❌ En développement : Créez un fichier .env avec VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_ADMIN_CODE';
+    
+    console.error(
+        `%cSupabase non initialisé : URL manquante ou invalide.\n${setupGuide}`,
+        'color: red; font-weight: bold;',
+        { url: CONFIG.SUPABASE_URL }
+    );
 }
 
 export const supabaseClient = client;
