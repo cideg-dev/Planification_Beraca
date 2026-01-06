@@ -30,17 +30,26 @@ jobs:
         run: npm ci
 
       - name: Debug Secrets Availability
+        env:
+          SUPER_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPER_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPER_CODE: ${{ secrets.VITE_ADMIN_CODE }}
         run: |
           echo "Checking secrets..."
-          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ]; then echo "VITE_SUPABASE_URL is set (length: ${#{{ secrets.VITE_SUPABASE_URL }}})"; else echo "::error::VITE_SUPABASE_URL is NOT set"; fi
-          if [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then echo "VITE_SUPABASE_ANON_KEY is set (length: ${#{{ secrets.VITE_SUPABASE_ANON_KEY }}})"; else echo "::error::VITE_SUPABASE_ANON_KEY is NOT set"; fi
+          if [ -n "$SUPER_URL" ]; then echo "VITE_SUPABASE_URL is set (length: ${#SUPER_URL})"; else echo "::error::VITE_SUPABASE_URL is NOT set"; fi
+          if [ -n "$SUPER_KEY" ]; then echo "VITE_SUPABASE_ANON_KEY is set (length: ${#SUPER_KEY})"; else echo "::error::VITE_SUPABASE_ANON_KEY is NOT set"; fi
+          if [ -n "$SUPER_CODE" ]; then echo "VITE_ADMIN_CODE is set (length: ${#SUPER_CODE})"; else echo "::warning::VITE_ADMIN_CODE is NOT set"; fi
 
       - name: Generate config.js from Secrets
+        env:
+          SUPER_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPER_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPER_CODE: ${{ secrets.VITE_ADMIN_CODE }}
         run: |
           echo "export const CONFIG = {" > src/config.js
-          echo "    SUPABASE_URL: '${{ secrets.VITE_SUPABASE_URL }}'," >> src/config.js
-          echo "    SUPABASE_ANON_KEY: '${{ secrets.VITE_SUPABASE_ANON_KEY }}'," >> src/config.js
-          echo "    ADMIN_CODE: '${{ secrets.VITE_ADMIN_CODE }}'" >> src/config.js
+          echo "    SUPABASE_URL: '$SUPER_URL'," >> src/config.js
+          echo "    SUPABASE_ANON_KEY: '$SUPER_KEY'," >> src/config.js
+          echo "    ADMIN_CODE: '$SUPER_CODE'" >> src/config.js
           echo "};" >> src/config.js
           echo "" >> src/config.js
           echo "export const CONSTANTS = {" >> src/config.js
