@@ -65,6 +65,15 @@ jobs:
           echo "    }" >> src/config.js
           echo "};" >> src/config.js
 
+          # Générer un runtime-config.json dans le dossier public pour être consommé au runtime
+          cat > public/runtime-config.json <<EOF
+          {
+            "SUPABASE_URL": "$SUPER_URL",
+            "SUPABASE_ANON_KEY": "$SUPER_KEY",
+            "ADMIN_CODE": "$SUPER_CODE"
+          }
+          EOF
+
       - name: Build
         run: npm run build
 
