@@ -35,7 +35,7 @@ const state = {
         phone: '',
         email: '',
         bank: '',
-        logo: 'AD.jpeg'
+        logo: 'ad.jpeg'
     },
     filters: {
         searchQuery: '',

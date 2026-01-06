@@ -29,11 +29,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate config.js from Secrets
+        run: |
+          echo "export const CONFIG = {" > src/config.js
+          echo "    SUPABASE_URL: '${{ secrets.VITE_SUPABASE_URL }}'," >> src/config.js
+          echo "    SUPABASE_ANON_KEY: '${{ secrets.VITE_SUPABASE_ANON_KEY }}'," >> src/config.js
+          echo "    ADMIN_CODE: '${{ secrets.VITE_ADMIN_CODE }}'" >> src/config.js
+          echo "};" >> src/config.js
+          echo "" >> src/config.js
+          echo "export const CONSTANTS = {" >> src/config.js
+          echo "    DAYS_OF_WEEK: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']," >> src/config.js
+          echo "    CULT_TYPES_BY_DAY: {" >> src/config.js
+          echo "        'Dimanche': ['Principal', 'Enseignement', 'Culte des enfants', 'Culte des Adolescents']," >> src/config.js
+          echo "        'Lundi': ['Réunion']," >> src/config.js
+          echo "        'Mardi': ['Prière hebdomadaire', 'Enseignement']," >> src/config.js
+          echo "        'Mercredi': ['Enseignement', 'Réunion', 'Culte des Adolescents']," >> src/config.js
+          echo "        'Jeudi': ['Témoignage/Action de grâce/Prière', 'Réunion']," >> src/config.js
+          echo "        'Vendredi': ['Enseignement', 'Veillée de prière', 'Réunion']," >> src/config.js
+          echo "        'Samedi': ['Jeune et Prière', 'Veillée de prière', 'Culte des Adolescents']" >> src/config.js
+          echo "    }" >> src/config.js
+          echo "};" >> src/config.js
+
       - name: Build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_ADMIN_CODE: ${{ secrets.VITE_ADMIN_CODE }}
         run: npm run build
 
       - name: Upload artifact
