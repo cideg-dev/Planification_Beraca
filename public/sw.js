@@ -1,5 +1,5 @@
 // Service Worker pour la PWA AD BERACA
-const CACHE_NAME = 'ad-beraca-v2';
+const CACHE_NAME = 'ad-beraca-v3';
 
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
@@ -18,8 +18,8 @@ self.addEventListener('push', (event) => {
     
     const options = {
         body: data.body,
-        icon: './ad.jpeg',
-        badge: './ad.jpeg',
+        icon: '/Planification_Beraca/logo.jpeg',
+        badge: '/Planification_Beraca/logo.jpeg',
         data: data.url || '/',
         vibrate: [100, 50, 100],
         actions: [

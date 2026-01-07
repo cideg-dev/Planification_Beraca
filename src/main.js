@@ -35,7 +35,7 @@ const state = {
         phone: '',
         email: '',
         bank: '',
-        logo: 'ad.jpeg'
+        logo: 'logo.jpeg'
     },
     filters: {
         searchQuery: '',
@@ -2978,6 +2978,7 @@ async function handleAddIntervention(e) {
         const dayVal = document.getElementById('day-text').textContent;
         const placeVal = document.getElementById('place').value;
         const typeVal = document.getElementById('type').value;
+        const timeVal = document.getElementById('time').value;
         const themeVal = document.getElementById('theme').value;
         const obsVal = document.getElementById('obs').value;
         const ivId = document.getElementById('intervenant').value;
@@ -2996,6 +2997,7 @@ async function handleAddIntervention(e) {
                 day_of_week: dayVal !== '...' ? dayVal : CONSTANTS.DAYS_OF_WEEK[new Date(dateVal).getDay()],
                 place: placeVal,
                 cult_type: typeVal,
+                time: timeVal || null,  // Ajouter l'heure si spécifiée
                 description: finalDesc,
                 intervenant_id: ivId || null,
                 intervenant_name_snapshot: ivText

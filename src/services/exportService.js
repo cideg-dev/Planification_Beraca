@@ -85,7 +85,7 @@ export const ExportService = {
         
         // Charger le logo défini dans la config ou par défaut
         // Pour l'exportation PDF, on construit le chemin absolu si nécessaire
-        let logoPath = config.logo && config.logo.trim() !== '' ? config.logo : 'ad.jpeg';
+        let logoPath = config.logo && config.logo.trim() !== '' ? config.logo : 'logo.jpeg';
         if (!logoPath.startsWith('/') && !logoPath.startsWith('http')) {
             // Si le chemin est relatif, on le convertit en chemin absolu pour GitHub Pages
             const basePath = window.location.pathname.split('/')[1] || '';
