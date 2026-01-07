@@ -35,7 +35,7 @@ const state = {
         phone: '',
         email: '',
         bank: '',
-        logo: 'logo.jpeg'
+        logo: '/logo.jpeg'
     },
     filters: {
         searchQuery: '',
@@ -1346,7 +1346,7 @@ function renderPreview() {
 
         // En-tête du document
         // Construire le chemin absolu pour le logo dans le contexte de GitHub Pages
-        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${window.location.pathname.split('/')[1] || ''}/${state.config.logo}`.replace('//', '/');
+        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${state.config.logo}`;
         html += `
             <div class="text-center mb-4 pb-2 border-bottom">
                 <img src="${logoPath}" id="preview-logo" alt="Logo" class="mb-2" style="max-height: 80px; max-width: 80px;">
@@ -1436,7 +1436,7 @@ function updatePreviewHeader() {
 
     if (logoElement) {
         // Construire le chemin absolu pour le logo dans le contexte de GitHub Pages
-        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${window.location.pathname.split('/')[1] || ''}/${state.config.logo}`.replace('//', '/');
+        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${state.config.logo}`;
         logoElement.src = logoPath;
         logoElement.alt = state.config.church;
     }
