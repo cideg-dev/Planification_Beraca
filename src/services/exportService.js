@@ -84,11 +84,10 @@ export const ExportService = {
         const doc = new jsPDF();
         
         // Charger le logo défini dans la config ou par défaut
-        // Pour l'exportation PDF, on construit le chemin absolu si nécessaire
-        let logoPath = config.logo && config.logo.trim() !== '' ? config.logo : '/logo.jpeg';
-        if (!logoPath.startsWith('/') && !logoPath.startsWith('http')) {
-            // Si le chemin est relatif, on le convertit en chemin absolu
-            logoPath = `/${logoPath}`;
+        let logoPath = config.logo && config.logo.trim() !== '' ? config.logo : './logo.jpeg';
+        // Construire l'URL complète pour le chargement d'image
+        if (!logoPath.startsWith('http')) {
+            logoPath = new URL(logoPath, window.location.href).href;
         }
         const logoData = await loadImage(logoPath);
 
