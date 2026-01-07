@@ -897,7 +897,7 @@ button, input, select, textarea, .btn, .navbar-brand {
 /* Le Logo via ::before */
 .ad-header-logo::before {
     content: "";
-    background-image: url('./logo.jpeg'); /* Utilisation de l'image locale */
+    background-image: url('logo.jpeg'); /* Utilisation de l'image locale */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

@@ -35,7 +35,7 @@ const state = {
         phone: '',
         email: '',
         bank: '',
-        logo: './logo.jpeg'
+        logo: 'logo.jpeg'
     },
     filters: {
         searchQuery: '',
@@ -1346,7 +1346,7 @@ function renderPreview() {
 
         // En-tête du document
         // Construire le chemin absolu pour le logo dans le contexte de GitHub Pages
-        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${state.config.logo}`;
+        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${window.location.pathname.split('/')[1] || ''}/${state.config.logo}`.replace('//', '/');
         html += `
             <div class="text-center mb-4 pb-2 border-bottom">
                 <img src="${logoPath}" id="preview-logo" alt="Logo" class="mb-2" style="max-height: 80px; max-width: 80px;">
@@ -1436,7 +1436,7 @@ function updatePreviewHeader() {
 
     if (logoElement) {
         // Construire le chemin absolu pour le logo dans le contexte de GitHub Pages
-        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${state.config.logo}`;
+        const logoPath = state.config.logo.startsWith('/') ? state.config.logo : `/${window.location.pathname.split('/')[1] || ''}/${state.config.logo}`.replace('//', '/');
         logoElement.src = logoPath;
         logoElement.alt = state.config.church;
     }
@@ -3093,7 +3093,7 @@ window.sendWhatsAppReminder = (id) => {
     const item = state.interventions.find(i => i.id === id); if (!item) return;
     const dateStr = new Date(item.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
     const name = item.intervenantStr || (item.intervenant ? `${item.intervenant.first_name} ${item.intervenant.last_name}` : 'Bien-aimé');
-    const theme = item.description ? ` sur le thème : "${item.description}"` : '';
+    const theme = item.description ? ` sur le th��me : "${item.description}"` : '';
     const message = `Bonjour ${name}, c'est le secrétariat de l'église AD BERACA. \n\nRappel pour votre intervention (${item.type}) prévue ce ${dateStr} à ${item.place}${theme}. \n\nSoyez richement béni !`;
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
